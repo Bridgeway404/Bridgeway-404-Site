@@ -1,0 +1,60 @@
+# ============================================================
+# netlify.toml — Bridgeway 404
+# Netlify configuration file. Commit this to your repo root.
+# ============================================================
+
+[build]
+  # This is a plain HTML site — no build step needed.
+  # If you add a build step later (e.g. Astro, Vite), update
+  # the command and publish fields below.
+  publish = "."
+  command = ""
+
+# ---- Security and caching headers ----
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options         = "DENY"
+    X-Content-Type-Options  = "nosniff"
+    X-XSS-Protection        = "1; mode=block"
+    Referrer-Policy         = "strict-origin-when-cross-origin"
+    Permissions-Policy      = "camera=(), microphone=(), geolocation=()"
+    # Update Content-Security-Policy as needed if you add external scripts
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://images.unsplash.com data:; connect-src 'self';"
+
+[[headers]]
+  for = "*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# ---- Redirects ----
+# Redirect www to non-www (update domain if needed)
+[[redirects]]
+  from   = "https://www.bridgeway404.com/*"
+  to     = "https://bridgeway404.com/:splat"
+  status = 301
+  force  = true
+
+# /privacy short-link forwards to the real privacy policy page
+[[redirects]]
+  from   = "/privacy"
+  to     = "/privacy-policy.html"
+  status = 301
+  force  = true
+
+# Placeholder for terms page — remove once a real terms page exists
+[[redirects]]
+  from   = "/terms"
+  to     = "/"
+  status = 302
+
+# ---- Form spam protection ----
+# Netlify automatically handles form submissions when data-netlify="true"
+# is set on the <form> element. No additional config needed here.
+# To set up email notifications:
+#   Netlify dashboard > Your site > Forms > Form notifications

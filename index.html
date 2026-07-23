@@ -1,0 +1,2232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Favicon — Bridgeway 404 logo -->
+  <link rel="icon" type="image/png" sizes="512x512" href="/favicon.png">
+  <link rel="shortcut icon" type="image/png" href="/favicon.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="/favicon.png">
+
+  <!-- ============================================================
+       SEO METADATA — Update title/description as needed
+       ============================================================ -->
+  <title>Bridgeway 404 | Junk Removal and Furniture Pickup in Metro Atlanta</title>
+  <meta name="description" content="Bridgeway 404 provides junk removal, furniture removal, mattress pickup, couch pickup, apartment move-out pickup, curbside pickup, and furniture assembly in Metro Atlanta." />
+  <meta name="keywords" content="junk removal Atlanta, furniture removal Atlanta, mattress pickup Atlanta, couch removal, apartment move-out pickup, curbside pickup, furniture assembly Atlanta" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://bridgeway404.com/" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Bridgeway 404 | Junk Removal and Furniture Pickup in Metro Atlanta" />
+  <meta property="og:description" content="Fast, respectful, and professional junk removal, furniture pickup, mattress removal, and furniture assembly in Metro Atlanta." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://bridgeway404.com/" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ============================================================
+       DESIGN TOKENS — Change colors/fonts here
+       ============================================================ */
+    :root {
+      --color-black:       #0f0f0f;
+      --color-white:       #ffffff;
+      --color-off-white:   #f8f7f5;
+      --color-purple:      #6b3d9a;   /* polished purple — adjust hex to taste */
+      --color-purple-dark: #4e2c72;
+      --color-purple-light:#f3eafa;
+      --color-gold:        #c49a30;   /* warm muted gold — adjust hex to taste */
+      --color-gold-light:  #f9f0d9;
+      --color-gray-100:    #f4f4f4;
+      --color-gray-200:    #e8e8e8;
+      --color-gray-400:    #9a9a9a;
+      --color-gray-600:    #555555;
+      --color-gray-800:    #2a2a2a;
+      --color-error:       #c0392b;
+      --color-success:     #1e7e34;
+
+      --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 20px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.10);
+      --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+    }
+
+    /* ============================================================
+       RESET & BASE
+       ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-main);
+      color: var(--color-gray-800);
+      background: var(--color-white);
+      line-height: 1.6;
+      font-size: 16px;
+    }
+    img { max-width: 100%; height: auto; display: block; }
+    a { color: inherit; text-decoration: none; }
+    ul { list-style: none; }
+
+    /* ============================================================
+       LAYOUT UTILITIES
+       ============================================================ */
+    .container {
+      width: 100%;
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+    .section-pad { padding: 80px 0; }
+    .section-pad-sm { padding: 56px 0; }
+
+    /* ============================================================
+       TYPOGRAPHY UTILITIES
+       ============================================================ */
+    .eyebrow {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-gold);
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+      font-weight: 800;
+      color: var(--color-black);
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+    .section-subtitle {
+      font-size: 1.05rem;
+      color: var(--color-gray-600);
+      max-width: 620px;
+    }
+    .section-header { margin-bottom: 48px; }
+    .section-header.centered { text-align: center; }
+    .section-header.centered .section-subtitle { margin: 0 auto; }
+
+    /* ============================================================
+       BUTTONS
+       ============================================================ */
+    .btn {
+      display: inline-block;
+      padding: 14px 28px;
+      border-radius: var(--radius-sm);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.1s, box-shadow 0.2s;
+      text-align: center;
+      line-height: 1;
+    }
+    .btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+    .btn:active { transform: translateY(0); }
+
+    .btn-primary {
+      background: var(--color-purple);
+      color: var(--color-white);
+      border-color: var(--color-purple);
+    }
+    .btn-primary:hover { background: var(--color-purple-dark); border-color: var(--color-purple-dark); }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--color-white);
+      border-color: rgba(255,255,255,0.7);
+    }
+    .btn-outline:hover { background: rgba(255,255,255,0.12); border-color: var(--color-white); }
+
+    .btn-gold {
+      background: var(--color-gold);
+      color: var(--color-white);
+      border-color: var(--color-gold);
+    }
+    .btn-gold:hover { background: #a8821f; border-color: #a8821f; }
+
+    .btn-outline-dark {
+      background: transparent;
+      color: var(--color-purple);
+      border-color: var(--color-purple);
+    }
+    .btn-outline-dark:hover { background: var(--color-purple-light); }
+
+    .btn-lg { padding: 17px 36px; font-size: 1.05rem; }
+
+    /* ============================================================
+       NAV
+       ============================================================ */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--color-black);
+      padding: 14px 0;
+      border-bottom: 1px solid #1e1e1e;
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .nav-logo {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--color-white);
+      letter-spacing: -0.01em;
+    }
+    .nav-logo span { color: var(--color-gold); }
+    .nav-logo-desc { font-weight: 400; font-size: 0.8em; color: rgba(255,255,255,0.55); letter-spacing: 0; }
+    .nav-cta { display: flex; gap: 10px; align-items: center; }
+    .nav-phone {
+      color: var(--color-gray-400);
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    /* ============================================================
+       UPDATE PHONE — replace 404-565-4216 in the nav-phone span
+       and anywhere else you see <!-- PHONE --> comments
+       ============================================================ */
+
+    /* ============================================================
+       HERO
+       ============================================================ */
+    .hero {
+      background: linear-gradient(135deg, #0f0f0f 0%, #1a0f2e 55%, #0f0f0f 100%);
+      padding: 100px 0 90px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 70% 30%, rgba(107,61,154,0.22) 0%, transparent 60%),
+        radial-gradient(ellipse at 20% 80%, rgba(196,154,48,0.10) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    .hero-content { position: relative; z-index: 1; max-width: 720px; }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(196,154,48,0.15);
+      border: 1px solid rgba(196,154,48,0.35);
+      color: var(--color-gold);
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border-radius: 100px;
+      margin-bottom: 28px;
+    }
+    .hero-badge::before { content: '★'; font-size: 0.7rem; }
+    .hero h1 {
+      font-size: clamp(2rem, 5.5vw, 3.4rem);
+      font-weight: 800;
+      color: var(--color-white);
+      line-height: 1.12;
+      margin-bottom: 22px;
+      letter-spacing: -0.02em;
+    }
+    .hero h1 span { color: var(--color-gold); }
+    .hero-sub {
+      font-size: clamp(1rem, 2.2vw, 1.2rem);
+      color: rgba(255,255,255,0.72);
+      margin-bottom: 36px;
+      max-width: 600px;
+      line-height: 1.65;
+    }
+    .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 40px; }
+    .hero-trust {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: rgba(255,255,255,0.50);
+      font-size: 0.85rem;
+    }
+    .hero-trust-dot {
+      width: 5px; height: 5px;
+      background: var(--color-gold);
+      border-radius: 50%;
+      opacity: 0.7;
+    }
+    .trust-items { display: flex; gap: 18px; flex-wrap: wrap; }
+    .trust-item { display: flex; align-items: center; gap: 7px; color: rgba(255,255,255,0.88); }
+    .trust-item::before {
+      content: '✓';
+      color: var(--color-gold);
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    /* ============================================================
+       SERVICES
+       ============================================================ */
+    .services { background: var(--color-white); }
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 20px;
+    }
+    .service-card {
+      background: var(--color-off-white);
+      border: 1px solid var(--color-gray-200);
+      border-radius: var(--radius-md);
+      padding: 28px 26px;
+      transition: box-shadow 0.2s, border-color 0.2s, transform 0.2s;
+    }
+    .service-card:hover {
+      border-color: var(--color-purple);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+    .service-icon {
+      font-size: 1.8rem;
+      margin-bottom: 14px;
+    }
+    .service-card h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--color-black);
+      margin-bottom: 8px;
+    }
+    .service-card p {
+      font-size: 0.92rem;
+      color: var(--color-gray-600);
+      line-height: 1.6;
+    }
+    .service-tag {
+      display: inline-block;
+      margin-top: 14px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--color-purple);
+    }
+
+    /* ============================================================
+       PHOTO / VISUAL SECTION
+       ============================================================ */
+    .visuals { background: var(--color-gray-100); }
+    .visuals-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: auto auto;
+      gap: 14px;
+    }
+    .visual-item {
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      position: relative;
+      background: var(--color-gray-200);
+    }
+    .visual-item.wide { grid-column: span 2; }
+    .visual-item img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.4s ease;
+    }
+    .visual-item.wide img { height: 280px; }
+    .visual-item:hover img { transform: scale(1.03); }
+    .visual-caption {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);
+      color: var(--color-white);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 20px 14px 12px;
+    }
+
+    /* ============================================================
+       HOW IT WORKS
+       ============================================================ */
+    .how-it-works { background: var(--color-white); }
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 32px;
+    }
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      position: relative;
+    }
+    .step-number {
+      width: 50px; height: 50px;
+      border-radius: 50%;
+      background: var(--color-purple);
+      color: var(--color-white);
+      font-size: 1.15rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 18px;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(107,61,154,0.3);
+    }
+    .step h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--color-black);
+      margin-bottom: 10px;
+    }
+    .step p { font-size: 0.93rem; color: var(--color-gray-600); line-height: 1.65; }
+
+    /* ============================================================
+       QUOTE FORM
+       ============================================================ */
+    .quote-section {
+      background: var(--color-off-white);
+      border-top: 4px solid var(--color-gold);
+    }
+    .form-wrap {
+      background: var(--color-white);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      padding: 44px 40px;
+      max-width: 820px;
+      margin: 0 auto;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px 20px;   /* 22px row gap, 20px column gap */
+    }
+    .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 2px; }
+    .form-group.full { grid-column: span 2; }
+    .form-group label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--color-gray-800);
+    }
+    .form-group label .req { color: var(--color-purple); margin-left: 2px; }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1.5px solid var(--color-gray-200);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-main);
+      font-size: 0.93rem;
+      color: var(--color-gray-800);
+      background: var(--color-white);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--color-purple);
+      box-shadow: 0 0 0 3px rgba(107,61,154,0.12);
+    }
+    .form-group select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b3d9a' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 38px;
+    }
+    .form-group textarea { resize: vertical; min-height: 90px; }
+    .checkbox-group { display: flex; align-items: flex-start; gap: 12px; }
+    .checkbox-group input[type="checkbox"] {
+      width: 18px; height: 18px;
+      flex-shrink: 0;
+      margin-top: 2px;
+      accent-color: var(--color-purple);
+      cursor: pointer;
+      /* Restore native checkbox rendering — overrides the blanket appearance:none on .form-group input */
+      appearance: auto;
+      -webkit-appearance: checkbox;
+    }
+    .checkbox-group label {
+      font-size: 0.88rem;
+      color: var(--color-gray-600);
+      line-height: 1.55;
+      cursor: pointer;
+    }
+    .form-note {
+      font-size: 0.82rem;
+      color: var(--color-gray-400);
+      margin-top: 4px;
+    }
+    .form-divider {
+      border: none;
+      border-top: 1px solid var(--color-gray-200);
+      margin: 28px 0;
+    }
+    .form-section-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      letter-spacing: 0.12em;
+      color: var(--color-purple);
+      margin-bottom: 16px;
+    }
+    .form-submit-wrap { margin-top: 28px; }
+    .form-submit-wrap .btn { width: 100%; font-size: 1rem; padding: 16px; }
+    .form-success {
+      display: none;
+      text-align: center;
+      padding: 40px 24px;
+    }
+    .form-success-icon {
+      font-size: 2.8rem;
+      margin-bottom: 16px;
+    }
+    .form-success h3 {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--color-black);
+      margin-bottom: 12px;
+    }
+    .form-success p { color: var(--color-gray-600); font-size: 0.95rem; line-height: 1.65; }
+
+    /* ============================================================
+       RESTRICTED ITEMS
+       ============================================================ */
+    .restricted { background: var(--color-black); }
+    .restricted .section-title { color: var(--color-white); }
+    .restricted .eyebrow { color: var(--color-gold); }
+    .restricted-note {
+      font-size: 0.95rem;
+      color: rgba(255,255,255,0.60);
+      margin-bottom: 36px;
+      max-width: 540px;
+    }
+    .restricted-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
+    }
+    .restricted-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius-sm);
+      padding: 13px 16px;
+    }
+    .restricted-item::before {
+      content: '✕';
+      color: #e05252;
+      font-weight: 700;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+    .restricted-item span { font-size: 0.88rem; color: rgba(255,255,255,0.75); }
+
+    /* ============================================================
+       SCHEDULING SECTION
+       ============================================================ */
+    .scheduling { background: var(--color-purple-light); }
+    .scheduling-inner {
+      display: flex;
+      align-items: center;
+      gap: 48px;
+      flex-wrap: wrap;
+    }
+    .scheduling-text { flex: 1; min-width: 260px; }
+    .scheduling-text .section-title { max-width: 460px; }
+    .scheduling-text p {
+      font-size: 1rem;
+      color: var(--color-gray-600);
+      margin-bottom: 28px;
+      max-width: 460px;
+      line-height: 1.65;
+    }
+    .scheduling-card {
+      background: var(--color-white);
+      border-radius: var(--radius-md);
+      padding: 32px 28px;
+      text-align: center;
+      box-shadow: var(--shadow-md);
+      min-width: 240px;
+      flex-shrink: 0;
+    }
+    .scheduling-card .icon { font-size: 2rem; margin-bottom: 12px; }
+    .scheduling-card p { font-size: 0.88rem; color: var(--color-gray-400); margin-bottom: 16px; }
+
+    /* ============================================================
+       SERVICE AREA
+       ============================================================ */
+    .service-area { background: var(--color-white); }
+    .area-content {
+      display: flex;
+      align-items: flex-start;
+      gap: 48px;
+      flex-wrap: wrap;
+    }
+    .area-text { flex: 1; min-width: 260px; }
+    .area-map-placeholder {
+      flex: 1;
+      min-width: 260px;
+      min-height: 200px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--color-purple-light) 0%, var(--color-gold-light) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 10px;
+      border: 1.5px dashed var(--color-purple);
+      padding: 40px 24px;
+      text-align: center;
+    }
+    .area-map-placeholder .map-icon { font-size: 2.5rem; }
+    .area-map-placeholder p {
+      font-size: 0.85rem;
+      color: var(--color-purple);
+      font-weight: 600;
+    }
+    .area-note {
+      margin-top: 16px;
+      font-size: 0.88rem;
+      color: var(--color-gray-400);
+      font-style: italic;
+    }
+    .area-text .section-subtitle { margin-top: 12px; }
+    .area-cities {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 20px;
+    }
+    .area-city {
+      background: var(--color-off-white);
+      border: 1px solid var(--color-gray-200);
+      border-radius: 100px;
+      padding: 5px 14px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--color-gray-600);
+    }
+
+    /* ============================================================
+       CONTACT
+       ============================================================ */
+    .contact { background: var(--color-black); }
+    .contact-inner {
+      display: flex;
+      align-items: flex-start;
+      gap: 60px;
+      flex-wrap: wrap;
+    }
+    .contact-info { flex: 1; min-width: 240px; }
+    .contact-info .section-title { color: var(--color-white); }
+    .contact-info .eyebrow { color: var(--color-gold); }
+    .contact-detail {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .contact-detail-icon {
+      width: 42px; height: 42px;
+      background: rgba(196,154,48,0.15);
+      border: 1px solid rgba(196,154,48,0.3);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .contact-detail-text { font-size: 0.93rem; }
+    .contact-detail-text .label {
+      font-size: 0.72rem;
+      color: var(--color-gray-400);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 600;
+      margin-bottom: 3px;
+    }
+    .contact-detail-text .value {
+      color: var(--color-white);
+      font-weight: 500;
+    }
+    .contact-detail-text .value a { color: var(--color-white); }
+    .contact-detail-text .value a:hover { color: var(--color-gold); }
+    .contact-cta { flex: 1; min-width: 240px; }
+    .contact-cta-card {
+      background: var(--color-purple);
+      border-radius: var(--radius-md);
+      padding: 36px 32px;
+      text-align: center;
+    }
+    .contact-cta-card h3 {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--color-white);
+      margin-bottom: 12px;
+    }
+    .contact-cta-card p {
+      color: rgba(255,255,255,0.75);
+      font-size: 0.9rem;
+      margin-bottom: 22px;
+      line-height: 1.6;
+    }
+
+    /* ============================================================
+       FOOTER
+       ============================================================ */
+    .footer {
+      background: #080808;
+      border-top: 1px solid #1a1a1a;
+      padding: 32px 0;
+    }
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .footer-logo {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--color-white);
+    }
+    .footer-logo span { color: var(--color-gold); }
+    .footer-copy {
+      font-size: 0.82rem;
+      color: var(--color-gray-400);
+    }
+    .footer-links {
+      display: flex;
+      gap: 20px;
+    }
+    .footer-links a {
+      font-size: 0.82rem;
+      color: var(--color-gray-400);
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--color-gold); }
+
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
+    @media (max-width: 768px) {
+      .section-pad { padding: 56px 0; }
+      .section-pad-sm { padding: 40px 0; }
+      .hero { padding: 64px 0 56px; }
+      .hero h1 { font-size: 2rem; }
+      .hero-actions { flex-direction: column; }
+      .hero-actions .btn { width: 100%; text-align: center; padding: 16px; }
+      .trust-items { gap: 12px; }
+      .form-wrap { padding: 28px 20px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-group.full { grid-column: span 1; }
+      .visuals-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .visual-item.wide { grid-column: span 2; }
+      .scheduling-inner { flex-direction: column; gap: 28px; }
+      .contact-inner { flex-direction: column; gap: 36px; }
+      .footer-inner { flex-direction: column; text-align: center; }
+      .footer-links { justify-content: center; }
+      .area-content { flex-direction: column; }
+    }
+    @media (max-width: 480px) {
+      .nav-phone { display: none; }
+      .visuals-grid { grid-template-columns: 1fr; }
+      .visual-item.wide { grid-column: span 1; }
+      .visual-item.wide img { height: 220px; }
+      .scheduling-card { width: 100%; }
+      .services-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ============================================================
+       SKIP LINK (ACCESSIBILITY)
+       ============================================================ */
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      padding: 8px 16px;
+      background: var(--color-purple);
+      color: var(--color-white);
+      font-weight: 700;
+      z-index: 999;
+      transition: top 0.2s;
+    }
+    .skip-link:focus { top: 0; }
+
+    /* Smooth anchor offset for sticky nav */
+    [id] { scroll-margin-top: 70px; }
+
+    /* ============================================================
+       QUOTE FORM TABS
+       ============================================================ */
+    .qtabs-wrap {
+      background: var(--color-white);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      max-width: 820px;
+      margin: 0 auto;
+    }
+    /* Strip the card shadow/radius from form-wrap when nested inside tabs */
+    .qtabs-wrap .form-wrap { box-shadow: none; border-radius: 0; max-width: none; margin: 0; }
+    /* Tab buttons */
+    .qtab-tabs { display: grid; grid-template-columns: 1fr 1fr; }
+    .qtab-btn {
+      padding: 15px 20px;
+      font-family: var(--font-main);
+      font-size: 0.92rem;
+      font-weight: 600;
+      border: none;
+      border-bottom: 3px solid var(--color-gray-200);
+      background: var(--color-gray-100);
+      color: var(--color-gray-600);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .qtab-btn:hover { background: var(--color-off-white); color: var(--color-gray-800); }
+    .qtab-btn.qtab-active { background: var(--color-white); color: var(--color-black); border-bottom-color: var(--color-purple); }
+    /* Panels */
+    .qtab-panel.qtab-hidden { display: none; }
+
+    /* ============================================================
+       QUOTE ROUTING MODAL
+       ============================================================ */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.62);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-card {
+      background: var(--color-white);
+      border-radius: var(--radius-lg);
+      padding: 44px 40px 40px;
+      max-width: 560px;
+      width: 100%;
+      position: relative;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.28);
+      animation: modalIn 0.18s ease;
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(12px) scale(0.98); }
+      to   { opacity: 1; transform: translateY(0)   scale(1); }
+    }
+    .modal-close {
+      position: absolute;
+      top: 14px; right: 16px;
+      background: none;
+      border: none;
+      font-size: 1.6rem;
+      line-height: 1;
+      cursor: pointer;
+      color: var(--color-gray-400);
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+      transition: color 0.15s, background 0.15s;
+    }
+    .modal-close:hover { color: var(--color-black); background: var(--color-gray-100); }
+    .modal-eyebrow {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-gold);
+      margin-bottom: 10px;
+    }
+    .modal-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--color-black);
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+    .modal-sub {
+      font-size: 0.92rem;
+      color: var(--color-gray-600);
+      margin-bottom: 28px;
+      line-height: 1.55;
+    }
+    .modal-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .modal-option {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      background: var(--color-off-white);
+      border: 2px solid var(--color-gray-200);
+      border-radius: var(--radius-md);
+      padding: 22px 20px;
+      cursor: pointer;
+      text-align: left;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.18s, box-shadow 0.18s, transform 0.12s;
+    }
+    .modal-option:hover {
+      border-color: var(--color-purple);
+      box-shadow: 0 4px 18px rgba(107,61,154,0.14);
+      transform: translateY(-2px);
+    }
+    .modal-option:active { transform: translateY(0); }
+    .modal-option-icon { font-size: 1.8rem; margin-bottom: 10px; }
+    .modal-option-title {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: var(--color-black);
+      margin-bottom: 6px;
+    }
+    .modal-option-desc {
+      font-size: 0.82rem;
+      color: var(--color-gray-600);
+      line-height: 1.5;
+      flex: 1;
+    }
+    .modal-option-cta {
+      display: inline-block;
+      margin-top: 14px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--color-purple);
+    }
+    @media (max-width: 480px) {
+      .modal-card { padding: 36px 22px 28px; }
+      .modal-options { grid-template-columns: 1fr; }
+      .modal-title { font-size: 1.25rem; }
+    }
+
+    /* ============================================================
+       CALL MODAL (desktop "Call Now")
+       ============================================================ */
+    .call-card { max-width: 440px; text-align: center; }
+    .call-number {
+      font-size: 1.9rem;
+      font-weight: 800;
+      color: var(--color-purple);
+      letter-spacing: -0.01em;
+      margin: 4px 0 26px;
+    }
+    .call-actions { display: flex; flex-direction: column; gap: 12px; }
+    .call-actions .btn { width: 100%; }
+    .call-copied {
+      margin-top: 14px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--color-success);
+    }
+    .call-copied[hidden] { display: none; }
+  </style>
+</head>
+
+<body>
+  <!-- Skip link for screen readers -->
+  <a class="skip-link" href="#quote">Skip to quote form</a>
+
+  <!-- ============================================================
+       QUOTE ROUTING MODAL
+       Opens when any "Get a Quote" or "Request a Quote" button is clicked.
+       Routes customer to either the removal form (#quote) or the assembly
+       form (#assembly-form) depending on their selection.
+       ============================================================ -->
+  <div class="modal-overlay" id="quote-modal" role="dialog" aria-modal="true" aria-labelledby="modal-heading">
+    <div class="modal-card">
+      <button class="modal-close" id="modal-close-btn" aria-label="Close dialog">&times;</button>
+      <p class="modal-eyebrow">Get a Quote</p>
+      <h2 class="modal-title" id="modal-heading">What do you need help with?</h2>
+      <p class="modal-sub">Choose a service below and we'll take you to the right quote form.</p>
+      <div class="modal-options">
+
+        <!-- Option A: Removal -->
+        <button type="button" class="modal-option" id="modal-opt-removal">
+          <span class="modal-option-icon" aria-hidden="true">🚛</span>
+          <span class="modal-option-title">Junk &amp; Furniture Removal</span>
+          <span class="modal-option-desc">Furniture pickup, mattress removal, couch removal, apartment move-out, curbside pickup, and single-item junk removal.</span>
+          <span class="modal-option-cta">Go to Removal Form →</span>
+        </button>
+
+        <!-- Option B: Assembly -->
+        <button type="button" class="modal-option" id="modal-opt-assembly">
+          <span class="modal-option-icon" aria-hidden="true">🔧</span>
+          <span class="modal-option-title">Furniture Assembly</span>
+          <span class="modal-option-desc">Bed frames, desks, dressers, shelves, TV stands, tables, and more — assembled cleanly and correctly.</span>
+          <span class="modal-option-cta">Go to Assembly Form →</span>
+        </button>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       CALL MODAL
+       Shown on desktop when a "Call Now" control is clicked.
+       (On mobile, the tel: link opens the dialer directly instead.)
+       ============================================================ -->
+  <div class="modal-overlay" id="call-modal" role="dialog" aria-modal="true"
+       aria-labelledby="call-modal-heading" aria-describedby="call-modal-desc">
+    <div class="modal-card call-card">
+      <button class="modal-close" id="call-modal-close" aria-label="Close dialog">&times;</button>
+      <p class="modal-eyebrow">Call Us</p>
+      <h2 class="modal-title" id="call-modal-heading">Call Bridgeway 404</h2>
+      <p class="modal-sub" id="call-modal-desc">For immediate assistance, call us at:</p>
+      <p class="call-number">404-565-4216</p>
+      <div class="call-actions">
+        <a href="tel:+14045654216" class="btn btn-primary btn-lg">Call 404-565-4216</a>
+        <button type="button" id="call-copy-btn" class="btn btn-outline-dark">Copy Number</button>
+      </div>
+      <p class="call-copied" id="call-copied" role="status" aria-live="polite" hidden>Phone number copied</p>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       NAVIGATION
+       ============================================================ -->
+  <nav class="nav" aria-label="Main navigation">
+    <div class="container nav-inner">
+      <!-- LOGO — update business name here if needed -->
+      <a href="/" class="nav-logo">Bridgeway <span>404</span> <em class="nav-logo-desc">Junk Removal</em></a>
+      <div class="nav-cta">
+        <!-- PHONE — update phone number here -->
+        <span class="nav-phone">404-565-4216</span>
+        <button type="button" data-open-modal class="btn btn-primary" style="padding:10px 20px;font-size:0.88rem;">Get a Quote</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============================================================
+       HERO SECTION
+       ============================================================ -->
+  <section class="hero" id="home" aria-label="Hero">
+    <div class="container">
+      <div class="hero-content">
+        <span class="hero-badge">Metro Atlanta Junk Removal</span>
+        <h1>
+          Reliable Junk Removal and<br>
+          <span>Furniture Pickup</span> in Metro Atlanta
+        </h1>
+        <p class="hero-sub">
+          Fast, respectful, and professional help for furniture removal, mattress pickup,
+          couch removal, apartment move-out pickups, curbside pickup, and furniture assembly.
+        </p>
+        <div class="hero-actions">
+          <!-- Primary CTA opens the quote routing modal -->
+          <button type="button" data-open-modal class="btn btn-primary btn-lg">Request a Quote</button>
+          <!-- Call Now: on mobile the tel: link opens the dialer; on desktop JS opens the call modal -->
+          <a href="tel:+14045654216" data-call-now
+             class="btn btn-outline btn-lg">Call Now</a>
+        </div>
+        <div class="trust-items">
+          <div class="trust-item">Locally owned</div>
+          <div class="trust-item">Easy scheduling</div>
+          <div class="trust-item">Clear communication</div>
+          <div class="trust-item">Respectful service</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SERVICES SECTION
+       ============================================================ -->
+  <section class="services section-pad" id="services" aria-label="Services">
+    <div class="container">
+      <div class="section-header">
+        <p class="eyebrow">What We Do</p>
+        <h2 class="section-title">Services We Offer</h2>
+        <p class="section-subtitle">
+          We handle the heavy lifting so you don't have to. From a single couch to a full apartment
+          move-out, we keep the process simple and straightforward.
+        </p>
+      </div>
+      <div class="services-grid">
+
+        <!-- SERVICE CARDS — edit name, description, and icon per card as needed -->
+
+        <article class="service-card">
+          <div class="service-icon" aria-hidden="true">🛋️</div>
+          <h3>Furniture Removal</h3>
+          <p>We haul away unwanted furniture — desks, dressers, tables, bed frames, and more — from wherever it sits.</p>
+          <span class="service-tag">Available Now</span>
+        </article>
+
+        <article class="service-card">
+          <div class="service-icon" aria-hidden="true">🛏️</div>
+          <h3>Mattress Removal</h3>
+          <p>Old mattress taking up space? We'll load and remove it quickly, so you can get on with your day.</p>
+          <span class="service-tag">Available Now</span>
+        </article>
+
+        <article class="service-card">
+          <div class="service-icon" aria-hidden="true">🪑</div>
+          <h3>Couch Pickup</h3>
+          <p>Sectionals, loveseats, recliners — we handle bulky couch and sofa removals with care for your space.</p>
+          <span class="service-tag">Available Now</span>
+        </article>
+
+        <article class="service-card">
+          <div class="service-icon" aria-hidden="true">🗑️</div>
+          <h3>Single-Item Junk Removal</h3>
+          <p>One bulky item to go? We offer single-item pickup so you're not paying for more than you need.</p>
+          <span class="service-tag">Available Now</span>
+        </article>
+
+        <article class="service-card">
+          <div class="service-icon" aria-hidden="true">🏢</div>
+          <h3>Apartment Move-Out Pickup</h3>
+          <p>Clearing out before handing over your keys? We help remove leftover furniture and items to ease your move-out.</p>
+          <span class="service-tag">Available Now</span>
+        </article>
+
+        <article class="service-card">
+          <div class="service-icon" aria-hidden="true">🚛</div>
+          <h3>Curbside Pickup</h3>
+          <p>Already have items at the curb or driveway? We'll collect them quickly and efficiently at a scheduled time.</p>
+          <span class="service-tag">Available Now</span>
+        </article>
+
+        <article class="service-card">
+          <div class="service-icon" aria-hidden="true">🔧</div>
+          <h3>Furniture Assembly</h3>
+          <p>Need something put together rather than taken away? We assemble furniture cleanly and correctly.</p>
+          <span class="service-tag">Available Now</span>
+          <button type="button" data-qtab-open="assembly" class="btn btn-outline-dark" style="margin-top:18px;font-size:0.85rem;padding:9px 18px;">
+            Request Furniture Assembly Quote
+          </button>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PHOTO / VISUAL SECTION
+       IMAGES — Replace Unsplash URLs below with your own photos.
+       All images below are from Unsplash (free, royalty-free use).
+       Format for replacement: swap the src URLs in each <img> tag.
+       ============================================================ -->
+  <section class="visuals section-pad-sm" id="gallery" aria-label="Photo gallery">
+    <div class="container">
+      <div class="section-header centered">
+        <p class="eyebrow">Our Work</p>
+        <h2 class="section-title">Items We Handle Every Day</h2>
+      </div>
+      <div class="visuals-grid">
+
+        <!-- Wide feature image — REPLACE src with your own photo -->
+        <div class="visual-item wide">
+          <img
+            src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=900&h=560&fit=crop&q=80&auto=format"
+            alt="Furniture removal — sofa being moved out of a home"
+            loading="lazy"
+          />
+          <div class="visual-caption">Furniture Removal</div>
+        </div>
+
+        <!-- Image 2 — REPLACE src -->
+        <div class="visual-item">
+          <img
+            src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&h=440&fit=crop&q=80&auto=format"
+            alt="Couch and sofa pickup service"
+            loading="lazy"
+          />
+          <div class="visual-caption">Couch Pickup</div>
+        </div>
+
+        <!-- Image 3 — REPLACE src -->
+        <div class="visual-item">
+          <img
+            src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=600&h=440&fit=crop&q=80&auto=format"
+            alt="Mattress removal service"
+            loading="lazy"
+          />
+          <div class="visual-caption">Mattress Removal</div>
+        </div>
+
+        <!-- Image 4 — Bridgeway 404 real photo: assembly in progress -->
+        <div class="visual-item wide">
+          <img
+            src="/images/Assembly-before.jpg"
+            alt="Furniture assembly in progress — Bridgeway 404"
+            loading="lazy"
+            style="object-fit:cover;"
+          />
+          <div class="visual-caption">Furniture Assembly</div>
+        </div>
+
+        <!-- Image 5 — Bridgeway 404 real photo: completed dresser assembly -->
+        <div class="visual-item">
+          <img
+            src="/images/Assembly-after.jpg"
+            alt="Completed dresser assembly — Bridgeway 404"
+            loading="lazy"
+            style="object-fit:cover;"
+          />
+          <div class="visual-caption">Completed Assembly</div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       HOW IT WORKS
+       ============================================================ -->
+  <section class="how-it-works section-pad" id="how-it-works" aria-label="How it works">
+    <div class="container">
+      <div class="section-header centered">
+        <p class="eyebrow">Simple Process</p>
+        <h2 class="section-title">How It Works</h2>
+        <p class="section-subtitle">
+          Three easy steps from quote request to completed job. No hidden fees, no surprises.
+        </p>
+      </div>
+      <div class="steps-grid">
+
+        <div class="step">
+          <div class="step-number" aria-hidden="true">1</div>
+          <h3>Send Details and Photos</h3>
+          <p>
+            Fill out the quote request form below and include photos or a short video of the item(s)
+            if available. The more detail you share, the faster we can respond with an accurate price.
+          </p>
+        </div>
+
+        <div class="step">
+          <div class="step-number" aria-hidden="true">2</div>
+          <h3>We Confirm Price and Timing</h3>
+          <p>
+            Bridgeway 404 reviews your request and follows up by text, call, or email — whichever
+            you prefer. We'll confirm pricing and find a pickup window that works for your schedule.
+          </p>
+        </div>
+
+        <div class="step">
+          <div class="step-number" aria-hidden="true">3</div>
+          <h3>We Handle the Job</h3>
+          <p>
+            We arrive during the scheduled window and take care of the pickup or assembly from
+            start to finish. Professional, clean, and efficient — every time.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       QUOTE / INTAKE FORM
+       Netlify Forms: add data-netlify="true" and the hidden
+       form-name field. Netlify detects this at build time.
+       For Zapier/Make/n8n integration, enable form notifications
+       in the Netlify dashboard and connect via webhook.
+       ============================================================ -->
+  <!-- (estimator section removed — see tabbed #quote section below) -->
+
+  <section class="quote-section section-pad" id="quote" aria-label="Request a quote">
+    <div class="container">
+      <div class="section-header centered">
+        <p class="eyebrow">Free Quote</p>
+        <h2 class="section-title">Request a Quote</h2>
+        <p class="section-subtitle">
+          Choose your service below. Fill out the short form and we'll follow up as quickly as possible.
+        </p>
+      </div>
+
+      <div class="qtabs-wrap">
+        <div class="qtab-tabs" role="tablist" aria-label="Select service type">
+          <button type="button" class="qtab-btn qtab-active" role="tab"
+            aria-selected="true" aria-controls="qtab-removal" data-qtab="removal">
+            Junk &amp; Furniture Removal
+          </button>
+          <button type="button" class="qtab-btn" role="tab"
+            aria-selected="false" aria-controls="qtab-assembly" data-qtab="assembly">
+            Furniture Assembly
+          </button>
+        </div>
+
+        <div class="qtab-panel" id="qtab-removal" role="tabpanel">
+        <div class="form-wrap">
+
+        <!--
+          NETLIFY FORMS SETUP:
+          - data-netlify="true" enables Netlify form detection
+          - name="quote-request" is the form name in your Netlify dashboard
+          - action="/thank-you.html" sends customers to the thank-you page after submission
+          - The hidden input mirrors the name attribute (required by Netlify)
+          - To receive email notifications: Netlify dashboard > Forms > Notifications
+        -->
+        <form
+          id="quote-form"
+          name="quote-request"
+          method="POST"
+          action="/thank-you.html"
+          data-netlify="true"
+          netlify
+          data-netlify-honeypot="bot-field"
+          aria-label="Quote request form"
+        >
+          <!-- Netlify hidden fields " do not remove -->
+          <input type="hidden" name="form-name" value="quote-request" />
+          <!-- privacy_consent_granted: Yes/No mirror of the checkbox below, for clean CRM import -->
+          <input type="hidden" id="qr-privacy-granted" name="privacy_consent_granted" value="No" />
+
+          <!-- Honeypot spam prevention -->
+          <p style="display:none;">
+            <label>Don't fill this out if you're human: <input name="bot-field" /></label>
+          </p>
+
+          <!-- ---- CONTACT INFO ---- -->
+          <p class="form-section-label">Contact Information</p>
+          <div class="form-grid">
+
+            <div class="form-group">
+              <label for="customer-name">Full Name <span class="req" aria-hidden="true">*</span></label>
+              <input
+                type="text"
+                id="customer-name"
+                name="customer_name"
+                autocomplete="name"
+                required
+                placeholder="Jane Smith"
+                aria-required="true"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="phone">Phone Number <span class="req" aria-hidden="true">*</span></label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                autocomplete="tel"
+                required
+                placeholder="(404) 000-0000"
+                aria-required="true"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="email">Email Address <span class="req" aria-hidden="true">*</span></label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                autocomplete="email"
+                required
+                placeholder="you@email.com"
+                aria-required="true"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="preferred-contact">Preferred Contact Method <span class="req" aria-hidden="true">*</span></label>
+              <select id="preferred-contact" name="preferred_contact" required aria-required="true">
+                <option value="" disabled selected>Select one</option>
+                <option value="call">Call</option>
+                <option value="text">Text</option>
+                <option value="email">Email</option>
+              </select>
+            </div>
+
+            <div class="form-group full">
+              <label for="pickup-address">Pickup Address or General Area <span class="req" aria-hidden="true">*</span></label>
+              <input
+                type="text"
+                id="pickup-address"
+                name="pickup_address"
+                autocomplete="street-address"
+                required
+                placeholder="123 Main St, Atlanta, GA — or just a neighborhood / city"
+                aria-required="true"
+              />
+            </div>
+
+          </div>
+
+          <hr class="form-divider" />
+
+          <!-- ---- SERVICE INFO ---- -->
+          <p class="form-section-label">Service Details</p>
+          <div class="form-grid">
+
+            <div class="form-group">
+              <label for="service-type">Service Needed <span class="req" aria-hidden="true">*</span></label>
+              <select id="service-type" name="service_type" required aria-required="true">
+                <option value="" disabled selected>Select a service</option>
+                <option value="junk-removal">Junk Removal</option>
+                <option value="furniture-removal">Furniture Removal</option>
+                <option value="mattress-removal">Mattress Removal</option>
+                <option value="couch-removal">Couch Removal</option>
+                <option value="apartment-moveout">Apartment Move-Out Pickup</option>
+                <option value="curbside-pickup">Curbside Pickup</option>
+                <option value="furniture-assembly">Furniture Assembly</option>
+              </select>
+            </div>
+
+            <div class="form-group full">
+              <label for="items-detail">Tell Us About the Items <span class="req" aria-hidden="true">*</span></label>
+              <textarea
+                id="items-detail"
+                name="items_detail"
+                required
+                aria-required="true"
+                placeholder="What needs to be removed? Include the type, number of items, approximate size, condition (still assembled or broken down), and anything attached — drawers, cushions, legs, glass pieces, screws, etc. The more detail, the faster we can confirm your price."
+                rows="5"
+              ></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="volume-estimate">Estimated Volume / Truck Needs</label>
+              <select id="volume-estimate" name="volume_estimate">
+                <option value="" disabled selected>Best guess is fine</option>
+                <option value="1-2-small">1–2 small items (fits in a car or van)</option>
+                <option value="few-medium">A few medium items (couch, dresser, or appliance)</option>
+                <option value="half-truck">Half a truckload (clearing a room or two)</option>
+                <option value="full-truck">Full truckload (whole apartment or large cleanout)</option>
+                <option value="not-sure">Not sure</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="item-location">Where Is the Item Located? <span class="req" aria-hidden="true">*</span></label>
+              <select id="item-location" name="item_location" required aria-required="true">
+                <option value="" disabled selected>Select location</option>
+                <option value="curbside">Curbside</option>
+                <option value="garage">Garage</option>
+                <option value="driveway">Driveway</option>
+                <option value="inside-home">Inside home</option>
+                <option value="apartment">Apartment</option>
+                <option value="upstairs">Upstairs</option>
+                <option value="elevator-access">Elevator access</option>
+                <option value="storage-unit">Storage unit</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            <div class="form-group full">
+              <label for="access-details">Access Details</label>
+              <textarea
+                id="access-details"
+                name="access_details"
+                placeholder="Tell us about stairs, elevator access, parking availability, long hallways, narrow doors, tight corners, or anything that may make removal harder."
+                rows="3"
+              ></textarea>
+            </div>
+
+          </div>
+
+          <hr class="form-divider" />
+
+          <!-- ---- PHOTOS & TIMING ---- -->
+          <p class="form-section-label">Photos and Timing</p>
+          <div class="form-grid">
+
+            <div class="form-group full">
+              <label>Photos or Video</label>
+              <!-- PHONE — update 404-565-4216 here if phone number changes -->
+              <p style="font-size:0.93rem;color:var(--color-gray-600);background:var(--color-off-white);border:1.5px solid var(--color-gray-200);border-radius:var(--radius-sm);padding:12px 14px;line-height:1.6;margin:0;">
+                📷 For the fastest quote, submit this form and then text photos or videos to
+                <strong>404-565-4216</strong>. Photos help us confirm the price quickly.
+              </p>
+            </div>
+
+            <div class="form-group">
+              <label for="timing">Timing Needed <span class="req" aria-hidden="true">*</span></label>
+              <select id="timing" name="timing" required aria-required="true">
+                <option value="" disabled selected>Select one</option>
+                <option value="same-day">Same day</option>
+                <option value="next-day">Next day</option>
+                <option value="this-week">This week</option>
+                <option value="flexible">Flexible</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <!-- Spacer on wider screens -->
+            </div>
+
+          </div>
+
+          <hr class="form-divider" />
+
+          <!-- ---- RESTRICTED ITEMS CONFIRMATION ---- -->
+          <p class="form-section-label">Required Confirmation</p>
+          <div class="form-group full" style="margin-bottom:20px;">
+            <div class="checkbox-group">
+              <input
+                type="checkbox"
+                id="restricted-confirm"
+                name="restricted_confirm"
+                value="confirmed"
+                required
+                aria-required="true"
+                aria-describedby="restricted-desc"
+              />
+              <label for="restricted-confirm" id="restricted-desc">
+                I confirm this request does not include refrigerators, Freon appliances, paint,
+                chemicals, fuel, propane tanks, hazardous materials, biohazards, asbestos,
+                unknown leaking containers, or anything requiring a separate permit to handle.
+                <span class="req" aria-hidden="true">*</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- ---- ADDITIONAL NOTES ---- -->
+          <div class="form-group full" style="margin-bottom:28px;">
+            <label for="additional-notes">Additional Notes</label>
+            <textarea
+              id="additional-notes"
+              name="additional_notes"
+              placeholder="Anything else we should know before your pickup or assembly?"
+              rows="3"
+            ></textarea>
+          </div>
+
+          <!-- ---- PRIVACY CONSENT ---- -->
+          <div class="form-group full" style="margin-bottom:20px;">
+            <div class="checkbox-group">
+              <input
+                type="checkbox"
+                id="privacy-consent"
+                name="privacy_consent"
+                value="agreed"
+                required
+                aria-required="true"
+              />
+              <!-- PRIVACY POLICY LINK — update /privacy once your policy page is live -->
+              <label for="privacy-consent">
+                I agree to the <a href="/privacy-policy.html" style="color:var(--color-purple);text-decoration:underline;">Privacy Policy</a>
+                and consent to having my data collected to process this quote.
+                <span class="req" aria-hidden="true">*</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- SUBMIT -->
+          <div class="form-submit-wrap">
+            <button type="submit" class="btn btn-primary">
+              Submit Quote Request
+            </button>
+          </div>
+
+        </form>
+        </div><!-- /form-wrap removal -->
+      </div><!-- /qtab-panel removal -->
+
+      <!-- Assembly tab panel " same #quote section, second tab -->
+      <div class="qtab-panel qtab-hidden" id="qtab-assembly" role="tabpanel">
+      <div class="form-wrap">
+
+        <form
+          name="furniture-assembly-request"
+          method="POST"
+          action="/thank-you.html"
+          data-netlify="true"
+          netlify
+          data-netlify-honeypot="bot-field-assembly"
+          aria-label="Furniture assembly request form"
+        >
+          <!-- Netlify hidden fields — do not remove -->
+          <input type="hidden" name="form-name" value="furniture-assembly-request" />
+          <!-- privacy_consent_granted: Yes/No mirror of the checkbox below, for clean CRM import -->
+          <input type="hidden" id="asm-privacy-granted" name="privacy_consent_granted" value="No" />
+
+          <!-- Honeypot spam prevention -->
+          <p style="display:none;" aria-hidden="true">
+            <label>Don't fill this out: <input name="bot-field-assembly" /></label>
+          </p>
+
+          <!-- ---- CONTACT INFO ---- -->
+          <p class="form-section-label">Contact Information</p>
+          <div class="form-grid">
+
+            <div class="form-group">
+              <label for="asm-name">Full Name <span class="req" aria-hidden="true">*</span></label>
+              <input
+                type="text"
+                id="asm-name"
+                name="customer_name"
+                autocomplete="name"
+                required
+                placeholder="Jane Smith"
+                aria-required="true"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="asm-phone">Phone Number <span class="req" aria-hidden="true">*</span></label>
+              <input
+                type="tel"
+                id="asm-phone"
+                name="phone"
+                autocomplete="tel"
+                required
+                placeholder="(404) 000-0000"
+                aria-required="true"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="asm-email">Email Address <span class="req" aria-hidden="true">*</span></label>
+              <input
+                type="email"
+                id="asm-email"
+                name="email"
+                autocomplete="email"
+                required
+                placeholder="you@email.com"
+                aria-required="true"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="asm-preferred-contact">Preferred Contact Method <span class="req" aria-hidden="true">*</span></label>
+              <select id="asm-preferred-contact" name="preferred_contact" required aria-required="true">
+                <option value="" disabled selected>Select one</option>
+                <option value="call">Call</option>
+                <option value="text">Text</option>
+                <option value="email">Email</option>
+              </select>
+            </div>
+
+            <div class="form-group full">
+              <label for="asm-address">Address or General Area <span class="req" aria-hidden="true">*</span></label>
+              <input
+                type="text"
+                id="asm-address"
+                name="service_area"
+                autocomplete="street-address"
+                required
+                placeholder="123 Main St, Atlanta, GA — or just a neighborhood / city"
+                aria-required="true"
+              />
+            </div>
+
+          </div>
+
+          <hr class="form-divider" />
+
+          <!-- ---- ASSEMBLY DETAILS ---- -->
+          <p class="form-section-label">Assembly Details</p>
+          <div class="form-grid">
+
+            <div class="form-group full">
+              <label for="asm-item-type">Item Type(s) <span class="req" aria-hidden="true">*</span></label>
+              <input
+                type="text"
+                id="asm-item-type"
+                name="assembly_item_type"
+                required
+                aria-required="true"
+                placeholder="e.g., bed frame, dresser, desk, bookshelf, patio set"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="asm-num-items">Number of Items <span class="req" aria-hidden="true">*</span></label>
+              <input
+                type="number"
+                id="asm-num-items"
+                name="num_items"
+                required
+                min="1"
+                placeholder="e.g. 1, 2, 3"
+                aria-required="true"
+              />
+            </div>
+
+            <div class="form-group full">
+              <label for="asm-brand">Item Brand or Model (if known)</label>
+              <input
+                type="text"
+                id="asm-brand"
+                name="item_brand_model"
+                placeholder="e.g. IKEA MALM bed frame, Wayfair Linon desk"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="asm-in-box">Is the Item Still in the Box? <span class="req" aria-hidden="true">*</span></label>
+              <select id="asm-in-box" name="still_in_box" required aria-required="true">
+                <option value="" disabled selected>Select one</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+                <option value="partially-assembled">Partially assembled</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="asm-instructions">Do You Have the Instructions / Manual? <span class="req" aria-hidden="true">*</span></label>
+              <select id="asm-instructions" name="has_instructions" required aria-required="true">
+                <option value="" disabled selected>Select one</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+                <option value="digital-only">Digital instructions only</option>
+                <option value="not-sure">Not sure</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="asm-special">Drawers, Glass, Mirrors, or Wall-Mounting? <span class="req" aria-hidden="true">*</span></label>
+              <select id="asm-special" name="special_pieces" required aria-required="true">
+                <option value="" disabled selected>Select one</option>
+                <option value="no">No</option>
+                <option value="yes">Yes</option>
+                <option value="not-sure">Not sure</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="asm-location">Where Will Assembly Take Place? <span class="req" aria-hidden="true">*</span></label>
+              <select id="asm-location" name="assembly_location" required aria-required="true">
+                <option value="" disabled selected>Select one</option>
+                <option value="apartment">Apartment</option>
+                <option value="house">House</option>
+                <option value="office">Office</option>
+                <option value="storage-unit">Storage unit</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="asm-timing">Timing Needed <span class="req" aria-hidden="true">*</span></label>
+              <input
+                type="date"
+                id="asm-timing"
+                name="timing"
+                required
+                aria-required="true"
+              />
+            </div>
+
+          </div>
+
+          <hr class="form-divider" />
+
+          <!-- ---- PHOTOS & NOTES ---- -->
+          <p class="form-section-label">Photos and Additional Notes</p>
+          <div class="form-grid">
+
+            <div class="form-group full">
+              <label>Photos, Item Links, or Instructions</label>
+              <!-- PHONE — update 404-565-4216 here if phone number changes -->
+              <p style="font-size:0.93rem;color:var(--color-gray-600);background:var(--color-off-white);border:1.5px solid var(--color-gray-200);border-radius:var(--radius-sm);padding:12px 14px;line-height:1.6;margin:0;">
+                📷 For the fastest quote, please text photos, item links, or assembly instructions to
+                <strong>404-565-4216</strong> after submitting this form.
+              </p>
+            </div>
+
+            <div class="form-group full">
+              <label for="asm-notes">Additional Notes</label>
+              <textarea
+                id="asm-notes"
+                name="additional_notes"
+                placeholder="Anything else we should know? Stairs, tight hallways, floor type, or any special instructions."
+                rows="3"
+              ></textarea>
+            </div>
+
+          </div>
+
+          <!-- ---- PRIVACY CONSENT ---- -->
+          <div class="form-group full" style="margin-bottom:20px;">
+            <div class="checkbox-group">
+              <input
+                type="checkbox"
+                id="asm-privacy-consent"
+                name="privacy_consent"
+                value="agreed"
+                required
+                aria-required="true"
+              />
+              <!-- PRIVACY POLICY LINK — update /privacy once your policy page is live -->
+              <label for="asm-privacy-consent">
+                I agree to the <a href="/privacy-policy.html" style="color:var(--color-purple);text-decoration:underline;">Privacy Policy</a>
+                and consent to having my data collected to process this quote.
+                <span class="req" aria-hidden="true">*</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- SUBMIT -->
+          <div class="form-submit-wrap">
+            <button type="submit" class="btn btn-primary">
+              Submit Assembly Request
+            </button>
+          </div>
+
+        </form>
+        </div><!-- /form-wrap assembly -->
+      </div><!-- /qtab-panel assembly -->
+      </div><!-- /qtabs-wrap -->
+    </div><!-- /container -->
+  </section><!-- /unified quote section -->
+
+  <!-- ============================================================
+       RESTRICTED ITEMS SECTION
+       ============================================================ -->
+  <section class="restricted section-pad" id="restricted" aria-label="Items we cannot accept">
+    <div class="container">
+      <div class="section-header">
+        <p class="eyebrow">Important Information</p>
+        <h2 class="section-title">Items We Cannot Accept Yet</h2>
+        <p class="restricted-note">
+          For safety and compliance reasons, we currently cannot accept the following items.
+          If you are unsure whether your item qualifies, please reach out before scheduling.
+        </p>
+      </div>
+      <div class="restricted-grid">
+        <div class="restricted-item"><span>Refrigerators</span></div>
+        <div class="restricted-item"><span>Freon appliances</span></div>
+        <div class="restricted-item"><span>Paint</span></div>
+        <div class="restricted-item"><span>Chemicals</span></div>
+        <div class="restricted-item"><span>Fuel</span></div>
+        <div class="restricted-item"><span>Propane tanks</span></div>
+        <div class="restricted-item"><span>Hazardous materials</span></div>
+        <div class="restricted-item"><span>Biohazards</span></div>
+        <div class="restricted-item"><span>Asbestos</span></div>
+        <div class="restricted-item"><span>Unknown leaking containers</span></div>
+        <div class="restricted-item"><span>Items requiring a separate permit</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SCHEDULING SECTION
+       ============================================================ -->
+  <section class="scheduling section-pad" id="schedule" aria-label="Speak with us">
+    <div class="container">
+      <div class="scheduling-inner">
+        <div class="scheduling-text">
+          <p class="eyebrow">Prefer to Talk?</p>
+          <h2 class="section-title">Want to Talk Through the Job?</h2>
+          <p>
+            If you would rather talk through the details before submitting a form,
+            call Bridgeway 404 directly. We'll answer your questions,
+            confirm what we can help with, and get you set up.
+          </p>
+          <!-- Call Now: mobile opens the dialer via tel:; desktop opens the call modal -->
+          <a
+            href="tel:+14045654216"
+            data-call-now
+            class="btn btn-primary btn-lg"
+          >
+            Speak With Us Now
+          </a>
+        </div>
+        <div class="scheduling-card">
+          <div class="icon" aria-hidden="true">📞</div>
+          <p>Quick, no-pressure call to discuss your job and confirm availability.</p>
+          <!-- Call Now -->
+          <a
+            href="tel:+14045654216"
+            data-call-now
+            class="btn btn-gold"
+            style="width:100%;display:block;"
+          >
+            Call Now
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SERVICE AREA
+       ============================================================ -->
+  <section class="service-area section-pad" id="service-area" aria-label="Service area">
+    <div class="container">
+      <div class="area-content">
+        <div class="area-text">
+          <p class="eyebrow">Where We Serve</p>
+          <h2 class="section-title">Serving Metro Atlanta</h2>
+          <p class="section-subtitle">
+            Bridgeway 404 serves Metro Atlanta and the surrounding areas. Whether you're in the
+            city or a nearby suburb, we're ready to help.
+          </p>
+          <!-- CITIES — add or remove cities below as your service area expands -->
+          <div class="area-cities" aria-label="Cities and areas we serve">
+            <span class="area-city">Atlanta</span>
+            <span class="area-city">Decatur</span>
+            <span class="area-city">Sandy Springs</span>
+            <span class="area-city">Marietta</span>
+            <span class="area-city">Smyrna</span>
+            <span class="area-city">Roswell</span>
+            <span class="area-city">Alpharetta</span>
+            <span class="area-city">East Point</span>
+            <span class="area-city">College Park</span>
+            <span class="area-city">Stockbridge</span>
+            <span class="area-city">Lithonia</span>
+            <span class="area-city">And more</span>
+          </div>
+          <p class="area-note">
+            Availability may depend on distance, timing, truck availability, and job size.
+            Contact us to confirm service to your location.
+          </p>
+        </div>
+        <div class="area-map-placeholder" role="img" aria-label="Metro Atlanta service area map placeholder">
+          <span class="map-icon" aria-hidden="true">📍</span>
+          <p>Metro Atlanta &amp; Surrounding Areas</p>
+          <p style="font-size:0.75rem;color:#6b3d9a;margin-top:4px;font-weight:400;">
+            <!-- MAP — replace this placeholder with a Google Maps embed or custom map image -->
+            Map coming soon
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       CONTACT SECTION
+       ============================================================ -->
+  <section class="contact section-pad" id="contact" aria-label="Contact information">
+    <div class="container">
+      <div class="contact-inner">
+        <div class="contact-info">
+          <p class="eyebrow">Get in Touch</p>
+          <h2 class="section-title">Contact Bridgeway 404</h2>
+
+          <!-- PHONE — update 404-565-4216 here -->
+          <div class="contact-detail">
+            <div class="contact-detail-icon" aria-hidden="true">📞</div>
+            <div class="contact-detail-text">
+              <div class="label">Phone</div>
+              <div class="value">
+                <a href="tel:+14045654216">404-565-4216</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- EMAIL — update info@bridgeway404.com here -->
+          <div class="contact-detail">
+            <div class="contact-detail-icon" aria-hidden="true">✉️</div>
+            <div class="contact-detail-text">
+              <div class="label">Email</div>
+              <div class="value">
+                <a href="mailto:info@bridgeway404.com">info@bridgeway404.com</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- SERVICE AREA — update as needed -->
+          <div class="contact-detail">
+            <div class="contact-detail-icon" aria-hidden="true">📍</div>
+            <div class="contact-detail-text">
+              <div class="label">Service Area</div>
+              <div class="value" style="color:rgba(255,255,255,0.75);">Metro Atlanta &amp; Surrounding Areas</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="contact-cta">
+          <div class="contact-cta-card">
+            <h3>Ready to Get Started?</h3>
+            <p>
+              Fill out our quick quote form and we'll be in touch. Most requests receive
+              a response within a few hours.
+            </p>
+            <button type="button" data-open-modal class="btn btn-gold" style="display:block;width:100%;">
+              Request a Quote
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer class="footer" role="contentinfo">
+    <div class="container footer-inner">
+      <div class="footer-logo">Bridgeway <span>404</span> <em class="nav-logo-desc">Junk Removal</em></div>
+      <p class="footer-copy">© 2026 Bridgeway 404. All rights reserved.</p>
+      <nav class="footer-links" aria-label="Footer links">
+        <!-- FOOTER LINKS — replace # with actual URLs when pages are ready -->
+        <a href="/privacy-policy.html">Privacy Policy</a>
+        <a href="/terms">Terms</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </div>
+  </footer>
+
+  <!-- ============================================================
+       JAVASCRIPT — Form handling and smooth interactions
+       ============================================================ -->
+  <!--
+    NETLIFY STATIC DETECTION FORM
+    This hidden form is never shown to users. Its sole purpose is to guarantee
+    Netlify's build-time HTML scanner detects and registers "quote-request" with
+    all its field names. Every field name here must exactly match the visible form above.
+    Do not remove this block.
+  -->
+  <!-- Fallback detection form: quote-request
+       All inputs are type="hidden" so nothing renders on screen.
+       The form itself also has [hidden] and display:none as belt-and-suspenders.
+       Field names must exactly match the visible form above. -->
+  <form name="quote-request" data-netlify="true" netlify data-netlify-honeypot="bot-field"
+        hidden aria-hidden="true" style="display:none;">
+    <input type="hidden" name="form-name"           value="quote-request" />
+    <input type="hidden" name="bot-field" />
+    <input type="hidden" name="customer_name" />
+    <input type="hidden" name="phone" />
+    <input type="hidden" name="email" />
+    <input type="hidden" name="preferred_contact" />
+    <input type="hidden" name="pickup_address" />
+    <input type="hidden" name="service_type" />
+    <input type="hidden" name="items_detail" />
+    <input type="hidden" name="volume_estimate" />
+    <input type="hidden" name="item_location" />
+    <input type="hidden" name="access_details" />
+    <input type="hidden" name="timing" />
+    <input type="hidden" name="restricted_confirm" />
+    <input type="hidden" name="additional_notes" />
+    <input type="hidden" name="privacy_consent" />
+    <input type="hidden" name="privacy_consent_granted" />
+  </form>
+
+  <!-- Fallback detection form: furniture-assembly-request -->
+  <form name="furniture-assembly-request" data-netlify="true" netlify data-netlify-honeypot="bot-field-assembly"
+        hidden aria-hidden="true" style="display:none;">
+    <input type="hidden" name="form-name"           value="furniture-assembly-request" />
+    <input type="hidden" name="bot-field-assembly" />
+    <input type="hidden" name="customer_name" />
+    <input type="hidden" name="phone" />
+    <input type="hidden" name="email" />
+    <input type="hidden" name="preferred_contact" />
+    <input type="hidden" name="service_area" />
+    <input type="hidden" name="assembly_item_type" />
+    <input type="hidden" name="num_items" />
+    <input type="hidden" name="item_brand_model" />
+    <input type="hidden" name="still_in_box" />
+    <input type="hidden" name="has_instructions" />
+    <input type="hidden" name="special_pieces" />
+    <input type="hidden" name="assembly_location" />
+    <input type="hidden" name="timing" />
+    <input type="hidden" name="additional_notes" />
+    <input type="hidden" name="privacy_consent" />
+    <input type="hidden" name="privacy_consent_granted" />
+  </form>
+
+  <script>
+    // ---- Quote Routing Modal ----
+    var modal    = document.getElementById('quote-modal');
+    var closeBtn = document.getElementById('modal-close-btn');
+
+    function openModal() {
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      closeBtn.focus();
+    }
+    function closeModal() {
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+    function scrollToSection(id) {
+      closeModal();
+      // Brief delay lets the modal finish closing before scroll
+      setTimeout(function () {
+        var el = document.getElementById(id);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 60);
+    }
+
+    // Open modal when any [data-open-modal] button is clicked
+    document.querySelectorAll('[data-open-modal]').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        openModal();
+      });
+    });
+
+    // Modal option buttons
+    document.getElementById('modal-opt-removal').addEventListener('click', function () {
+      activateQTab('removal');
+      scrollToSection('quote');
+    });
+    document.getElementById('modal-opt-assembly').addEventListener('click', function () {
+      activateQTab('assembly');
+      scrollToSection('quote');
+    });
+
+    // Close on X button
+    closeBtn.addEventListener('click', closeModal);
+
+    // Close on overlay click (outside the card)
+    modal.addEventListener('click', function (e) {
+      if (e.target === modal) closeModal();
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && modal.classList.contains('active')) closeModal();
+    });
+
+    // ================================================================
+
+    // ---- Quote form tab switching ----
+    function activateQTab(tabName) {
+      document.querySelectorAll('.qtab-btn').forEach(function(btn) {
+        var on = btn.dataset.qtab === tabName;
+        btn.classList.toggle('qtab-active', on);
+        btn.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      document.querySelectorAll('.qtab-panel').forEach(function(panel) {
+        panel.classList.toggle('qtab-hidden', panel.id !== 'qtab-' + tabName);
+      });
+    }
+
+    document.querySelectorAll('.qtab-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() { activateQTab(this.dataset.qtab); });
+    });
+
+    // Open a specific tab from any [data-qtab-open] button (e.g. service card CTA)
+    document.querySelectorAll('[data-qtab-open]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        activateQTab(this.dataset.qtabOpen);
+        var target = document.getElementById('quote');
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+
+    // ================================================================
+
+    // ---- Call Now: responsive behavior ----
+    // Mobile/touch devices follow the tel: link to open the dialer.
+    // Desktop devices open a branded modal with the number + copy button.
+    var callModal     = document.getElementById('call-modal');
+    var callCloseBtn  = document.getElementById('call-modal-close');
+    var callCopyBtn   = document.getElementById('call-copy-btn');
+    var callCopied    = document.getElementById('call-copied');
+    var callPhoneDisplay = '404-565-4216';
+    var callLastFocused  = null;
+    var callCopiedTimer  = null;
+
+    // True for phones/tablets with a touch-primary input (where tel: just works).
+    function isTouchPhone() {
+      return window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    }
+
+    function openCallModal(trigger) {
+      callLastFocused = trigger || document.activeElement;
+      callModal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      callCloseBtn.focus();
+    }
+    function closeCallModal() {
+      callModal.classList.remove('active');
+      document.body.style.overflow = '';
+      if (callCopied) callCopied.hidden = true;
+      if (callLastFocused && typeof callLastFocused.focus === 'function') {
+        callLastFocused.focus();
+      }
+      callLastFocused = null;
+    }
+
+    // Intercept every Call Now control. On desktop, open the modal instead
+    // of dialing; on touch phones, let the tel: link behave normally.
+    document.querySelectorAll('[data-call-now]').forEach(function (el) {
+      el.addEventListener('click', function (e) {
+        if (!isTouchPhone()) {
+          e.preventDefault();
+          openCallModal(el);
+        }
+      });
+    });
+
+    if (callModal) {
+      // Close on X button
+      callCloseBtn.addEventListener('click', closeCallModal);
+      // Close on overlay click (outside the card)
+      callModal.addEventListener('click', function (e) {
+        if (e.target === callModal) closeCallModal();
+      });
+      // Close on Escape + simple focus trap while open
+      document.addEventListener('keydown', function (e) {
+        if (!callModal.classList.contains('active')) return;
+        if (e.key === 'Escape') { closeCallModal(); return; }
+        if (e.key === 'Tab') {
+          var focusable = callModal.querySelectorAll('a[href], button:not([disabled])');
+          if (!focusable.length) return;
+          var first = focusable[0];
+          var last  = focusable[focusable.length - 1];
+          if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault(); last.focus();
+          } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault(); first.focus();
+          }
+        }
+      });
+
+      // Copy Number button
+      callCopyBtn.addEventListener('click', function () {
+        function showCopied() {
+          callCopied.hidden = false;
+          if (callCopiedTimer) clearTimeout(callCopiedTimer);
+          callCopiedTimer = setTimeout(function () { callCopied.hidden = true; }, 3000);
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(callPhoneDisplay).then(showCopied, fallbackCopy);
+        } else {
+          fallbackCopy();
+        }
+        function fallbackCopy() {
+          var tmp = document.createElement('textarea');
+          tmp.value = callPhoneDisplay;
+          tmp.setAttribute('readonly', '');
+          tmp.style.position = 'absolute';
+          tmp.style.left = '-9999px';
+          document.body.appendChild(tmp);
+          tmp.select();
+          try { document.execCommand('copy'); } catch (err) {}
+          document.body.removeChild(tmp);
+          showCopied();
+        }
+      });
+    }
+
+    // ================================================================
+
+    // ---- Smooth scroll for remaining same-page anchor links ----
+    document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
+      anchor.addEventListener('click', function (e) {
+        var target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

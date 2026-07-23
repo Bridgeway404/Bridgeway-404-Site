@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Favicon — Bridgeway 404 logo -->
+  <link rel="icon" type="image/png" sizes="512x512" href="/favicon.png">
+  <link rel="shortcut icon" type="image/png" href="/favicon.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="/favicon.png">
+  <title>Request Received | Bridgeway 404 Junk Removal</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --color-black:       #0f0f0f;
+      --color-white:       #ffffff;
+      --color-off-white:   #f8f7f5;
+      --color-purple:      #6b3d9a;
+      --color-purple-dark: #4e2c72;
+      --color-gold:        #c49a30;
+      --color-gray-400:    #9a9a9a;
+      --color-gray-600:    #555555;
+      --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-main);
+      background: var(--color-off-white);
+      color: var(--color-black);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ---- NAV ---- */
+    .nav {
+      background: var(--color-black);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--color-white);
+      text-decoration: none;
+      letter-spacing: -0.01em;
+    }
+    .nav-logo span { color: var(--color-gold); }
+    .nav-logo em {
+      font-style: normal;
+      font-weight: 400;
+      font-size: 0.8em;
+      color: rgba(255,255,255,0.5);
+    }
+
+    /* ---- MAIN CONTENT ---- */
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 24px;
+    }
+
+    .card {
+      background: var(--color-white);
+      border-radius: 20px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.10);
+      padding: 56px 48px;
+      max-width: 580px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .check-circle {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--color-purple) 0%, var(--color-purple-dark) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 28px;
+      box-shadow: 0 4px 20px rgba(107,61,154,0.30);
+    }
+    .check-circle svg {
+      width: 36px;
+      height: 36px;
+      stroke: #ffffff;
+      stroke-width: 3;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .eyebrow {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-gold);
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 1.9rem;
+      font-weight: 800;
+      color: var(--color-black);
+      line-height: 1.2;
+      margin-bottom: 18px;
+      letter-spacing: -0.02em;
+    }
+
+    .message {
+      font-size: 1rem;
+      color: var(--color-gray-600);
+      line-height: 1.7;
+      margin-bottom: 36px;
+    }
+    .message strong { color: var(--color-black); }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #e8e8e8;
+      margin: 0 0 32px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 13px 26px;
+      border-radius: 6px;
+      font-family: var(--font-main);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 2px solid transparent;
+      text-decoration: none;
+      text-align: center;
+      transition: background 0.2s, border-color 0.2s, transform 0.1s, box-shadow 0.2s;
+    }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,0,0,0.12); }
+    .btn:active { transform: translateY(0); }
+
+    .btn-primary {
+      background: var(--color-purple);
+      color: #ffffff;
+      border-color: var(--color-purple);
+    }
+    .btn-primary:hover { background: var(--color-purple-dark); border-color: var(--color-purple-dark); }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--color-purple);
+      border-color: var(--color-purple);
+    }
+    .btn-outline:hover { background: #f3eafa; }
+
+    /* ---- FOOTER ---- */
+    footer {
+      background: #080808;
+      border-top: 1px solid #1a1a1a;
+      padding: 24px;
+      text-align: center;
+    }
+    footer p {
+      font-size: 0.82rem;
+      color: var(--color-gray-400);
+    }
+
+    @media (max-width: 480px) {
+      .card { padding: 36px 24px; }
+      h1 { font-size: 1.5rem; }
+      .actions { flex-direction: column; }
+      .btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav" aria-label="Main navigation">
+    <a href="/" class="nav-logo">
+      Bridgeway <span>404</span> <em>Junk Removal</em>
+    </a>
+  </nav>
+
+  <!-- MAIN -->
+  <main>
+    <div class="card" role="main">
+
+      <!-- Checkmark icon -->
+      <div class="check-circle" aria-hidden="true">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
+
+      <p class="eyebrow">Quote Request Received</p>
+
+      <h1>Thank You!</h1>
+
+      <p class="message">
+        Your quote request has been received. Bridgeway 404 will follow up as soon as possible.<br><br>
+        For the fastest quote, you may also text photos or videos to
+        <!-- PHONE — update 404-565-4216 here if number changes -->
+        <strong>404-565-4216</strong>.
+      </p>
+
+      <hr class="divider" />
+
+      <div class="actions">
+        <a href="/" class="btn btn-primary">Back to Home</a>
+        <!-- PHONE — update 404-565-4216 / tel:+14045654216 here if number changes -->
+        <a
+          href="tel:+14045654216"
+          class="btn btn-outline"
+        >
+          Call 404-565-4216
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2026 Bridgeway 404 Junk Removal. All rights reserved.</p>
+  </footer>
+
+</body>
+</html>
