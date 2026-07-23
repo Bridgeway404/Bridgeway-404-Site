@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell($path = \"C:\\\\Users\\\\MStrickland\\\\OneDrive - hallboothsmith.com\\\\Desktop\\\\bridgeway404-site\\\\index.html\"; $bytes = [System.IO.File]::ReadAllBytes\\($path\\); \\($bytes[0..15] | ForEach-Object { $_.ToString\\('X2'\\) }\\) -join ' ')",
+      "mcp__Claude_Preview__preview_start"
+    ]
+  }
+}
