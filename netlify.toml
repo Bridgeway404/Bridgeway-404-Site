@@ -28,7 +28,7 @@
     Cache-Control = "public, max-age=0, must-revalidate"
 
 # Long-lived cache for /assets/* — this includes the branded social share
-# card (assets/bridgeway404-share-card-v1.png). Because these are cached as
+# card (assets/bridgeway404-social-preview-v2.png). Because these are cached as
 # immutable for a year, always ship a NEW filename (-v2, -v3, ...) when the
 # share image changes, and update the og:image / twitter:image URLs to match.
 [[headers]]

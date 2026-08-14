@@ -10,7 +10,7 @@ One-page marketing and quote-request site for Bridgeway 404 (Metro Atlanta junk 
 |---|---|
 | `index.html` | The entire website — all sections, styles, and scripts in one file |
 | `netlify.toml` | Netlify configuration (headers, redirects, build settings) |
-| `assets/bridgeway404-share-card-v1.png` | 1200 × 630 branded link-preview image (iMessage, SMS, Facebook, LinkedIn, X, Slack, WhatsApp) |
+| `assets/bridgeway404-social-preview-v2.png` | 1200 × 630 branded link-preview image (iMessage, SMS, Facebook, LinkedIn, X, Slack, WhatsApp) |
 | `favicon.png` | Bridgeway 404 logo, used as the browser/tab icon |
 | `README.md` | This file — deployment guide |
 
@@ -18,16 +18,18 @@ One-page marketing and quote-request site for Bridgeway 404 (Metro Atlanta junk 
 
 The image people see when bridgeway404.com is texted or posted comes from the
 Open Graph / Twitter tags in the `<head>` of `index.html` — **not** from the photos
-in the page. Those tags point at `assets/bridgeway404-share-card-v1.png`.
+in the page. Those tags point at `assets/bridgeway404-social-preview-v2.png`.
 
 To change the preview image:
 
 1. Export a new 1200 × 630 PNG.
-2. Save it under `assets/` with a **new** filename (`...-v2.png`) — files in `assets/`
-   are cached for a year by the CDN, so reusing the name can serve the old image.
+2. Save it under `assets/` with a **new** filename — bump the version, so
+   `...-v3.png`. Files in `assets/` are cached for a year by the CDN and by
+   Apple/Facebook/LinkedIn, so reusing a filename can keep serving the old image.
 3. Update every `og:image`, `og:image:secure_url`, and `twitter:image` URL in
    `index.html`, `thank-you.html`, and `privacy-policy.html`.
-4. Re-scrape at https://developers.facebook.com/tools/debug/ and
+4. Run `python3 tools/verify-social-metadata.py` to confirm nothing was missed.
+5. Re-scrape at https://developers.facebook.com/tools/debug/ and
    https://www.linkedin.com/post-inspector/ so those platforms drop their cached copy.
 
 ---
