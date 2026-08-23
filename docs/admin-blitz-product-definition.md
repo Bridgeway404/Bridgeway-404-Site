@@ -1,8 +1,8 @@
 # Bridgeway Admin — Property Management Blitz
-## Product Definition (for approval — no implementation yet)
+## Product Definition (FINAL — approved, implementation in progress)
 
-**Date:** 2026-08-23
-**Status:** Awaiting Michael's approval
+**Approved:** 2026-08-23
+**Status:** Building
 
 ---
 
@@ -10,120 +10,135 @@
 
 A password-protected internal admin panel added to the existing Bridgeway 404 website at
 **`bridgeway404.com/admin`**, containing one module: the **Property Management Blitz** tool
-for Jonathan's outreach to property-management companies and vendor networks.
+at **`/admin/blitz`** for Jonathan's outreach to property-management companies and vendor
+networks. The public website remains visually and functionally unchanged.
 
-The core loop it must make effortless:
+The core loop:
 
-> Jonathan opens `/admin` → sees who to contact next → taps to call → records the result
-> in seconds → immediately gets the next prospect.
+> Jonathan opens `/admin/blitz` → sees the best prospect to contact next → understands why
+> Bridgeway wants the account → taps the phone number → records the outcome → immediately
+> gets the next prospect.
 
----
-
-## 2. Existing website — inspection findings
-
-These findings drove the architecture below.
-
-| Aspect | Finding |
-|---|---|
-| Framework / stack | Hand-written static HTML/CSS/JS. The entire public site is essentially one file (`index.html`); no framework, no build step (`netlify.toml`: `command = ""`, `publish = "."`). |
-| Hosting | Netlify, auto-deploying from the GitHub repo `Bridgeway404/Bridgeway-404-Site` (`main` branch). A push is live in ~30 seconds. |
-| Routing | File-based (`index.html`, `privacy-policy.html`, `thank-you.html`) plus redirects in `netlify.toml`. |
-| Authentication | None anywhere on the site. |
-| Admin / private functionality | None. |
-| Database / storage | None in the site itself. Netlify Forms captures leads → email notifications and Zapier/Make → Google Sheets. Separately, the business has an **active Supabase account** (`info@bridgeway404.com`) with healthy projects. |
-| Deployment process | `git push` to `main` → Netlify auto-deploy. |
-| Adding `/admin` | Straightforward. An `/admin/` directory of pages serves at `bridgeway404.com/admin` with zero changes to the public site. Because static hosting cannot gate page files by itself, **security lives at the data layer**: the admin HTML is an empty shell with no data in it, and every piece of prospect data requires an authenticated session enforced server-side by Supabase (Auth + Postgres row-level security). |
-
-**Conclusion:** no separate repository or application is needed. The admin panel extends this
-repo and this Netlify site, using Supabase (already owned) as the secure backend.
+The MVP ships with a researched prospect universe (target ~300–500 credible organizations,
+subject to research quality — no manufactured filler) so the tool is immediately useful.
 
 ---
 
-## 3. Decisions from the requirements interview
+## 2. Final decisions
 
-All ten architecture questions were answered:
+### Access
+- Day 1 users: **Michael** and **Jonathan**, separate authenticated accounts.
+- **Leslie** is easy to add later (in-app "Team" management) but is not in the initial build.
+- Every outreach action is attributed to the authenticated user who recorded it.
 
-1. **Day-1 access:** Michael + Jonathan.
-2. **Logins:** Separate credentials for each person.
-3. **Leslie:** Will need access eventually — adding her later is a ~2-minute task (create account, done).
-4. **Attribution:** Yes — every logged outcome is stamped with which user did it and when.
-5. **Mobile:** Yes, mobile-first. The Next Prospect workflow is designed for a phone: big tap targets, tap-to-call numbers, one-thumb outcome buttons. Desktop gets the fuller list views.
-6. **Panel scope:** A simple "Bridgeway Admin" shell that can host future internal modules, with **only the Blitz module built now**.
-7. **Public site:** Remains completely visually unchanged. No public link to `/admin`; the URL is typed directly.
-8. **Route:** `/admin` (with the blitz at `/admin/blitz`).
-9. **Sessions & passwords:** Stay signed in ~30 days per device; password reset by email; passwords never stored in plaintext (Supabase Auth handles hashing and reset flows — nothing custom is built).
-10. **Data storage:** **Supabase database = source of truth.** Google Sheets remains a research/import source: prospect lists are exported as CSV and uploaded through an Import page in the admin panel. No live Google API integration to maintain.
+### Platform
+- Route: `/admin`, blitz at `/admin/blitz`. Same repo, same static-HTML idiom, same
+  Netlify/GitHub deploy. No public-site redesign.
+- **Dedicated Supabase project** (`bridgeway-404`) — auth, Postgres, row-level security,
+  outreach attribution. No custom password storage; Supabase Auth only.
+- Sessions persist (~30 days per device, rolling refresh). Password changes in-app; an
+  admin can reset a teammate's password from the Team page.
 
-### Scope trimming (from the workflow interrogation)
+### Prospect types (V1 — exactly five)
+1. Property Management Company
+2. Multifamily / Apartment Operator
+3. Single-Family Rental Operator
+4. Third-Party Maintenance / Vendor Network
+5. REO / Field Services
 
-- **Views kept:** the focused **Next Prospect** workflow (core) and a searchable/filterable **Prospects master list**.
-- **Views cut:** a separate Follow-Ups view and a Vendor Applications view — not built now.
-- **Outcome buttons kept:** **Called / No Answer / Left Voicemail**, plus one **Done** button to close a prospect out, and an **optional** quick note on any outcome (never required).
-- **Outcome buttons cut:** Emailed, Interested, Follow Up, Vendor Application, Not a Fit, Job Opportunity.
-- **Queue movement:** auto-recycle. No Answer / Left Voicemail automatically re-queue the prospect a few days out; Called re-queues on a longer interval; **Done** (with an optional one-line note) removes it from the rotation. Nothing requires scheduling by hand.
-- **Prospect detail fields kept:** company name, prospect type, why Bridgeway wants them, and the best-contact block (name, title, tap-to-call phone, email).
-- **Prospect detail fields cut:** service footprint, vendor-registration link/status, scripted call openers / voicemail / email templates, and a manual "next action" field (the queue *is* the next action).
+No HOA, self-storage, senior living, student housing, or realtor categories unless a
+company clearly fits one of the five above.
+
+### Outreach outcomes
+- **No Answer** → prospect returns to queue after **2 business days**
+- **Left Voicemail** → returns after **3 business days**
+- **Spoke / Connected** → returns after **7 calendar days** unless marked Done
+- **Done** → removed from the active blitz rotation
+- Optional note on any outcome, never required.
+- Recycling timing lives in one database table (`recycle_rules`) read by one function —
+  changeable later without redesigning anything.
+
+### Views
+- **Next Prospect** (default page): company + type, why Bridgeway wants the account,
+  best contact (name, title, tap-to-call phone, clickable email), company info (website,
+  Metro Atlanta relevance, approximate portfolio/footprint when known), third-party/vendor
+  registration info when relevant (registration URL, contact URL, onboarding note),
+  source of the data, and the four action buttons. After an action, the next prospect
+  appears immediately. No separate Vendor Applications workflow.
+- **Master Prospect List**: search plus filters for type, status, geography,
+  worked/unworked, company, and contact availability. For visibility, searching,
+  corrections, and selecting prospects — not a CRM.
+
+### Prioritization (internal, invisible)
+The queue orders by a simple internal rule combining: practical contact path first, then
+research priority (1–4, assigned during research from recurring-volume / Atlanta
+concentration / portfolio size / outsourcing likelihood / vendor-network opportunity /
+contact quality / geographic fit / freshness), then due time. Jonathan never sees a score —
+the screen just serves the best available prospect. Companies without a practical contact
+path stay in the database but rank last.
+
+### Data ingestion
+- **Supabase Postgres is the operating source of truth.**
+- CSV import/upsert in the admin panel: de-duplicates on normalized company name, updates
+  existing companies non-destructively (never overwrites a field with blank, never touches
+  outreach history or queue state), validates required fields, and reports per-row failures.
+- Google Sheets/CSV remain research and staging formats only.
+- **Prospect data is never committed to this repository** — everything in the repo is
+  published to the public website by Netlify.
+
+### Security
+- Supabase Auth + Postgres row-level security. Every table denies access unless the
+  requester is an authenticated member of the `admin_users` allowlist — so even though the
+  `/admin` HTML shell is statically served, unauthenticated users cannot read prospect or
+  outreach data through the client/API.
+- The only frontend config is the Supabase project URL and anon (publishable) key — public
+  client configuration by design. The service-role key is never in the browser or the repo.
+- `/admin/*` responses carry `X-Robots-Tag: noindex`; `/docs/*` is blocked from serving.
 
 ---
 
-## 4. Architecture
+## 3. Implementation plan (brief)
+
+**Files/directories added** (public site untouched except `netlify.toml` headers):
 
 ```
-bridgeway404.com            ← public site, untouched
-bridgeway404.com/admin      ← login + Bridgeway Admin shell
-bridgeway404.com/admin/blitz← Property Management Blitz module
-        │
-        │  authenticated requests only (Supabase JS client)
-        ▼
-Supabase (existing account)
-  ├─ Auth: email+password accounts (Michael, Jonathan; Leslie later)
-  └─ Postgres with row-level security: prospects, outreach log
+admin/index.html            login + Bridgeway Admin shell (module card, Team, password)
+admin/blitz/index.html      Next Prospect workflow (default blitz page)
+admin/prospects/index.html  master list + CSV import
+admin/assets/admin.css      shared admin styles (Bridgeway brand, mobile-first)
+admin/assets/admin.js       shared auth guard + Supabase client + helpers
+admin/assets/supabase.js    vendored @supabase/supabase-js (UMD, pinned)
+admin/assets/config.js      Supabase URL + anon key (public client config)
+supabase/migrations/*.sql   schema, functions, RLS (versioned in repo)
+netlify.toml                + connect-src for Supabase, noindex on /admin/*, block /docs/*
 ```
 
-- **Same repo, same stack, same deploy.** Admin pages are hand-written static HTML/CSS/JS in an `/admin/` directory, styled to match Bridgeway branding, deployed by the same `git push` → Netlify flow.
-- **Supabase Auth** provides login, hashed passwords, email password reset, and ~30-day persistent sessions. Michael and Jonathan get individual accounts; only accounts on an approved admin list can read or write any data (enforced in the database via row-level security, not in the browser).
-- **`netlify.toml` changes only:** allow the browser to talk to the Supabase project (Content-Security-Policy `connect-src`), and add `noindex` headers on `/admin/*` so admin pages never appear in search engines. No other public-site configuration changes.
-- **CSV import:** an Import page accepts a CSV exported from the research Google Sheet, previews the rows, de-duplicates against existing companies, and loads them as prospects.
+**Supabase tables:** `admin_users` (allowlist + display names), `prospects` (company,
+type, contact, vendor URLs, priority, status, `next_due_at`), `outreach_log` (outcome,
+note, user, timestamp), `recycle_rules` (outcome → days + business-day flag).
 
-### Data model (draft)
+**Auth approach:** Supabase Auth email+password. Accounts are created only by an existing
+admin through a `security definer` database function (used by the Team page) — public
+signup is never trusted: RLS checks membership in `admin_users`, not mere authentication.
+Michael's account is seeded with a temporary password; Michael adds Jonathan (and later
+Leslie) from the Team page.
 
-**prospects** — one row per company
-`company_name`, `prospect_type`, `why_bridgeway` (why we want them), `contact_name`, `contact_title`, `contact_phone`, `contact_email`, `status` (active / done), `next_due_at`, `created_at`, `imported_from` (batch reference)
+**Next Prospect query/recycling:** one RPC returns the best due prospect
+(`status = active`, `next_due_at <= now()`, ordered by has-contact-path → priority →
+due time; if nothing is due it serves the earliest upcoming one, labeled as early). One
+RPC logs an outcome: inserts the attributed `outreach_log` row and re-queues or closes the
+prospect using `recycle_rules` — all timing in one place.
 
-**outreach_log** — one row per logged attempt
-`prospect_id`, `outcome` (called / no_answer / voicemail / done), `note` (optional), `user` (who logged it), `logged_at`
+**Import mechanism:** client-side CSV parse → chunked `import_prospects` RPC → upsert by
+normalized company name with per-row success/failure report in the UI.
 
-**Queue rule:** the next prospect is the active one whose `next_due_at` is earliest (never-contacted prospects first). Proposed default recycle intervals — **No Answer / Voicemail: +3 days; Called: +7 days; Done: leaves the queue.** *(Intervals are adjustable — flag any preference at approval.)*
+**Initial prospect universe:** parallel web research across the five categories —
+Atlanta residential PM companies, multifamily/apartment operators with Atlanta portfolios,
+SFR/scattered-site operators, Lessen-like vendor networks (vendor-registration URLs
+prioritized), and REO/property-preservation field services recruiting Georgia vendors —
+every record carrying source URLs, no fabricated data, deduplicated and loaded through the
+importer. The staging CSV is delivered separately, not committed.
 
----
-
-## 5. Product experience
-
-**`/admin`** — Bridgeway-branded login (email + password). After login: a minimal **Bridgeway Admin** home showing one module card, *Property Management Blitz*. Future internal tools become additional cards later; none are built now.
-
-**`/admin/blitz` — Next Prospect (the heart of the tool, mobile-first):**
-- A header line shows how many prospects are due today.
-- One full-screen prospect card: company, prospect type, why Bridgeway wants them, contact name + title, **tap-to-call phone**, email.
-- Four large one-thumb buttons: **Called · No Answer · Left Voicemail · Done**, with an optional note field.
-- Tapping an outcome logs it (stamped with user + time), re-queues or closes the prospect, and immediately shows the next one.
-
-**Prospects (master list):** searchable and filterable by prospect type and status; tapping a row opens the prospect for viewing/editing. Includes the **Import CSV** entry point.
-
----
-
-## 6. Explicitly out of scope
-
-- Any visual or content change to the public website.
-- Follow-Ups view, Vendor Applications module, outreach scripts, email sending.
-- Role-based permissions beyond "is an approved admin" (not useful at 2–3 users).
-- A separate repository, frontend framework, or standalone application.
-- Live Google Sheets API sync (CSV upload replaces it).
-- Any other internal modules beyond the Blitz.
-
----
-
-## 7. Open items to confirm at approval
-
-1. **Recycle intervals** — accept the 3-day / 7-day defaults, or specify others.
-2. **Prospect types** — the list of `prospect_type` values (e.g., Property Management Co., HOA, Vendor Network, Apartment Community) to seed filters and the CSV import.
-3. **Supabase project** — reuse the existing general project or create a dedicated one for Bridgeway (recommended: dedicated, to keep the business data isolated; decided at implementation).
+**Build order:** schema/RLS → auth → shell → Next Prospect → master list → CSV import →
+prospect research/load → mobile + security QA → push through the existing GitHub/Netlify
+workflow.
