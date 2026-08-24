@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Blitz — Bridgeway Admin</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap">
+<link rel="stylesheet" href="/admin/assets/admin.css">
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="/admin/">Bridgeway <span>Admin</span></a>
+  <nav>
+    <a href="/admin/blitz/" class="active">Blitz</a>
+    <a href="/admin/prospects/">Prospects</a>
+  </nav>
+</header>
+
+<main class="wrap blitz-main">
+  <div style="display:flex;align-items:center;gap:.6rem;margin:.2rem 0 .8rem">
+    <h1 style="margin:0;font-size:1.15rem">Next Prospect</h1>
+    <span id="due-chip" class="due-chip hidden"></span>
+  </div>
+
+  <div id="loading" class="loading">Loading&hellip;</div>
+  <div id="error" class="alert-error hidden"></div>
+
+  <section id="empty-view" class="hidden">
+    <div class="card center">
+      <h2>Queue clear</h2>
+      <p class="muted">There are no active prospects in the database. Import a batch from the <a href="/admin/prospects/">Prospects</a> page to get started.</p>
+    </div>
+  </section>
+
+  <section id="prospect-view" class="hidden">
+    <div id="ahead-note" class="alert-ok hidden"></div>
+    <div class="card">
+      <div class="company-head">
+        <span id="p-type" class="chip"></span>
+      </div>
+      <h1 id="p-name"></h1>
+      <div id="p-why" class="why-box"></div>
+
+      <div id="p-contact-block">
+        <p class="label">Best contact</p>
+        <p id="p-contact-person" style="margin:.1rem 0 .5rem"></p>
+        <div class="contact-row">
+          <a id="p-call" class="contact-btn call hidden" href="#">&#9742; <span id="p-call-num"></span></a>
+          <a id="p-email" class="contact-btn email hidden" href="#">&#9993; <span id="p-email-addr"></span></a>
+        </div>
+        <p id="p-no-contact" class="muted small hidden">No direct contact on file &mdash; use the company links below.</p>
+      </div>
+
+      <div class="info-grid" style="margin-top:.9rem">
+        <div class="item" id="i-website"><p class="label">Website</p><a id="p-website" href="#" target="_blank" rel="noopener"></a></div>
+        <div class="item" id="i-geo"><p class="label">Geography</p><span id="p-geo"></span></div>
+        <div class="item" id="i-atl"><p class="label">Metro Atlanta relevance</p><span id="p-atl"></span></div>
+        <div class="item" id="i-portfolio"><p class="label">Portfolio / footprint</p><span id="p-portfolio"></span></div>
+      </div>
+    </div>
+
+    <div class="card hidden" id="vendor-card">
+      <h2 style="color:var(--purple-dark)">Vendor network</h2>
+      <div class="info-grid">
+        <div class="item" id="i-vreg"><p class="label">Vendor registration</p><a id="p-vreg" href="#" target="_blank" rel="noopener"></a></div>
+        <div class="item" id="i-vcontact"><p class="label">Contact page</p><a id="p-vcontact" href="#" target="_blank" rel="noopener"></a></div>
+        <div class="item" id="i-vnotes"><p class="label">Onboarding notes</p><span id="p-vnotes"></span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="label">Source</p>
+      <div id="p-sources" class="src-links small muted">Not recorded</div>
+      <p class="muted small" style="margin:.5rem 0 0">Verified <span id="p-verified"></span> &middot; <a id="p-edit-link" href="#">view in Prospects</a></p>
+    </div>
+  </section>
+</main>
+
+<div class="action-bar hidden" id="action-bar">
+  <div class="action-bar-inner">
+    <div class="action-note">
+      <input id="note-input" type="text" placeholder="Optional note&hellip;" autocomplete="off">
+    </div>
+    <div class="outcome-grid">
+      <button class="btn-noanswer"  data-outcome="no_answer">No Answer</button>
+      <button class="btn-voicemail" data-outcome="left_voicemail">Left Voicemail</button>
+      <button class="btn-spoke"     data-outcome="spoke_connected">Spoke / Connected</button>
+      <button class="btn-done"      data-outcome="done">Done</button>
+    </div>
+  </div>
+</div>
+
+<script src="/admin/assets/supabase.js"></script>
+<script src="/admin/assets/config.js"></script>
+<script src="/admin/assets/admin.js"></script>
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var current = null;
+  var busy = false;
+
+  function setText(id, v) { $(id).textContent = v || ''; }
+  function toggleItem(itemId, has) { $(itemId).classList.toggle('hidden', !has); }
+
+  function render(state) {
+    $('loading').classList.add('hidden');
+    $('error').classList.add('hidden');
+
+    var due = state.due_count || 0;
+    $('due-chip').textContent = due + ' due now';
+    $('due-chip').classList.remove('hidden');
+
+    var p = state.prospect;
+    current = p;
+    if (!p) {
+      $('prospect-view').classList.add('hidden');
+      $('action-bar').classList.add('hidden');
+      $('empty-view').classList.remove('hidden');
+      return;
+    }
+    $('empty-view').classList.add('hidden');
+    $('prospect-view').classList.remove('hidden');
+    $('action-bar').classList.remove('hidden');
+
+    $('ahead-note').classList.toggle('hidden', !state.ahead);
+    if (state.ahead) {
+      $('ahead-note').textContent = 'Nothing is due right now — working ahead. This one comes due ' + BW.fmtDateTime(p.next_due_at) + '.';
+    }
+
+    setText('p-type', BW.TYPE_LABELS[p.prospect_type] || p.prospect_type);
+    setText('p-name', p.company_name);
+    $('p-why').textContent = p.why_bridgeway || 'No summary recorded yet.';
+
+    var person = [p.contact_name, p.contact_title].filter(Boolean).join(' — ');
+    setText('p-contact-person', person || 'Main line / general inbox');
+
+    var hasPhone = !!(p.contact_phone && p.contact_phone.trim());
+    var hasEmail = !!(p.contact_email && p.contact_email.trim());
+    $('p-call').classList.toggle('hidden', !hasPhone);
+    if (hasPhone) {
+      $('p-call').href = BW.telHref(p.contact_phone);
+      setText('p-call-num', p.contact_phone);
+    }
+    $('p-email').classList.toggle('hidden', !hasEmail);
+    if (hasEmail) {
+      $('p-email').href = 'mailto:' + p.contact_email.trim();
+      setText('p-email-addr', p.contact_email.trim());
+    }
+    $('p-no-contact').classList.toggle('hidden', hasPhone || hasEmail);
+
+    toggleItem('i-website', !!p.website);
+    if (p.website) { $('p-website').href = p.website; $('p-website').textContent = BW.host(p.website); }
+    toggleItem('i-geo', !!p.primary_geography);
+    setText('p-geo', p.primary_geography);
+    toggleItem('i-atl', !!p.metro_atlanta_relevance);
+    setText('p-atl', p.metro_atlanta_relevance);
+    toggleItem('i-portfolio', !!p.portfolio_summary);
+    setText('p-portfolio', p.portfolio_summary);
+
+    var hasVendor = !!(p.vendor_registration_url || p.general_contact_url || p.vendor_notes);
+    $('vendor-card').classList.toggle('hidden', !hasVendor);
+    toggleItem('i-vreg', !!p.vendor_registration_url);
+    if (p.vendor_registration_url) {
+      $('p-vreg').href = p.vendor_registration_url;
+      $('p-vreg').textContent = BW.host(p.vendor_registration_url);
+    }
+    toggleItem('i-vcontact', !!p.general_contact_url);
+    if (p.general_contact_url) {
+      $('p-vcontact').href = p.general_contact_url;
+      $('p-vcontact').textContent = BW.host(p.general_contact_url);
+    }
+    toggleItem('i-vnotes', !!p.vendor_notes);
+    setText('p-vnotes', p.vendor_notes);
+
+    var srcs = p.source_urls || [];
+    $('p-sources').innerHTML = srcs.length
+      ? srcs.map(function (u) {
+          return '<a href="' + BW.esc(u) + '" target="_blank" rel="noopener">' + BW.esc(BW.host(u)) + '</a>';
+        }).join('')
+      : 'Not recorded';
+    setText('p-verified', p.last_verified_date ? BW.fmtDate(p.last_verified_date) : 'n/a');
+    $('p-edit-link').href = '/admin/prospects/?open=' + p.id;
+
+    window.scrollTo(0, 0);
+  }
+
+  function fail(msg) {
+    $('loading').classList.add('hidden');
+    $('error').textContent = msg;
+    $('error').classList.remove('hidden');
+  }
+
+  async function loadNext() {
+    var res = await BW.sb.rpc('get_blitz_state');
+    if (res.error) { fail('Could not load the queue: ' + res.error.message); return; }
+    render(res.data);
+  }
+
+  async function logOutcome(outcome) {
+    if (!current || busy) return;
+    busy = true;
+    var buttons = document.querySelectorAll('.outcome-grid button');
+    buttons.forEach(function (b) { b.disabled = true; });
+    var res = await BW.sb.rpc('log_outcome', {
+      p_prospect_id: current.id,
+      p_outcome: outcome,
+      p_note: $('note-input').value
+    });
+    if (res.error) {
+      fail('Could not save that outcome: ' + res.error.message);
+    } else {
+      $('note-input').value = '';
+      await loadNext();
+    }
+    buttons.forEach(function (b) { b.disabled = false; });
+    busy = false;
+  }
+
+  document.querySelectorAll('.outcome-grid button').forEach(function (b) {
+    b.addEventListener('click', function () { logOutcome(b.dataset.outcome); });
+  });
+
+  (async function boot() {
+    var auth = await BW.requireAdmin();
+    if (!auth) return;
+    loadNext();
+  })();
+})();
+</script>
+</body>
+</html>
