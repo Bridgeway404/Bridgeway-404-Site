@@ -56,12 +56,23 @@ a { color: var(--purple); }
   text-decoration: none;
   font-size: 1rem;
   white-space: nowrap;
+  min-width: 0;          /* allow the brand to shrink instead of pushing nav out */
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .topbar .brand span { color: var(--gold); }
 .topbar nav {
   margin-left: auto;
   display: flex;
   gap: .25rem;
+  flex: none;
+}
+/* Narrow phones (iPhone SE and similar): tighten the bar so it never
+   overflows the viewport. */
+@media (max-width: 380px) {
+  .topbar { gap: .4rem; padding-left: .7rem; padding-right: .7rem; }
+  .topbar nav a { padding: .5rem .45rem; font-size: .8rem; }
+  .topbar .brand { font-size: .88rem; }
 }
 .topbar nav a {
   color: #fff;
@@ -157,21 +168,27 @@ button:disabled { opacity: .55; cursor: default; }
 }
 
 /* ---------- Chips ---------- */
+/* Type labels run long ("Third-Party Maintenance / Vendor Network"), so chips
+   must wrap rather than force the page to scroll sideways on small phones. */
 .chip {
   display: inline-block;
+  max-width: 100%;
   font-size: .74rem;
   font-weight: 700;
   padding: .2rem .6rem;
   border-radius: 999px;
   background: var(--purple-light);
   color: var(--purple-dark);
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 .chip.gold { background: var(--gold-light); color: #8a6a15; }
 .chip.done { background: #ececec; color: #666; }
 
 /* ---------- Blitz: next prospect ---------- */
-.blitz-main { padding-bottom: 190px; } /* room for sticky action bar */
+/* Fallback gap under the card; the exact height of the fixed action bar is
+   measured at runtime and written to --action-bar-h (see blitz page script),
+   so the last field is never hidden behind the bar on any device. */
+.blitz-main { padding-bottom: calc(var(--action-bar-h, 190px) + 24px); }
 .due-chip {
   font-size: .8rem;
   font-weight: 700;
@@ -206,7 +223,15 @@ button:disabled { opacity: .55; cursor: default; }
 .contact-btn.email { background: var(--purple-light); color: var(--purple-dark); font-size: .95rem; }
 .info-grid { display: grid; gap: .65rem; margin-top: .4rem; }
 .info-grid .item { min-width: 0; overflow-wrap: anywhere; }
-.src-links a { margin-right: .6rem; font-size: .8rem; }
+/* Source hostnames can be long and unbreakable — wrap them anywhere. */
+.src-links a {
+  margin-right: .6rem;
+  font-size: .8rem;
+  display: inline-block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.info-grid .item a { overflow-wrap: anywhere; }
 
 /* Sticky outcome bar */
 .action-bar {

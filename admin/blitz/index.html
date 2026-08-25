@@ -127,6 +127,7 @@
     $('empty-view').classList.add('hidden');
     $('prospect-view').classList.remove('hidden');
     $('action-bar').classList.remove('hidden');
+    syncBarHeight();
 
     $('ahead-note').classList.toggle('hidden', !state.ahead);
     if (state.ahead) {
@@ -225,6 +226,17 @@
   document.querySelectorAll('.outcome-grid button').forEach(function (b) {
     b.addEventListener('click', function () { logOutcome(b.dataset.outcome); });
   });
+
+  // Reserve exactly as much room as the fixed action bar occupies, so the last
+  // field of a long prospect is never hidden behind it (bar height varies with
+  // safe-area inset, font size, and button text wrapping).
+  function syncBarHeight() {
+    var bar = $('action-bar');
+    if (bar.classList.contains('hidden')) return;
+    document.documentElement.style.setProperty('--action-bar-h', bar.offsetHeight + 'px');
+  }
+  window.addEventListener('resize', syncBarHeight);
+  if (window.ResizeObserver) new ResizeObserver(syncBarHeight).observe($('action-bar'));
 
   (async function boot() {
     var auth = await BW.requireAdmin();
