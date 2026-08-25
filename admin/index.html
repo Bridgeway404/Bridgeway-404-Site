@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Bridgeway Admin</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap">
+<link rel="stylesheet" href="/admin/assets/admin.css">
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="/admin/">Bridgeway <span>Admin</span></a>
+  <nav id="top-nav" class="hidden">
+    <a href="/admin/blitz/">Blitz</a>
+    <a href="/admin/prospects/">Prospects</a>
+  </nav>
+</header>
+
+<main class="wrap">
+  <div id="loading" class="loading">Loading&hellip;</div>
+
+  <!-- ===== Login ===== -->
+  <section id="login-view" class="hidden">
+    <div class="card">
+      <h1>Sign in</h1>
+      <p class="muted small">Bridgeway 404 internal tools. Authorized team members only.</p>
+      <form id="login-form">
+        <div class="field">
+          <label class="label" for="login-email">Email</label>
+          <input id="login-email" type="email" autocomplete="username" required>
+        </div>
+        <div class="field">
+          <label class="label" for="login-password">Password</label>
+          <input id="login-password" type="password" autocomplete="current-password" required>
+        </div>
+        <div id="login-error" class="alert-error hidden"></div>
+        <button type="submit" class="btn-primary" id="login-btn" style="width:100%">Sign in</button>
+      </form>
+      <p class="muted small">Forgot your password? Ask another Bridgeway admin to reset it from their Team page.</p>
+    </div>
+  </section>
+
+  <!-- ===== No access (signed in but not allowlisted) ===== -->
+  <section id="denied-view" class="hidden">
+    <div class="card">
+      <h1>No admin access</h1>
+      <p>This account is signed in but has not been granted Bridgeway admin access. Ask Michael to add you from the Team page.</p>
+      <button class="btn-secondary" onclick="BW.signOut()">Sign out</button>
+    </div>
+  </section>
+
+  <!-- ===== Shell home ===== -->
+  <section id="home-view" class="hidden">
+    <div class="card">
+      <p class="label">Signed in as</p>
+      <p style="margin:0 0 .2rem"><strong id="me-name"></strong> <span class="muted small" id="me-email"></span></p>
+    </div>
+
+    <a href="/admin/blitz/" style="text-decoration:none">
+      <div class="card" style="border-left:5px solid var(--purple)">
+        <h2 style="color:var(--purple-dark)">Property Management Blitz &rarr;</h2>
+        <p class="muted small" style="margin:0">Work the next prospect, log the outcome, keep moving.</p>
+      </div>
+    </a>
+
+    <a href="/admin/prospects/" style="text-decoration:none">
+      <div class="card">
+        <h2>Prospects &rarr;</h2>
+        <p class="muted small" style="margin:0">Search the master database, make corrections, import batches.</p>
+      </div>
+    </a>
+
+    <div class="card">
+      <h2>Team</h2>
+      <div id="team-list" class="small"></div>
+      <details style="margin-top:.6rem">
+        <summary style="cursor:pointer;font-weight:700;color:var(--purple)">Add a team member</summary>
+        <form id="team-add-form" style="margin-top:.6rem">
+          <div class="field"><label class="label" for="ta-name">Name</label><input id="ta-name" type="text" required></div>
+          <div class="field"><label class="label" for="ta-email">Email</label><input id="ta-email" type="email" required></div>
+          <div class="field"><label class="label" for="ta-pass">Temporary password (min 10 characters)</label><input id="ta-pass" type="text" minlength="10" required></div>
+          <div id="team-add-msg"></div>
+          <button type="submit" class="btn-secondary">Create account</button>
+        </form>
+      </details>
+      <details style="margin-top:.6rem">
+        <summary style="cursor:pointer;font-weight:700;color:var(--purple)">Reset a team member's password</summary>
+        <form id="team-reset-form" style="margin-top:.6rem">
+          <div class="field"><label class="label" for="tr-email">Their email</label><input id="tr-email" type="email" required></div>
+          <div class="field"><label class="label" for="tr-pass">New temporary password (min 10 characters)</label><input id="tr-pass" type="text" minlength="10" required></div>
+          <div id="team-reset-msg"></div>
+          <button type="submit" class="btn-secondary">Reset password</button>
+        </form>
+      </details>
+    </div>
+
+    <div class="card">
+      <h2>Your account</h2>
+      <form id="pw-form">
+        <div class="field">
+          <label class="label" for="pw-new">New password (min 10 characters)</label>
+          <input id="pw-new" type="password" autocomplete="new-password" minlength="10" required>
+        </div>
+        <div id="pw-msg"></div>
+        <button type="submit" class="btn-secondary">Change password</button>
+      </form>
+      <button class="btn-quiet" style="margin-top:.5rem" onclick="BW.signOut()">Sign out</button>
+    </div>
+  </section>
+</main>
+
+<script src="/admin/assets/supabase.js"></script>
+<script src="/admin/assets/config.js"></script>
+<script src="/admin/assets/admin.js"></script>
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  function show(id) {
+    ['loading', 'login-view', 'denied-view', 'home-view'].forEach(function (v) {
+      $(v).classList.toggle('hidden', v !== id);
+    });
+    $('top-nav').classList.toggle('hidden', id !== 'home-view');
+  }
+
+  async function loadTeam() {
+    var res = await BW.sb.from('admin_users').select('email, display_name').order('created_at');
+    if (res.error || !res.data) return;
+    $('team-list').innerHTML = res.data.map(function (u) {
+      return '<div style="padding:.25rem 0"><strong>' + BW.esc(u.display_name) +
+             '</strong> <span class="muted">' + BW.esc(u.email) + '</span></div>';
+    }).join('');
+  }
+
+  async function boot() {
+    var session = await BW.getSession();
+    if (!session) { show('login-view'); return; }
+    var res = await BW.sb.from('admin_users')
+      .select('user_id, email, display_name')
+      .eq('user_id', session.user.id).maybeSingle();
+    if (res.error || !res.data) { show('denied-view'); return; }
+    $('me-name').textContent = res.data.display_name;
+    $('me-email').textContent = res.data.email;
+    show('home-view');
+    loadTeam();
+  }
+
+  $('login-form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var btn = $('login-btn'), err = $('login-error');
+    btn.disabled = true; err.classList.add('hidden');
+    var res = await BW.sb.auth.signInWithPassword({
+      email: $('login-email').value.trim(),
+      password: $('login-password').value
+    });
+    btn.disabled = false;
+    if (res.error) {
+      err.textContent = /invalid/i.test(res.error.message)
+        ? 'Wrong email or password.' : res.error.message;
+      err.classList.remove('hidden');
+      return;
+    }
+    boot();
+  });
+
+  $('team-add-form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var msg = $('team-add-msg');
+    msg.innerHTML = '';
+    var res = await BW.sb.rpc('create_team_member', {
+      p_email: $('ta-email').value.trim(),
+      p_password: $('ta-pass').value,
+      p_display_name: $('ta-name').value.trim()
+    });
+    if (res.error) {
+      msg.innerHTML = '<div class="alert-error">' + BW.esc(res.error.message) + '</div>';
+      return;
+    }
+    msg.innerHTML = '<div class="alert-ok">Account created. Share the temporary password with them and have them change it after signing in.</div>';
+    e.target.reset();
+    loadTeam();
+  });
+
+  $('team-reset-form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var msg = $('team-reset-msg');
+    msg.innerHTML = '';
+    var res = await BW.sb.rpc('reset_team_password', {
+      p_email: $('tr-email').value.trim(),
+      p_password: $('tr-pass').value
+    });
+    if (res.error) {
+      msg.innerHTML = '<div class="alert-error">' + BW.esc(res.error.message) + '</div>';
+      return;
+    }
+    msg.innerHTML = '<div class="alert-ok">Password reset. Share the new temporary password with them.</div>';
+    e.target.reset();
+  });
+
+  $('pw-form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var msg = $('pw-msg');
+    msg.innerHTML = '';
+    var res = await BW.sb.auth.updateUser({ password: $('pw-new').value });
+    if (res.error) {
+      msg.innerHTML = '<div class="alert-error">' + BW.esc(res.error.message) + '</div>';
+      return;
+    }
+    msg.innerHTML = '<div class="alert-ok">Password changed.</div>';
+    e.target.reset();
+  });
+
+  boot();
+})();
+</script>
+</body>
+</html>

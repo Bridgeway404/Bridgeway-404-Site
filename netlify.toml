@@ -20,7 +20,14 @@
     Referrer-Policy         = "strict-origin-when-cross-origin"
     Permissions-Policy      = "camera=(), microphone=(), geolocation=()"
     # Update Content-Security-Policy as needed if you add external scripts
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://images.unsplash.com data:; connect-src 'self';"
+    # connect-src includes the Bridgeway Supabase project, used only by the /admin panel
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://images.unsplash.com data:; connect-src 'self' https://ctqdnphsvkbgegdtsmwb.supabase.co;"
+
+# Admin panel: never index, never cache the shell aggressively
+[[headers]]
+  for = "/admin/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
 
 [[headers]]
   for = "*.html"
@@ -56,6 +63,19 @@
   from   = "/terms"
   to     = "/"
   status = 302
+
+# Internal repo directories — never serve these publicly
+[[redirects]]
+  from   = "/docs/*"
+  to     = "/index.html"
+  status = 404
+  force  = true
+
+[[redirects]]
+  from   = "/supabase/*"
+  to     = "/index.html"
+  status = 404
+  force  = true
 
 # ---- Form spam protection ----
 # Netlify automatically handles form submissions when data-netlify="true"
