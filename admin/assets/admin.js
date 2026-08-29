@@ -16,6 +16,11 @@
     reo_field_services: 'REO / Field Services'
   };
 
+  // Vendor-partnership onboarding workflow. NULL/blank = ordinary outbound lead.
+  BW.APP_STATUSES = ['Apply First', 'Application Needed', 'Application Started',
+    'Application Submitted', 'Vendor Contact Needed', 'Follow-Up',
+    'Approved Vendor', 'Not a Fit'];
+
   BW.OUTCOME_LABELS = {
     no_answer: 'No Answer',
     left_voicemail: 'Left Voicemail',

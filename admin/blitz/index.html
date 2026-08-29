@@ -41,6 +41,7 @@
     <div id="ahead-note" class="alert-ok hidden"></div>
     <div class="card">
       <div class="company-head">
+        <span id="p-appstatus" class="chip gold hidden"></span>
         <span id="p-type" class="chip"></span>
       </div>
       <h1 id="p-name"></h1>
@@ -134,6 +135,11 @@
       $('ahead-note').textContent = 'Nothing is due right now — working ahead. This one comes due ' + BW.fmtDateTime(p.next_due_at) + '.';
     }
 
+    var appStatus = p.application_status;
+    $('p-appstatus').classList.toggle('hidden', !appStatus);
+    if (appStatus) {
+      setText('p-appstatus', p.priority === 0 ? appStatus.toUpperCase() : appStatus);
+    }
     setText('p-type', BW.TYPE_LABELS[p.prospect_type] || p.prospect_type);
     setText('p-name', p.company_name);
     $('p-why').textContent = p.why_bridgeway || 'No summary recorded yet.';

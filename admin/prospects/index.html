@@ -52,6 +52,12 @@
         <option value="worked">Worked</option>
         <option value="unworked">Unworked</option>
       </select>
+      <select id="f-partnership">
+        <option value="">All leads</option>
+        <option value="yes">Vendor partnership targets</option>
+        <option value="apply_first">Apply First (P0)</option>
+        <option value="no">Ordinary outbound only</option>
+      </select>
       <select id="f-contact">
         <option value="">Any contact info</option>
         <option value="phone">Has phone</option>
@@ -93,9 +99,24 @@
         <div class="field">
           <label class="label" for="ed-priority">Priority (1 best &ndash; 5)</label>
           <select id="ed-priority">
+            <option value="0">0 &mdash; Apply First</option>
             <option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option>
           </select>
         </div>
+      </div>
+      <div class="field">
+        <label class="label" for="ed-application_status">Vendor partnership status</label>
+        <select id="ed-application_status">
+          <option value="">Not a partnership target</option>
+          <option>Apply First</option>
+          <option>Application Needed</option>
+          <option>Application Started</option>
+          <option>Application Submitted</option>
+          <option>Vendor Contact Needed</option>
+          <option>Follow-Up</option>
+          <option>Approved Vendor</option>
+          <option>Not a Fit</option>
+        </select>
       </div>
       <div class="field"><label class="label" for="ed-why_bridgeway">Why Bridgeway wants this account</label><textarea id="ed-why_bridgeway"></textarea></div>
       <div class="grid2">
@@ -159,7 +180,7 @@
   var editing = null; // prospect row being edited, or null for "add new"
   var importRows = null;
 
-  var ED_FIELDS = ['company_name', 'prospect_type', 'priority', 'why_bridgeway', 'website',
+  var ED_FIELDS = ['company_name', 'prospect_type', 'priority', 'application_status', 'why_bridgeway', 'website',
     'primary_geography', 'metro_atlanta_relevance', 'portfolio_summary', 'contact_name',
     'contact_title', 'contact_phone', 'contact_email', 'vendor_registration_url',
     'general_contact_url', 'vendor_notes', 'last_verified_date'];
@@ -187,6 +208,10 @@
     var worked = $('f-worked').value;
     if (worked === 'worked') q = q.gt('attempts', 0);
     if (worked === 'unworked') q = q.eq('attempts', 0);
+    var partnership = $('f-partnership').value;
+    if (partnership === 'yes') q = q.not('application_status', 'is', null);
+    if (partnership === 'apply_first') q = q.eq('application_status', 'Apply First');
+    if (partnership === 'no') q = q.is('application_status', null);
     var contact = $('f-contact').value;
     if (contact === 'phone') q = q.not('contact_phone', 'is', null);
     if (contact === 'email') q = q.not('contact_email', 'is', null);
@@ -195,11 +220,15 @@
     if (geo) {
       q = q.or('primary_geography.ilike.%' + geo + '%,metro_atlanta_relevance.ilike.%' + geo + '%');
     }
-    return q.order('company_name').range(offset, offset + PAGE - 1);
+    return q.order('priority').order('company_name').range(offset, offset + PAGE - 1);
   }
 
   function rowHTML(p) {
     var meta = [];
+    if (p.application_status) {
+      meta.push('<span class="chip gold">' +
+        BW.esc(p.priority === 0 ? p.application_status.toUpperCase() : p.application_status) + '</span>');
+    }
     meta.push('<span class="chip' + (p.status === 'done' ? ' done' : '') + '">' +
       BW.esc(BW.TYPE_LABELS[p.prospect_type] || p.prospect_type) + '</span>');
     if (p.status === 'done') meta.push('<span class="chip done">Done</span>');
@@ -413,7 +442,7 @@
     clearTimeout(searchTimer);
     searchTimer = setTimeout(function () { load(true); }, 300);
   });
-  ['f-type', 'f-status', 'f-worked', 'f-contact'].forEach(function (id) {
+  ['f-type', 'f-status', 'f-worked', 'f-contact', 'f-partnership'].forEach(function (id) {
     $(id).addEventListener('change', function () { load(true); });
   });
   $('more-btn').addEventListener('click', function () { load(false); });

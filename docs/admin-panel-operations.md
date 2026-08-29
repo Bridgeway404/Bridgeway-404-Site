@@ -75,6 +75,38 @@ reported individually — the rest still import.
 
 ---
 
+## 3b. Vendor partnership targets (Apply First)
+
+Some companies are **partnership targets**: Bridgeway should register as an approved
+service vendor with them rather than cold-sell them. These carry a gold status chip in
+the Blitz and Prospects screens, and the highest tier is labelled **APPLY FIRST**.
+
+Priority 0 is reserved for these Tier 1 targets, so they are always served ahead of
+ordinary outbound prospects. Use the **Vendor partnership status** field on a prospect
+to move it through the onboarding workflow:
+
+| Status | Meaning |
+|---|---|
+| Apply First | Tier 1 target — work this before anything else |
+| Application Needed | A vendor application exists; it has not been started |
+| Application Started | Application in progress |
+| Application Submitted | Submitted, awaiting a decision |
+| Vendor Contact Needed | No public application — find the vendor/ops contact |
+| Follow-Up | Waiting on them; check back |
+| Approved Vendor | Accepted into their vendor network |
+| Not a Fit | Ruled out |
+
+Leave the field on "Not a partnership target" for ordinary outbound leads. The
+**All leads** filter on the Prospects page narrows to partnership targets or to
+Apply First only.
+
+> **Note on CSV import:** the importer sets `priority` from the file. Re-importing an
+> older research CSV would overwrite the priority 0 values on these targets. It does
+> **not** touch vendor partnership status. If you re-import, re-check the Apply First
+> list afterwards.
+
+---
+
 ## 4. Adding and removing people
 
 On the admin home page:
