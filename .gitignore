@@ -1,0 +1,11 @@
+# OS cruft
+.DS_Store
+
+# Raw personal-data imports (Meta/Instagram exports, contact dumps).
+# Never commit raw export data — it contains phone numbers and other
+# personal information. Parse locally; only derived, minimal records
+# belong in the (private) database.
+data/
+imports/
+*.zip
+connections/

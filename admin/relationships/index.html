@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Relationships — Bridgeway Admin</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap">
+<link rel="stylesheet" href="/admin/assets/admin.css">
+<style>
+  .tabs { display:flex; gap:.35rem; flex-wrap:wrap; margin:.2rem 0 .9rem; }
+  .tabs button { min-height:40px; padding:.4rem .8rem; background:var(--card); color:var(--muted); border:1px solid var(--line); font-weight:700; }
+  .tabs button.active { background:var(--purple); color:#fff; border-color:var(--purple); }
+  .opp-card { border-left:5px solid var(--purple); }
+  .opp-head { display:flex; align-items:baseline; gap:.5rem; flex-wrap:wrap; }
+  .score-pill { font-weight:800; color:var(--purple-dark); background:var(--purple-light); border-radius:999px; padding:.15rem .6rem; font-size:.8rem; white-space:nowrap; }
+  .path-line { font-weight:600; margin:.3rem 0; display:flex; align-items:center; gap:.4rem; flex-wrap:wrap; }
+  .path-line .arrow { color:var(--gold); font-weight:800; }
+  .stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:.5rem; }
+  .stat-grid .stat { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:.5rem .6rem; text-align:center; }
+  .stat-grid .stat b { display:block; font-size:1.15rem; color:var(--purple-dark); }
+  .stat-grid .stat span { font-size:.7rem; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.05em; }
+  .sig-item { border-top:1px solid var(--line); padding:.4rem 0; font-size:.85rem; }
+  .inline-select { min-height:38px; padding:.3rem .5rem; width:auto; font-size:.85rem; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="/admin/">Bridgeway <span>Admin</span></a>
+  <nav>
+    <a href="/admin/blitz/">Blitz</a>
+    <a href="/admin/prospects/">Prospects</a>
+    <a href="/admin/relationships/" class="active">Relationships</a>
+  </nav>
+</header>
+
+<main class="wrap wide">
+  <div style="display:flex;align-items:center;gap:.6rem;margin:.2rem 0 .6rem;flex-wrap:wrap">
+    <h1 style="margin:0;font-size:1.15rem">Relationship Mapper</h1>
+    <span class="chip">Who does Michael already know?</span>
+  </div>
+
+  <div class="tabs">
+    <button data-view="opps" class="active">Top Opportunities</button>
+    <button data-view="companies">Company Paths</button>
+    <button data-view="people">People</button>
+    <button data-view="data">Import &amp; Data</button>
+  </div>
+
+  <div id="loading" class="loading">Loading&hellip;</div>
+  <div id="error" class="alert-error hidden"></div>
+
+  <!-- ===== Top Opportunities ===== -->
+  <section id="view-opps" class="hidden">
+    <div id="opps-empty" class="card hidden">
+      <h2>No scored opportunities yet</h2>
+      <p class="muted small">Import a connections export under <strong>Import &amp; Data</strong>, then research
+      promising people and give them a Bridgeway opportunity score — scored people appear here,
+      strongest first.</p>
+    </div>
+    <div id="opps-list"></div>
+  </section>
+
+  <!-- ===== Company Paths ===== -->
+  <section id="view-companies" class="hidden">
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
+        <h2 style="margin:0">Warm paths into target companies</h2>
+        <button class="btn-secondary" id="path-add-btn" style="margin-left:auto;min-height:38px;padding:.35rem .7rem">+ Add path</button>
+      </div>
+      <p class="muted small" style="margin:.4rem 0 0">Before Bridgeway cold-contacts a company, check whether Michael already has a way in.</p>
+    </div>
+    <div id="paths-list"></div>
+    <div class="card">
+      <h2>Suggested new Bridgeway leads</h2>
+      <p class="muted small">Companies discovered through Michael's network that are not in the prospect
+      database yet. Review each one — add it to Prospects or dismiss it.</p>
+      <div id="suggested-list"></div>
+    </div>
+  </section>
+
+  <!-- ===== People ===== -->
+  <section id="view-people" class="hidden">
+    <div class="card">
+      <div class="filters">
+        <input class="full" id="pf-search" type="search" placeholder="Search name, username, company&hellip;" autocomplete="off">
+        <select id="pf-signal">
+          <option value="">Any relationship</option>
+          <option value="mutual_follow">Instagram mutual</option>
+          <option value="synced_contact">Phone contact</option>
+          <option value="both">Contact + Instagram</option>
+          <option value="following_only">Michael follows only</option>
+        </select>
+        <select id="pf-strength">
+          <option value="">Any strength</option>
+          <option value="4">Strong (4+)</option>
+          <option value="3">Solid (3+)</option>
+          <option value="2">2+</option>
+        </select>
+        <select id="pf-status">
+          <option value="">Any action status</option>
+          <option>New</option><option>Research</option><option>Reach Out</option>
+          <option>Ask for Intro</option><option>Contacted</option><option>Follow Up</option>
+          <option>Opportunity Created</option><option>Not Relevant</option><option>Do Not Contact</option>
+        </select>
+        <select id="pf-tier">
+          <option value="">Any relevance tier</option>
+          <option value="1">Tier 1 — PM / multifamily core</option>
+          <option value="2">Tier 2 — real estate adjacent</option>
+          <option value="3">Tier 3 — connector</option>
+        </select>
+        <select id="pf-research">
+          <option value="">Researched + not</option>
+          <option value="researched">Has company research</option>
+          <option value="needs">Needs research</option>
+        </select>
+        <select id="pf-week">
+          <option value="">Any next-action date</option>
+          <option value="week">Contact this week</option>
+          <option value="overdue">Overdue</option>
+        </select>
+        <input id="pf-location" type="text" placeholder="Location (e.g. Atlanta)&hellip;" autocomplete="off">
+      </div>
+    </div>
+    <div id="people-count" class="muted small" style="margin:.3rem 0"></div>
+    <div id="people-list"></div>
+    <div class="center" style="margin:1rem 0">
+      <button id="people-more" class="btn-secondary hidden">Load more</button>
+    </div>
+  </section>
+
+  <!-- ===== Import & Data ===== -->
+  <section id="view-data" class="hidden">
+    <div id="stats" class="stat-grid" style="margin-bottom:1rem"></div>
+
+    <div class="card">
+      <h2>Import a Meta connections export</h2>
+      <p class="muted small">Upload the <code>connections.zip</code> from Instagram/Meta
+      "Download your information" (HTML format). The ZIP is parsed <strong>in your browser</strong> —
+      raw files are never uploaded anywhere. Only normalized people and relationship signals are
+      stored in the private admin database. Re-importing a newer export updates signals without
+      touching research notes or statuses.</p>
+      <div class="field"><input type="file" id="zip-file" accept=".zip,application/zip"></div>
+      <div id="zip-preview" class="small muted"></div>
+      <div id="zip-msg"></div>
+      <button class="btn-primary" id="zip-run" disabled>Import</button>
+    </div>
+
+    <div class="card">
+      <h2>Import research CSV</h2>
+      <p class="muted small">Bulk-apply research to people. Columns: <code>person_key</code> or
+      <code>ig_username</code> (to match), plus any of: company, title, industry, location,
+      relevance_tier (1&ndash;3), opportunity_score (0&ndash;100), research_confidence
+      (confirmed/high/medium/low/unknown), why_matters, recommended_action, action_status,
+      action_priority, next_action_date, notes. Blank cells never erase existing data.</p>
+      <div class="field"><input type="file" id="csv-file" accept=".csv,text/csv"></div>
+      <div id="csv-preview" class="small muted"></div>
+      <div id="csv-msg"></div>
+      <button class="btn-primary" id="csv-run" disabled>Apply research</button>
+    </div>
+
+    <div class="card">
+      <h2>Imported datasets</h2>
+      <p class="muted small">Deleting an import removes its relationship signals and any people who
+      have no other signals and no manual research. People you have researched are kept.</p>
+      <div id="imports-list"></div>
+    </div>
+
+    <div class="card">
+      <h2>Privacy</h2>
+      <p class="muted small" style="margin:0">
+        This tool holds personal contact data from Michael's own accounts. It is only readable by
+        allowlisted Bridgeway admins (row-level security), is never indexed or public, and phone
+        numbers are shown only inside a person's detail view. Never commit exports to the code
+        repository. To remove someone entirely, open their profile and use
+        <strong>Delete person</strong>.
+      </p>
+    </div>
+  </section>
+</main>
+
+<!-- ===== Person editor modal ===== -->
+<div class="modal-back hidden" id="person-back">
+  <div class="modal">
+    <div style="display:flex;align-items:center;margin-bottom:.6rem">
+      <h2 id="pe-title" style="margin:0">Person</h2>
+      <button class="btn-quiet" style="margin-left:auto" id="pe-close">Close</button>
+    </div>
+    <div id="pe-identity" class="small" style="margin-bottom:.8rem"></div>
+    <form id="pe-form">
+      <div class="grid2">
+        <div class="field"><label class="label" for="pe-first_name">First name</label><input id="pe-first_name" type="text"></div>
+        <div class="field"><label class="label" for="pe-last_name">Last name</label><input id="pe-last_name" type="text"></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label class="label" for="pe-company">Company</label><input id="pe-company" type="text"></div>
+        <div class="field"><label class="label" for="pe-title-f">Title / role</label><input id="pe-title-f" type="text"></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label class="label" for="pe-industry">Industry</label><input id="pe-industry" type="text"></div>
+        <div class="field"><label class="label" for="pe-location">Location</label><input id="pe-location" type="text"></div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label class="label" for="pe-relevance_tier">Relevance tier</label>
+          <select id="pe-relevance_tier">
+            <option value="">Unrated</option>
+            <option value="1">Tier 1 — PM / multifamily core</option>
+            <option value="2">Tier 2 — real estate adjacent</option>
+            <option value="3">Tier 3 — connector</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="label" for="pe-opportunity_score">Opportunity score (0&ndash;100)</label>
+          <input id="pe-opportunity_score" type="number" min="0" max="100">
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label class="label" for="pe-research_confidence">Research confidence</label>
+          <select id="pe-research_confidence">
+            <option value="unknown">Unknown</option><option value="low">Low</option>
+            <option value="medium">Medium</option><option value="high">High</option>
+            <option value="confirmed">Confirmed</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="label" for="pe-action_priority">Priority</label>
+          <select id="pe-action_priority">
+            <option>Critical</option><option>High</option><option selected>Medium</option><option>Low</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label class="label" for="pe-action_status">Action status</label>
+          <select id="pe-action_status">
+            <option>New</option><option>Research</option><option>Reach Out</option>
+            <option>Ask for Intro</option><option>Contacted</option><option>Follow Up</option>
+            <option>Opportunity Created</option><option>Not Relevant</option><option>Do Not Contact</option>
+          </select>
+        </div>
+        <div class="field"><label class="label" for="pe-next_action_date">Next action date</label><input id="pe-next_action_date" type="date"></div>
+      </div>
+      <div class="field"><label class="label" for="pe-why_matters">Why this person matters to Bridgeway</label><textarea id="pe-why_matters"></textarea></div>
+      <div class="field"><label class="label" for="pe-recommended_action">Recommended next move</label><input id="pe-recommended_action" type="text"></div>
+      <div class="field"><label class="label" for="pe-notes">Notes</label><textarea id="pe-notes"></textarea></div>
+      <div id="pe-msg"></div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+        <button type="submit" class="btn-primary">Save</button>
+        <button type="button" class="btn-quiet" id="pe-delete" style="color:var(--error)">Delete person</button>
+      </div>
+    </form>
+    <div style="margin-top:1rem">
+      <p class="label">Relationship evidence</p>
+      <div id="pe-signals"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Add path modal ===== -->
+<div class="modal-back hidden" id="path-back">
+  <div class="modal">
+    <div style="display:flex;align-items:center;margin-bottom:.6rem">
+      <h2 style="margin:0">Add company path</h2>
+      <button class="btn-quiet" style="margin-left:auto" id="path-close">Close</button>
+    </div>
+    <form id="path-form">
+      <div class="field"><label class="label" for="pa-org">Target company *</label><input id="pa-org" type="text" required placeholder="e.g. Greystar"></div>
+      <div class="field">
+        <label class="label" for="pa-person">Michael's connection *</label>
+        <input id="pa-person" type="search" placeholder="Search people&hellip;" autocomplete="off">
+        <div id="pa-person-results"></div>
+        <input type="hidden" id="pa-person-id">
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label class="label" for="pa-degree">Degree</label>
+          <select id="pa-degree">
+            <option value="1">1 — knows someone at the company</option>
+            <option value="2">2 — knows someone who can introduce</option>
+            <option value="3">3 — longer chain (strong evidence only)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="label" for="pa-confidence">Confidence</label>
+          <select id="pa-confidence"><option>high</option><option selected>medium</option><option>low</option></select>
+        </div>
+      </div>
+      <div class="field"><label class="label" for="pa-via">Intermediate hops (only for degree 2&ndash;3, comma-separated)</label><input id="pa-via" type="text" placeholder="e.g. Sarah Jones, Regional Manager"></div>
+      <div class="field"><label class="label" for="pa-evidence">Evidence *</label><textarea id="pa-evidence" required placeholder="What proves this path exists? (employer listing, documented relationship, …)"></textarea></div>
+      <div class="field"><label class="label" for="pa-action">Recommended move</label><input id="pa-action" type="text" placeholder="e.g. Text and ask who handles turns"></div>
+      <div id="path-msg"></div>
+      <button type="submit" class="btn-primary">Save path</button>
+    </form>
+  </div>
+</div>
+
+<script src="/admin/assets/supabase.js"></script>
+<script src="/admin/assets/config.js"></script>
+<script src="/admin/assets/admin.js"></script>
+<script src="/admin/assets/meta-import.js"></script>
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var PAGE = 100;
+  var peopleOffset = 0;
+  var peopleRows = [];
+  var editingPerson = null;
+  var zipParsed = null;
+  var csvRows = null;
+
+  var STATUS_ORDER = ['New', 'Research', 'Reach Out', 'Ask for Intro', 'Contacted',
+    'Follow Up', 'Opportunity Created', 'Not Relevant', 'Do Not Contact'];
+  var RESEARCH_FIELDS = ['first_name', 'last_name', 'company', 'industry', 'location',
+    'why_matters', 'recommended_action', 'notes', 'next_action_date'];
+
+  function showError(msg) { $('error').textContent = msg; $('error').classList.remove('hidden'); }
+  function clearError() { $('error').classList.add('hidden'); }
+
+  function personName(p) {
+    var n = ((p.first_name || '') + ' ' + (p.last_name || '')).trim();
+    return n || p.display_name || (p.ig_username ? '@' + p.ig_username : '(unnamed)');
+  }
+  function signalChips(p) {
+    var t = p.signal_types || [];
+    var chips = [];
+    var mutual = t.indexOf('mutual_follow') !== -1;
+    var contact = t.indexOf('synced_contact') !== -1 || t.indexOf('synced_contact_weak') !== -1;
+    if (mutual && contact) chips.push('<span class="chip gold">Contact + Mutual</span>');
+    else if (mutual) chips.push('<span class="chip gold">IG Mutual</span>');
+    else if (contact) chips.push('<span class="chip">Phone contact</span>');
+    else if (t.indexOf('follower_only') !== -1) chips.push('<span class="chip">Follows Michael</span>');
+    else if (t.indexOf('following_only') !== -1) chips.push('<span class="chip done">Michael follows</span>');
+    return chips.join(' ');
+  }
+
+  // ---------- Tabs ----------
+  var VIEWS = { opps: loadOpps, companies: loadCompanies, people: function () { loadPeople(true); }, data: loadData };
+  document.querySelector('.tabs').addEventListener('click', function (e) {
+    var btn = e.target.closest('button[data-view]');
+    if (!btn) return;
+    document.querySelectorAll('.tabs button').forEach(function (b) { b.classList.toggle('active', b === btn); });
+    ['opps', 'companies', 'people', 'data'].forEach(function (v) {
+      $('view-' + v).classList.toggle('hidden', v !== btn.dataset.view);
+    });
+    clearError();
+    VIEWS[btn.dataset.view]();
+  });
+
+  // ---------- Top Opportunities ----------
+  function oppCard(p) {
+    var name = personName(p);
+    var role = [p.title, p.company].filter(Boolean).join(', ');
+    var meta = [signalChips(p)];
+    if (p.relevance_tier) meta.push('<span class="chip">Tier ' + p.relevance_tier + '</span>');
+    meta.push('<span class="chip done">strength ' + p.relationship_strength + '</span>');
+    meta.push('<span class="chip done">' + BW.esc(p.research_confidence) + ' confidence</span>');
+    if (p.action_status !== 'New') meta.push('<span class="chip">' + BW.esc(p.action_status) + '</span>');
+    if (p.action_priority === 'Critical' || p.action_priority === 'High') {
+      meta.push('<span class="chip gold">' + BW.esc(p.action_priority) + '</span>');
+    }
+    return '<div class="card opp-card" data-id="' + p.id + '" style="cursor:pointer">' +
+      '<div class="opp-head"><h2 style="margin:0">' + BW.esc(name) + '</h2>' +
+      '<span class="score-pill">' + p.opportunity_score + '</span>' +
+      (role ? '<span class="muted small">' + BW.esc(role) + '</span>' : '') + '</div>' +
+      '<div class="p-row-meta" style="display:flex;gap:.35rem;flex-wrap:wrap;margin:.35rem 0">' + meta.join(' ') + '</div>' +
+      (p.why_matters ? '<p class="small" style="margin:.3rem 0">' + BW.esc(p.why_matters) + '</p>' : '') +
+      (p.recommended_action ? '<div class="why-box" style="margin:.4rem 0 0">&rarr; ' + BW.esc(p.recommended_action) + '</div>' : '') +
+      '</div>';
+  }
+
+  async function loadOpps() {
+    $('loading').classList.remove('hidden');
+    var res = await BW.sb.from('rm_person_list').select('*')
+      .gt('opportunity_score', 0)
+      .not('action_status', 'in', '("Not Relevant","Do Not Contact")')
+      .order('opportunity_score', { ascending: false })
+      .order('relationship_strength', { ascending: false })
+      .limit(25);
+    $('loading').classList.add('hidden');
+    if (res.error) { showError('Could not load opportunities: ' + res.error.message); return; }
+    peopleRows = res.data;
+    $('opps-empty').classList.toggle('hidden', res.data.length > 0);
+    $('opps-list').innerHTML = res.data.map(oppCard).join('');
+  }
+  $('opps-list').addEventListener('click', function (e) {
+    var card = e.target.closest('.opp-card');
+    if (!card) return;
+    var p = peopleRows.find(function (r) { return r.id === card.dataset.id; });
+    if (p) openPerson(p);
+  });
+
+  // ---------- Company paths ----------
+  var prospectIndex = null; // company_key -> {id, company_name}
+  async function loadProspectIndex() {
+    if (prospectIndex) return prospectIndex;
+    var res = await BW.sb.from('prospects').select('id, company_name, company_key');
+    prospectIndex = {};
+    (res.data || []).forEach(function (r) { prospectIndex[r.company_key] = r; });
+    return prospectIndex;
+  }
+
+  function pathCard(paths) {
+    var org = paths[0];
+    var html = '<div class="card"><div class="opp-head"><h2 style="margin:0">' + BW.esc(org.org_name) + '</h2>';
+    var best = paths[0];
+    var cls = { high: 'gold', medium: '', low: 'done' }[best.confidence] || '';
+    html += '<span class="chip ' + cls + '">' + BW.esc(best.confidence) + ' confidence</span>';
+    if (org.prospect_id) {
+      html += '<a class="small" style="margin-left:auto" href="/admin/prospects/?open=' + org.prospect_id + '">Open prospect &rarr;</a>';
+    }
+    html += '</div>';
+    if (org.org_industry || org.org_location) {
+      html += '<p class="muted small" style="margin:.2rem 0">' +
+        BW.esc([org.org_industry, org.org_location].filter(Boolean).join(' · ')) + '</p>';
+    }
+    paths.forEach(function (pa) {
+      var hops = ['Michael', BW.esc(pa.person_display_name ||
+        ((pa.person_first_name || '') + ' ' + (pa.person_last_name || '')).trim() ||
+        ('@' + pa.person_ig_username))];
+      (pa.via || []).forEach(function (v) { hops.push(BW.esc(v)); });
+      hops.push(BW.esc(pa.org_name));
+      html += '<div class="path-line">' + hops.join(' <span class="arrow">&rarr;</span> ') +
+        ' <span class="chip done">deg ' + pa.degree + '</span></div>';
+      if (pa.evidence) html += '<p class="muted small" style="margin:.1rem 0 .4rem">' + BW.esc(pa.evidence) + '</p>';
+      if (pa.recommended_action) html += '<div class="why-box" style="margin:.2rem 0 .5rem">&rarr; ' + BW.esc(pa.recommended_action) + '</div>';
+    });
+    return html + '</div>';
+  }
+
+  async function loadCompanies() {
+    $('loading').classList.remove('hidden');
+    var res = await BW.sb.from('rm_path_list').select('*')
+      .neq('status', 'Dead')
+      .order('confidence').order('degree');
+    var sugg = await BW.sb.from('rm_orgs').select('*').eq('lead_status', 'Suggested').order('name');
+    $('loading').classList.add('hidden');
+    if (res.error) { showError('Could not load paths: ' + res.error.message); return; }
+    var byOrg = {};
+    var order = [];
+    (res.data || []).forEach(function (pa) {
+      if (!byOrg[pa.org_id]) { byOrg[pa.org_id] = []; order.push(pa.org_id); }
+      byOrg[pa.org_id].push(pa);
+    });
+    $('paths-list').innerHTML = order.length
+      ? order.map(function (id) { return pathCard(byOrg[id]); }).join('')
+      : '<div class="card muted small">No company paths recorded yet. Use <strong>+ Add path</strong> once research links a person to a target company.</div>';
+
+    $('suggested-list').innerHTML = (sugg.data && sugg.data.length)
+      ? sugg.data.map(function (o) {
+          return '<div class="p-row" style="cursor:default"><span class="name">' + BW.esc(o.name) + '</span>' +
+            '<span class="meta">' + BW.esc([o.industry, o.location, o.bridgeway_relevance].filter(Boolean).join(' · ')) + '</span>' +
+            '<span style="display:flex;gap:.4rem;margin-top:.4rem">' +
+            '<button class="btn-secondary sg-add" data-id="' + o.id + '" style="min-height:36px;padding:.3rem .6rem;font-size:.8rem">Add to Prospects</button>' +
+            '<button class="btn-quiet sg-dismiss" data-id="' + o.id + '" style="min-height:36px;padding:.3rem .6rem;font-size:.8rem">Dismiss</button>' +
+            '</span></div>';
+        }).join('')
+      : '<p class="muted small" style="margin:0">Nothing waiting for review.</p>';
+  }
+
+  $('suggested-list').addEventListener('click', async function (e) {
+    var add = e.target.closest('.sg-add');
+    var dis = e.target.closest('.sg-dismiss');
+    if (!add && !dis) return;
+    var id = (add || dis).dataset.id;
+    var org = (await BW.sb.from('rm_orgs').select('*').eq('id', id).maybeSingle()).data;
+    if (!org) return;
+    if (dis) {
+      await BW.sb.from('rm_orgs').update({ lead_status: 'Dismissed' }).eq('id', id);
+      loadCompanies();
+      return;
+    }
+    // Add to the existing prospect pipeline through the existing import RPC.
+    var res = await BW.sb.rpc('import_prospects', { p_rows: [{
+      company_name: org.name,
+      prospect_type: 'property_management',
+      website: org.website || '',
+      primary_geography: org.location || '',
+      why_bridgeway: org.bridgeway_relevance || 'Warm path via Michael\'s network (Relationship Mapper)',
+      vendor_notes: 'Discovered via Relationship Mapper — Michael has a warm path. Check Relationships tab before cold outreach.'
+    }]});
+    if (res.error || (res.data.failed || []).length) {
+      showError('Could not add prospect: ' + (res.error ? res.error.message : res.data.failed[0].reason));
+      return;
+    }
+    var key = org.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+    var pr = (await BW.sb.from('prospects').select('id').eq('company_key', key).maybeSingle()).data;
+    await BW.sb.from('rm_orgs').update({
+      lead_status: 'Added to Prospects',
+      prospect_id: pr ? pr.id : null
+    }).eq('id', id);
+    loadCompanies();
+  });
+
+  // Add-path modal
+  $('path-add-btn').addEventListener('click', function () {
+    $('path-form').reset(); $('pa-person-id').value = ''; $('pa-person-results').innerHTML = '';
+    $('path-msg').innerHTML = '';
+    $('path-back').classList.remove('hidden');
+  });
+  $('path-close').addEventListener('click', function () { $('path-back').classList.add('hidden'); });
+  $('path-back').addEventListener('click', function (e) { if (e.target === this) this.classList.add('hidden'); });
+
+  var paTimer = null;
+  $('pa-person').addEventListener('input', function () {
+    clearTimeout(paTimer);
+    var q = this.value.trim().replace(/[,()]/g, ' ');
+    paTimer = setTimeout(async function () {
+      if (q.length < 2) { $('pa-person-results').innerHTML = ''; return; }
+      var res = await BW.sb.from('rm_people')
+        .select('id, first_name, last_name, display_name, ig_username, company')
+        .or('first_name.ilike.%' + q + '%,last_name.ilike.%' + q + '%,display_name.ilike.%' + q + '%,ig_username.ilike.%' + q + '%')
+        .limit(6);
+      $('pa-person-results').innerHTML = (res.data || []).map(function (p) {
+        return '<button type="button" class="btn-quiet pa-pick" data-id="' + p.id + '" style="display:block;min-height:36px;padding:.2rem .4rem">' +
+          BW.esc(personName(p)) + (p.ig_username ? ' <span class="muted">@' + BW.esc(p.ig_username) + '</span>' : '') +
+          (p.company ? ' <span class="muted">· ' + BW.esc(p.company) + '</span>' : '') + '</button>';
+      }).join('');
+    }, 250);
+  });
+  $('pa-person-results').addEventListener('click', function (e) {
+    var b = e.target.closest('.pa-pick');
+    if (!b) return;
+    $('pa-person-id').value = b.dataset.id;
+    $('pa-person').value = b.textContent.trim();
+    this.innerHTML = '';
+  });
+
+  $('path-form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var personId = $('pa-person-id').value;
+    if (!personId) { $('path-msg').innerHTML = '<div class="alert-error">Pick a person from the search results.</div>'; return; }
+    var orgName = $('pa-org').value.trim();
+    var key = orgName.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (!key) { $('path-msg').innerHTML = '<div class="alert-error">Company name is required.</div>'; return; }
+    var org = (await BW.sb.from('rm_orgs').select('id').eq('org_key', key).maybeSingle()).data;
+    var orgId;
+    if (org) orgId = org.id;
+    else {
+      await loadProspectIndex();
+      var pr = prospectIndex[key];
+      var ins = await BW.sb.from('rm_orgs').insert({
+        name: orgName,
+        prospect_id: pr ? pr.id : null,
+        lead_status: pr ? 'Existing Prospect' : 'Suggested'
+      }).select('id').single();
+      if (ins.error) { $('path-msg').innerHTML = '<div class="alert-error">' + BW.esc(ins.error.message) + '</div>'; return; }
+      orgId = ins.data.id;
+    }
+    var via = $('pa-via').value.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+    var res = await BW.sb.from('rm_paths').insert({
+      org_id: orgId, person_id: personId,
+      degree: parseInt($('pa-degree').value, 10),
+      via: via, confidence: $('pa-confidence').value,
+      evidence: $('pa-evidence').value.trim(),
+      recommended_action: $('pa-action').value.trim() || null
+    });
+    if (res.error) { $('path-msg').innerHTML = '<div class="alert-error">' + BW.esc(res.error.message) + '</div>'; return; }
+    $('path-back').classList.add('hidden');
+    loadCompanies();
+  });
+
+  // ---------- People ----------
+  function buildPeopleQuery() {
+    var q = BW.sb.from('rm_person_list').select('*');
+    var s = $('pf-search').value.trim().replace(/[,()]/g, ' ');
+    if (s) {
+      q = q.or('first_name.ilike.%' + s + '%,last_name.ilike.%' + s + '%,display_name.ilike.%' + s +
+               '%,ig_username.ilike.%' + s + '%,company.ilike.%' + s + '%');
+    }
+    var sig = $('pf-signal').value;
+    if (sig === 'both') q = q.contains('signal_types', ['mutual_follow']).overlaps('signal_types', ['synced_contact', 'synced_contact_weak']);
+    else if (sig === 'synced_contact') q = q.overlaps('signal_types', ['synced_contact', 'synced_contact_weak']);
+    else if (sig) q = q.contains('signal_types', [sig]);
+    var st = $('pf-strength').value;
+    if (st) q = q.gte('relationship_strength', parseInt(st, 10));
+    var status = $('pf-status').value;
+    if (status) q = q.eq('action_status', status);
+    var tier = $('pf-tier').value;
+    if (tier) q = q.eq('relevance_tier', parseInt(tier, 10));
+    var rs = $('pf-research').value;
+    if (rs === 'researched') q = q.not('company', 'is', null);
+    if (rs === 'needs') q = q.is('company', null);
+    var wk = $('pf-week').value;
+    if (wk) {
+      var today = new Date().toISOString().slice(0, 10);
+      if (wk === 'overdue') q = q.lt('next_action_date', today);
+      else {
+        var in7 = new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10);
+        q = q.gte('next_action_date', today).lte('next_action_date', in7);
+      }
+    }
+    var loc = $('pf-location').value.trim().replace(/[,()]/g, ' ');
+    if (loc) q = q.ilike('location', '%' + loc + '%');
+    return q.order('opportunity_score', { ascending: false })
+            .order('relationship_strength', { ascending: false })
+            .order('ig_username')
+            .range(peopleOffset, peopleOffset + PAGE - 1);
+  }
+
+  function personRow(p) {
+    var meta = [signalChips(p)];
+    if (p.company) meta.push(BW.esc([p.title, p.company].filter(Boolean).join(', ')));
+    if (p.location) meta.push(BW.esc(p.location));
+    meta.push('strength ' + p.relationship_strength);
+    if (p.opportunity_score > 0) meta.push('score ' + p.opportunity_score);
+    if (p.action_status !== 'New') meta.push('<span class="chip">' + BW.esc(p.action_status) + '</span>');
+    return '<button class="p-row" data-id="' + p.id + '">' +
+      '<span class="name">' + BW.esc(personName(p)) +
+      (p.ig_username ? ' <span class="muted" style="font-weight:400">@' + BW.esc(p.ig_username) + '</span>' : '') +
+      '</span><span class="meta">' + meta.join(' <span>&middot;</span> ') + '</span></button>';
+  }
+
+  async function loadPeople(reset) {
+    if (reset) { peopleOffset = 0; peopleRows = []; $('people-list').innerHTML = ''; }
+    $('loading').classList.remove('hidden');
+    var res = await buildPeopleQuery();
+    $('loading').classList.add('hidden');
+    if (res.error) { showError('Could not load people: ' + res.error.message); return; }
+    peopleRows = peopleRows.concat(res.data);
+    $('people-list').insertAdjacentHTML('beforeend', res.data.map(personRow).join(''));
+    $('people-count').textContent = peopleRows.length + (res.data.length === PAGE ? '+' : '') + ' people';
+    $('people-more').classList.toggle('hidden', res.data.length < PAGE);
+    peopleOffset += PAGE;
+  }
+  $('people-more').addEventListener('click', function () { loadPeople(false); });
+  var pfTimer = null;
+  ['pf-search', 'pf-location'].forEach(function (id) {
+    $(id).addEventListener('input', function () {
+      clearTimeout(pfTimer);
+      pfTimer = setTimeout(function () { loadPeople(true); }, 300);
+    });
+  });
+  ['pf-signal', 'pf-strength', 'pf-status', 'pf-tier', 'pf-research', 'pf-week'].forEach(function (id) {
+    $(id).addEventListener('change', function () { loadPeople(true); });
+  });
+  $('people-list').addEventListener('click', function (e) {
+    var btn = e.target.closest('.p-row');
+    if (!btn) return;
+    var p = peopleRows.find(function (r) { return r.id === btn.dataset.id; });
+    if (p) openPerson(p);
+  });
+
+  // ---------- Person editor ----------
+  function openPerson(p) {
+    editingPerson = p;
+    $('pe-title').textContent = personName(p);
+    var id = [];
+    if (p.ig_username) {
+      id.push('<a href="' + BW.esc(p.ig_url || 'https://www.instagram.com/' + p.ig_username) +
+        '" target="_blank" rel="noopener">@' + BW.esc(p.ig_username) + '</a>');
+    }
+    if (p.phone) id.push('<a href="' + BW.telHref(p.phone) + '">&#9742; ' + BW.esc(p.phone) + '</a>');
+    if (p.email) id.push(BW.esc(p.email));
+    id.push('<span class="muted">identity: ' + BW.esc(p.identity_confidence) + '</span>');
+    $('pe-identity').innerHTML = id.join(' &middot; ');
+    RESEARCH_FIELDS.forEach(function (f) {
+      var el = $('pe-' + f);
+      if (el) el.value = p[f] == null ? '' : p[f];
+    });
+    $('pe-title-f').value = p.title == null ? '' : p.title;
+    $('pe-relevance_tier').value = p.relevance_tier == null ? '' : String(p.relevance_tier);
+    $('pe-opportunity_score').value = p.opportunity_score || 0;
+    $('pe-research_confidence').value = p.research_confidence || 'unknown';
+    $('pe-action_status').value = p.action_status || 'New';
+    $('pe-action_priority').value = p.action_priority || 'Medium';
+    $('pe-msg').innerHTML = '';
+    $('person-back').classList.remove('hidden');
+    loadSignals(p.id);
+  }
+  async function loadSignals(personId) {
+    $('pe-signals').innerHTML = '<span class="muted small">Loading&hellip;</span>';
+    var res = await BW.sb.from('rm_signals').select('*').eq('person_id', personId).order('signal_type');
+    $('pe-signals').innerHTML = (res.data || []).map(function (s) {
+      return '<div class="sig-item"><strong>' + BW.esc(s.signal_type.replace(/_/g, ' ')) + '</strong>' +
+        ' <span class="muted">(' + BW.esc(s.source) + ', weight ' + s.strength + ')</span>' +
+        (s.evidence ? '<br><span class="muted">' + BW.esc(s.evidence) + '</span>' : '') + '</div>';
+    }).join('') || '<span class="muted small">No signals recorded.</span>';
+  }
+  function closePerson() { $('person-back').classList.add('hidden'); editingPerson = null; }
+  $('pe-close').addEventListener('click', closePerson);
+  $('person-back').addEventListener('click', function (e) { if (e.target === this) closePerson(); });
+
+  $('pe-form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    if (!editingPerson) return;
+    var vals = {};
+    RESEARCH_FIELDS.forEach(function (f) {
+      var el = $('pe-' + f);
+      if (el) vals[f] = el.value.trim() === '' ? null : el.value.trim();
+    });
+    vals.title = $('pe-title-f').value.trim() || null;
+    vals.relevance_tier = $('pe-relevance_tier').value ? parseInt($('pe-relevance_tier').value, 10) : null;
+    vals.opportunity_score = Math.max(0, Math.min(100, parseInt($('pe-opportunity_score').value || '0', 10)));
+    vals.research_confidence = $('pe-research_confidence').value;
+    vals.action_status = $('pe-action_status').value;
+    vals.action_priority = $('pe-action_priority').value;
+    var res = await BW.sb.from('rm_people').update(vals).eq('id', editingPerson.id);
+    if (res.error) { $('pe-msg').innerHTML = '<div class="alert-error">' + BW.esc(res.error.message) + '</div>'; return; }
+    closePerson();
+    refreshActiveView();
+  });
+
+  $('pe-delete').addEventListener('click', async function () {
+    if (!editingPerson) return;
+    if (!confirm('Delete ' + personName(editingPerson) + ' and all their relationship data? This cannot be undone.')) return;
+    var res = await BW.sb.from('rm_people').delete().eq('id', editingPerson.id);
+    if (res.error) { $('pe-msg').innerHTML = '<div class="alert-error">' + BW.esc(res.error.message) + '</div>'; return; }
+    closePerson();
+    refreshActiveView();
+  });
+
+  function refreshActiveView() {
+    var active = document.querySelector('.tabs button.active').dataset.view;
+    VIEWS[active]();
+  }
+
+  // ---------- Import & data ----------
+  async function loadData() {
+    $('loading').classList.remove('hidden');
+    var counts = await Promise.all([
+      BW.sb.from('rm_people').select('id', { count: 'exact', head: true }),
+      BW.sb.from('rm_people').select('id', { count: 'exact', head: true }).gt('relationship_strength', 2),
+      BW.sb.from('rm_people').select('id', { count: 'exact', head: true }).not('company', 'is', null),
+      BW.sb.from('rm_people').select('id', { count: 'exact', head: true }).gt('opportunity_score', 0),
+      BW.sb.from('rm_paths').select('id', { count: 'exact', head: true }),
+      BW.sb.from('rm_orgs').select('id', { count: 'exact', head: true }).eq('lead_status', 'Suggested')
+    ]);
+    $('loading').classList.add('hidden');
+    var labels = ['People', 'Strength 3+', 'Researched', 'Scored', 'Paths', 'Lead queue'];
+    $('stats').innerHTML = counts.map(function (c, i) {
+      return '<div class="stat"><b>' + (c.count == null ? '—' : c.count) + '</b><span>' + labels[i] + '</span></div>';
+    }).join('');
+
+    var imps = await BW.sb.from('rm_imports').select('*').order('created_at', { ascending: false });
+    $('imports-list').innerHTML = (imps.data && imps.data.length)
+      ? imps.data.map(function (im) {
+          var c = im.counts || {};
+          return '<div class="p-row" style="cursor:default"><span class="name">' + BW.esc(im.label) + '</span>' +
+            '<span class="meta">' + BW.esc(im.source) + ' · ' + BW.esc(BW.fmtDateTime(im.created_at)) +
+            ' · ' + (c.inserted || 0) + ' added, ' + (c.updated || 0) + ' updated' +
+            (c.failed ? ', ' + c.failed + ' failed' : '') + '</span>' +
+            '<span style="display:block;margin-top:.4rem"><button class="btn-quiet imp-del" data-id="' + im.id +
+            '" style="color:var(--error);min-height:36px;padding:.3rem .6rem;font-size:.8rem">Delete this import</button></span></div>';
+        }).join('')
+      : '<p class="muted small" style="margin:0">No imports yet.</p>';
+  }
+
+  $('imports-list').addEventListener('click', async function (e) {
+    var b = e.target.closest('.imp-del');
+    if (!b) return;
+    if (!confirm('Delete this imported dataset? Signals from this import are removed; researched people are kept.')) return;
+    var res = await BW.sb.rpc('rm_delete_import', { p_import_id: b.dataset.id });
+    if (res.error) { showError(res.error.message); return; }
+    loadData();
+  });
+
+  // ZIP import
+  $('zip-file').addEventListener('change', async function () {
+    zipParsed = null;
+    $('zip-run').disabled = true;
+    $('zip-msg').innerHTML = '';
+    $('zip-preview').textContent = '';
+    var file = this.files[0];
+    if (!file) return;
+    $('zip-preview').textContent = 'Parsing ' + file.name + '…';
+    try {
+      var buf = await file.arrayBuffer();
+      zipParsed = await BWMeta.parseConnectionsZip(buf);
+      var st = zipParsed.stats;
+      $('zip-preview').textContent = st.people + ' people found — ' + st.followers + ' followers, ' +
+        st.following + ' following, ' + st.mutual + ' mutual, ' + st.contacts_raw + ' contact rows, ' +
+        st.matched_both + ' matched across both sources.';
+      $('zip-run').disabled = false;
+    } catch (err) {
+      $('zip-preview').textContent = '';
+      $('zip-msg').innerHTML = '<div class="alert-error">' + BW.esc(err.message) + '</div>';
+    }
+  });
+
+  $('zip-run').addEventListener('click', async function () {
+    if (!zipParsed) return;
+    var btn = this;
+    btn.disabled = true;
+    var label = ($('zip-file').files[0] ? $('zip-file').files[0].name : 'connections.zip') +
+      ' — ' + new Date().toLocaleDateString();
+    var CHUNK = 200;
+    var totals = { inserted: 0, updated: 0, failed: 0 };
+    try {
+      for (var i = 0; i < zipParsed.people.length; i += CHUNK) {
+        btn.textContent = 'Importing ' + Math.min(i + CHUNK, zipParsed.people.length) + ' / ' + zipParsed.people.length + '…';
+        var res = await BW.sb.rpc('rm_import_people', {
+          p_source: 'instagram_meta_export',
+          p_label: label + ' (part ' + (Math.floor(i / CHUNK) + 1) + ')',
+          p_people: zipParsed.people.slice(i, i + CHUNK)
+        });
+        if (res.error) throw new Error(res.error.message);
+        totals.inserted += res.data.inserted;
+        totals.updated += res.data.updated;
+        totals.failed += res.data.failed;
+      }
+      $('zip-msg').innerHTML = '<div class="alert-ok">Imported: ' + totals.inserted + ' new people, ' +
+        totals.updated + ' updated' + (totals.failed ? ', ' + totals.failed + ' failed' : '') + '.</div>';
+      zipParsed = null;
+      $('zip-file').value = '';
+      $('zip-preview').textContent = '';
+      loadData();
+    } catch (err) {
+      $('zip-msg').innerHTML = '<div class="alert-error">Import stopped: ' + BW.esc(err.message) + '</div>';
+    }
+    btn.textContent = 'Import';
+  });
+
+  // Research CSV import
+  var CSV_RESEARCH = ['person_key', 'ig_username', 'first_name', 'last_name', 'company', 'title',
+    'industry', 'location', 'relevance_tier', 'opportunity_score', 'research_confidence',
+    'why_matters', 'recommended_action', 'action_status', 'action_priority', 'next_action_date', 'notes'];
+
+  $('csv-file').addEventListener('change', function () {
+    csvRows = null;
+    $('csv-run').disabled = true;
+    $('csv-msg').innerHTML = '';
+    $('csv-preview').textContent = '';
+    var file = this.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function () {
+      try {
+        var rows = BW.parseCSV(String(reader.result));
+        if (rows.length < 2) throw new Error('The file has no data rows.');
+        var headers = rows[0].map(function (h) { return h.trim().toLowerCase().replace(/\s+/g, '_'); });
+        if (headers.indexOf('person_key') === -1 && headers.indexOf('ig_username') === -1) {
+          throw new Error('Missing a person_key or ig_username column to match people.');
+        }
+        csvRows = rows.slice(1).map(function (r) {
+          var o = {};
+          headers.forEach(function (h, i) {
+            if (CSV_RESEARCH.indexOf(h) !== -1 && (r[i] || '').trim() !== '') o[h] = r[i].trim();
+          });
+          return o;
+        }).filter(function (o) { return o.person_key || o.ig_username; });
+        $('csv-preview').textContent = csvRows.length + ' research rows parsed from ' + file.name + '.';
+        $('csv-run').disabled = csvRows.length === 0;
+      } catch (err) {
+        $('csv-msg').innerHTML = '<div class="alert-error">' + BW.esc(err.message) + '</div>';
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  $('csv-run').addEventListener('click', async function () {
+    if (!csvRows) return;
+    var btn = this;
+    btn.disabled = true;
+    var applied = 0, missed = [];
+    for (var i = 0; i < csvRows.length; i++) {
+      btn.textContent = 'Applying ' + (i + 1) + ' / ' + csvRows.length + '…';
+      var row = csvRows[i];
+      var q = BW.sb.from('rm_people').select('id');
+      q = row.person_key ? q.eq('person_key', row.person_key) : q.eq('ig_username', row.ig_username);
+      var found = await q.maybeSingle();
+      if (!found.data) { missed.push(row.person_key || row.ig_username); continue; }
+      var vals = {};
+      CSV_RESEARCH.forEach(function (f) {
+        if (f === 'person_key' || f === 'ig_username' || row[f] === undefined) return;
+        if (f === 'relevance_tier' || f === 'opportunity_score') vals[f] = parseInt(row[f], 10);
+        else vals[f] = row[f];
+      });
+      var res = await BW.sb.from('rm_people').update(vals).eq('id', found.data.id);
+      if (res.error) missed.push((row.person_key || row.ig_username) + ' (' + res.error.message + ')');
+      else applied++;
+    }
+    btn.textContent = 'Apply research';
+    btn.disabled = false;
+    $('csv-msg').innerHTML = '<div class="alert-ok">' + applied + ' people updated.</div>' +
+      (missed.length ? '<div class="alert-error">Not matched: ' + BW.esc(missed.join(', ')) + '</div>' : '');
+    $('csv-file').value = '';
+    csvRows = null;
+    $('csv-preview').textContent = '';
+  });
+
+  // ---------- Boot ----------
+  (async function boot() {
+    var auth = await BW.requireAdmin();
+    if (!auth) return;
+    $('view-opps').classList.remove('hidden');
+    loadOpps();
+  })();
+})();
+</script>
+</body>
+</html>
