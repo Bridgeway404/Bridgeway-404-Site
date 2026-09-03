@@ -107,6 +107,41 @@ Apply First only.
 
 ---
 
+## 3c. Follow-Ups (`/admin/follow-ups`)
+
+One list of every company the team has actually touched, most recent activity first,
+so contacted companies are not buried in the full prospect database.
+
+A company appears here (once, no matter how many times it was worked) when any of
+these is true:
+
+- at least one outcome has been logged for it in the Blitz (No Answer, Left Voicemail,
+  Spoke / Connected, or Done) — with or without a note;
+- it has been marked **Done** from the Prospects editor;
+- its **Vendor partnership status** is Application Started, Application Submitted,
+  Follow-Up, Approved Vendor, or Not a Fit.
+
+Each row shows the type, contact person, tap-to-call phone, email, how many attempts have
+been logged and the last outcome, the most recent note typed in the Blitz (or the vendor /
+onboarding notes when no Blitz note exists), the queue due date, and where the research
+came from. Tapping a row opens the same editor as the Prospects page, with the full
+outreach history underneath.
+
+Rows are flagged **Needs follow-up** when the queue says the company is due again (per the
+recycling rules in section 5) or its partnership status is set to Follow-Up.
+**Contacted — waiting** means an outcome was logged and the company is not yet due back.
+
+Filters: search by company or contact, follow-up state (Needs follow-up / Contacted /
+Done), prospect type, and partnership vs. ordinary leads.
+
+> **What does not count as activity:** the *Vendor / onboarding notes* field and the
+> Apply First / Application Needed / Vendor Contact Needed statuses are filled in by the
+> research CSV import, so having them does not mean anyone has reached out. To have a
+> company show up here, log an outcome in the Blitz (a note is optional) or move its
+> partnership status forward.
+
+---
+
 ## 4. Adding and removing people
 
 On the admin home page:
