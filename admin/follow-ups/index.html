@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Follow-Ups — Bridgeway Admin</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap">
+<link rel="stylesheet" href="/admin/assets/admin.css">
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="/admin/">Bridgeway <span>Admin</span></a>
+  <nav>
+    <a href="/admin/blitz/">Blitz</a>
+    <a href="/admin/prospects/">Prospects</a>
+    <a href="/admin/follow-ups/" class="active">Follow-Ups</a>
+  </nav>
+</header>
+
+<main class="wrap wide">
+  <div style="display:flex;align-items:center;gap:.6rem;margin:.2rem 0 .5rem;flex-wrap:wrap">
+    <h1 style="margin:0;font-size:1.15rem">Follow-Ups</h1>
+    <span id="due-chip" class="chip gold hidden"></span>
+    <span id="count-chip" class="chip hidden"></span>
+  </div>
+  <p class="muted small" style="margin:0 0 .8rem">Every company we have called, left a team note on, marked Done, or moved through the vendor-partnership workflow &mdash; most recent activity first. Tap a company to see its history, edit it, or add a note.</p>
+
+  <div class="card">
+    <div class="filters">
+      <input class="full" id="f-search" type="search" placeholder="Search company or contact&hellip;" autocomplete="off">
+      <select id="f-state">
+        <option value="">All follow-ups</option>
+        <option value="due">Needs follow-up</option>
+        <option value="contacted">Contacted &mdash; waiting</option>
+        <option value="noted">Note only (no call logged)</option>
+        <option value="done">Done</option>
+      </select>
+      <select id="f-type">
+        <option value="">All types</option>
+        <option value="property_management">Property Management Company</option>
+        <option value="multifamily_operator">Multifamily / Apartment Operator</option>
+        <option value="sfr_operator">Single-Family Rental Operator</option>
+        <option value="vendor_network">Third-Party Maintenance / Vendor Network</option>
+        <option value="reo_field_services">REO / Field Services</option>
+      </select>
+      <select id="f-kind">
+        <option value="">All leads</option>
+        <option value="yes">Vendor partnership targets</option>
+        <option value="no">Ordinary outbound only</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="loading" class="loading">Loading&hellip;</div>
+  <div id="error" class="alert-error hidden"></div>
+  <div id="empty" class="card center hidden">
+    <p class="muted" style="margin:0">Nothing here yet. Companies appear on this list as soon as an outcome is logged for them in the <a href="/admin/blitz/">Blitz</a>, a team note is saved on them, or they are marked Done or moved through the vendor-partnership workflow in <a href="/admin/prospects/">Prospects</a>.</p>
+  </div>
+  <div id="list"></div>
+  <div class="center" style="margin:1rem 0">
+    <button id="more-btn" class="btn-secondary hidden">Load more</button>
+  </div>
+</main>
+
+<script src="/admin/assets/supabase.js"></script>
+<script src="/admin/assets/config.js"></script>
+<script src="/admin/assets/admin.js"></script>
+<script src="/admin/assets/prospect-editor.js"></script>
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var PAGE = 100;
+  var offset = 0;
+  var currentRows = [];
+
+  // Partnership statuses that mean the team has actually acted on a target.
+  // "Apply First", "Application Needed" and "Vendor Contact Needed" are set
+  // during research and do not by themselves mean anyone has reached out.
+  var ACTED_STATUSES = ['Application Started', 'Application Submitted', 'Follow-Up',
+    'Approved Vendor', 'Not a Fit'];
+
+  // A target qualifies for this list when any of these hold:
+  //   * any activity is logged for it — a call outcome (no answer / voicemail /
+  //     spoke / done) or a team note (last_activity_at covers both)
+  //   * it has been marked Done
+  //   * its vendor-partnership status is one of ACTED_STATUSES
+  // Imported research (vendor_notes) and plain record edits (updated_at) are
+  // deliberately not activity.
+  var QUALIFY = 'last_activity_at.not.is.null,status.eq.done,application_status.in.(' +
+    ACTED_STATUSES.map(function (s) { return '"' + s + '"'; }).join(',') + ')';
+
+  // "Needs follow-up" = the queue says it is due again (recycle rules), or the
+  // partnership status has been explicitly set to Follow-Up.
+  function dueFilter(now) {
+    return 'application_status.eq.Follow-Up,and(status.eq.active,attempts.gt.0,next_due_at.lte.' + now + ')';
+  }
+
+  function stateOf(p) {
+    if (p.status === 'done') return 'done';
+    if (p.application_status === 'Follow-Up') return 'due';
+    if (p.attempts > 0 && p.next_due_at && new Date(p.next_due_at) <= new Date()) return 'due';
+    if (p.attempts > 0) return 'contacted';
+    if (p.last_activity_at) return 'noted';
+    return 'partnership';
+  }
+
+  function showError(msg) {
+    $('error').textContent = msg;
+    $('error').classList.remove('hidden');
+  }
+
+  function buildQuery() {
+    var now = new Date().toISOString();
+    var q = BW.sb.from('prospect_list').select('*').or(QUALIFY);
+    var search = $('f-search').value.trim().replace(/[,()]/g, ' ');
+    if (search) {
+      q = q.or('company_name.ilike.%' + search + '%,contact_name.ilike.%' + search + '%');
+    }
+    var state = $('f-state').value;
+    if (state === 'due') q = q.or(dueFilter(now));
+    if (state === 'contacted') {
+      q = q.eq('status', 'active').gt('attempts', 0).gt('next_due_at', now)
+           .or('application_status.is.null,application_status.neq.Follow-Up');
+    }
+    if (state === 'noted') q = q.eq('status', 'active').eq('attempts', 0).not('last_activity_at', 'is', null);
+    if (state === 'done') q = q.eq('status', 'done');
+    var type = $('f-type').value;
+    if (type) q = q.eq('prospect_type', type);
+    var kind = $('f-kind').value;
+    if (kind === 'yes') q = q.not('application_status', 'is', null);
+    if (kind === 'no') q = q.is('application_status', null);
+    return q.order('last_activity_at', { ascending: false, nullsFirst: false })
+            .order('updated_at', { ascending: false })
+            .range(offset, offset + PAGE - 1);
+  }
+
+  // Latest activity carrying note text per prospect (a team note, or a call
+  // outcome that had a note typed with it).
+  async function loadNotes(ids) {
+    var map = {};
+    if (!ids.length) return map;
+    var res = await BW.sb.from('outreach_history')
+      .select('prospect_id, outcome, note, created_at, display_name')
+      .in('prospect_id', ids).not('note', 'is', null)
+      .order('created_at', { ascending: false });
+    (res.data || []).forEach(function (h) {
+      if (!map[h.prospect_id]) map[h.prospect_id] = h;
+    });
+    return map;
+  }
+
+  function truncate(s, n) {
+    s = String(s).replace(/\s+/g, ' ').trim();
+    return s.length > n ? s.slice(0, n - 1) + '…' : s;
+  }
+
+  function rowHTML(p, note) {
+    var state = stateOf(p);
+    var chips = [];
+    if (state === 'due') chips.push('<span class="chip gold">Needs follow-up</span>');
+    else if (state === 'contacted') chips.push('<span class="chip">Contacted</span>');
+    else if (state === 'done') chips.push('<span class="chip done">Done</span>');
+    if (p.application_status) {
+      chips.push('<span class="chip gold">' +
+        BW.esc(p.priority === 0 ? p.application_status.toUpperCase() : p.application_status) + '</span>');
+    }
+    chips.push('<span class="chip' + (state === 'done' ? ' done' : '') + '">' +
+      BW.esc(BW.TYPE_LABELS[p.prospect_type] || p.prospect_type) + '</span>');
+
+    var meta = [];
+    var person = [p.contact_name, p.contact_title].filter(Boolean).join(' — ');
+    if (person) meta.push(BW.esc(person));
+    if (p.contact_phone) {
+      meta.push('<a href="' + BW.esc(BW.telHref(p.contact_phone)) + '">&#9742; ' + BW.esc(p.contact_phone) + '</a>');
+    }
+    if (p.contact_email) {
+      meta.push('<a href="mailto:' + BW.esc(p.contact_email.trim()) + '">&#9993; ' + BW.esc(p.contact_email.trim()) + '</a>');
+    }
+    if (p.last_activity_at) {
+      meta.push('<strong>' + BW.esc(BW.ACTIVITY_LABELS[p.last_activity] || p.last_activity) + '</strong> ' +
+        BW.esc(BW.fmtDateTime(p.last_activity_at)));
+    } else {
+      meta.push('no activity logged &middot; updated ' + BW.esc(BW.fmtDate(p.updated_at)));
+    }
+    if (p.attempts > 0) {
+      meta.push(p.attempts + ' call' + (p.attempts === 1 ? '' : 's') +
+        (p.last_activity === 'note' && p.last_outcome
+          ? ' &middot; last call: ' + BW.esc(BW.OUTCOME_LABELS[p.last_outcome] || p.last_outcome) : ''));
+    }
+    if (p.team_notes > 0) meta.push(p.team_notes + ' note' + (p.team_notes === 1 ? '' : 's'));
+    if (state === 'due' && p.attempts > 0 && p.next_due_at) meta.push('due since ' + BW.esc(BW.fmtDateTime(p.next_due_at)));
+    if (state === 'contacted' && p.next_due_at) meta.push('due ' + BW.esc(BW.fmtDateTime(p.next_due_at)));
+    if (state === 'done' && p.done_at) meta.push('done ' + BW.esc(BW.fmtDate(p.done_at)));
+    var srcs = (p.source_urls || []).map(BW.host);
+    if (srcs.length) {
+      meta.push('<span class="muted">from ' + BW.esc(srcs.slice(0, 2).join(', ')) +
+        (srcs.length > 2 ? ' +' + (srcs.length - 2) : '') + '</span>');
+    }
+
+    var noteHTML = '';
+    if (note) {
+      noteHTML = '<span class="fu-note"><span class="fu-kind">' + BW.esc(BW.ACTIVITY_LABELS[note.outcome] || note.outcome) + '</span>' +
+        BW.esc(truncate(note.note, 160)) +
+        ' <span class="muted">&mdash; ' + BW.esc(note.display_name) + ', ' + BW.esc(BW.fmtDate(note.created_at)) + '</span></span>';
+    } else if (p.vendor_notes) {
+      noteHTML = '<span class="fu-note"><span class="fu-kind muted">Research notes</span>' + BW.esc(truncate(p.vendor_notes, 160)) + '</span>';
+    }
+
+    return '<div class="p-row fu-row" role="button" tabindex="0" data-id="' + p.id + '">' +
+      '<span class="fu-head"><span class="name">' + BW.esc(p.company_name) + '</span>' + chips.join('') + '</span>' +
+      '<span class="meta">' + meta.join(' <span>&middot;</span> ') + '</span>' +
+      noteHTML +
+      '</div>';
+  }
+
+  async function load(reset) {
+    if (reset) { offset = 0; currentRows = []; $('list').innerHTML = ''; }
+    $('error').classList.add('hidden');
+    $('empty').classList.add('hidden');
+    $('loading').classList.remove('hidden');
+    var res = await buildQuery();
+    if (res.error) {
+      $('loading').classList.add('hidden');
+      showError('Could not load follow-ups: ' + res.error.message);
+      return;
+    }
+    var notes = await loadNotes(res.data.map(function (r) { return r.id; }));
+    $('loading').classList.add('hidden');
+    currentRows = currentRows.concat(res.data);
+    $('list').insertAdjacentHTML('beforeend', res.data.map(function (p) {
+      return rowHTML(p, notes[p.id]);
+    }).join(''));
+    $('empty').classList.toggle('hidden', currentRows.length > 0);
+    $('count-chip').textContent = currentRows.length + (res.data.length === PAGE ? '+' : '') + ' shown';
+    $('count-chip').classList.remove('hidden');
+    $('more-btn').classList.toggle('hidden', res.data.length < PAGE);
+    offset += PAGE;
+  }
+
+  async function loadDueCount() {
+    var res = await BW.sb.from('prospect_list')
+      .select('id', { count: 'exact', head: true })
+      .or(QUALIFY).or(dueFilter(new Date().toISOString()));
+    if (res.error || res.count == null) return;
+    $('due-chip').textContent = res.count + ' need' + (res.count === 1 ? 's' : '') + ' follow-up';
+    $('due-chip').classList.remove('hidden');
+  }
+
+  function openRow(el) {
+    var p = currentRows.find(function (r) { return r.id === el.dataset.id; });
+    if (p) BW.editor.open(p);
+  }
+
+  $('list').addEventListener('click', function (e) {
+    if (e.target.closest('a')) return;
+    var row = e.target.closest('.fu-row');
+    if (row) openRow(row);
+  });
+  $('list').addEventListener('keydown', function (e) {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('fu-row')) {
+      e.preventDefault();
+      openRow(e.target);
+    }
+  });
+
+  BW.editor.onChange(function () { load(true); loadDueCount(); });
+
+  // ---------- Filters ----------
+  var searchTimer = null;
+  $('f-search').addEventListener('input', function () {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(function () { load(true); }, 300);
+  });
+  ['f-state', 'f-type', 'f-kind'].forEach(function (id) {
+    $(id).addEventListener('change', function () { load(true); });
+  });
+  $('more-btn').addEventListener('click', function () { load(false); });
+
+  (async function boot() {
+    var auth = await BW.requireAdmin();
+    if (!auth) return;
+    loadDueCount();
+    load(true);
+  })();
+})();
+</script>
+</body>
+</html>

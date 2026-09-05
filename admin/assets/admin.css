@@ -67,13 +67,6 @@ a { color: var(--purple); }
   gap: .25rem;
   flex: none;
 }
-/* Narrow phones (iPhone SE and similar): tighten the bar so it never
-   overflows the viewport. */
-@media (max-width: 380px) {
-  .topbar { gap: .4rem; padding-left: .7rem; padding-right: .7rem; }
-  .topbar nav a { padding: .5rem .45rem; font-size: .8rem; }
-  .topbar .brand { font-size: .88rem; }
-}
 .topbar nav a {
   color: #fff;
   text-decoration: none;
@@ -85,6 +78,19 @@ a { color: var(--purple); }
 }
 .topbar nav a:hover, .topbar nav a:focus-visible { opacity: 1; background: rgba(255,255,255,.12); }
 .topbar nav a.active { opacity: 1; background: rgba(255,255,255,.16); }
+/* Phones: with three tabs in the nav, tighten the bar so the brand is not
+   truncated and the bar never overflows the viewport. These must come after
+   the base nav rules above, which share their specificity. */
+@media (max-width: 480px) {
+  .topbar { gap: .4rem; padding-left: .7rem; padding-right: .7rem; }
+  .topbar nav a { padding: .5rem .45rem; font-size: .8rem; }
+  .topbar .brand { font-size: .88rem; }
+}
+@media (max-width: 400px) {
+  .topbar { padding-left: .6rem; padding-right: .6rem; }
+  .topbar nav a { padding: .5rem .3rem; font-size: .75rem; }
+  .topbar .brand { font-size: .82rem; }
+}
 
 .wrap {
   max-width: 640px;
@@ -275,6 +281,32 @@ button:disabled { opacity: .55; cursor: default; }
 .p-row:hover { border-color: var(--purple); }
 .p-row .name { font-weight: 700; }
 .p-row .meta { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .3rem; align-items: center; font-size: .78rem; color: var(--muted); }
+
+/* ---------- Follow-ups list ---------- */
+/* Rows are divs (not buttons) so the phone and email inside stay tappable
+   links; the row itself opens the editor. */
+.fu-row { cursor: pointer; }
+.fu-row:focus-visible { outline: 3px solid var(--gold); outline-offset: 1px; }
+.fu-head { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; }
+.fu-row .meta a { color: var(--purple); font-weight: 600; text-decoration: none; }
+.fu-row .meta a:hover { text-decoration: underline; }
+.fu-kind {
+  font-size: .7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--purple-dark);
+  margin-right: .3rem;
+}
+.fu-note {
+  display: block;
+  margin-top: .45rem;
+  padding-left: .6rem;
+  border-left: 3px solid var(--purple-light);
+  font-size: .85rem;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
 
 /* Editor modal */
 .modal-back {
