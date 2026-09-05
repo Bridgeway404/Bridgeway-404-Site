@@ -49,8 +49,18 @@ Every outcome is recorded with who logged it and when.
 Search by company or contact name, and filter by prospect type, status,
 worked/unworked, contact info, and geography.
 
-Tap any company to open it. You can correct any field, see its full outreach history,
+Tap any company to open it. You can correct any field, see its full activity history,
 mark it **Done**, or **Reactivate** a company that was marked Done earlier.
+
+**Team notes.** Under *Team notes & activity* in the editor, type what you did or learned
+(for example "Called property manager. Receptionist gave me Ashley's direct number. Try
+again Monday.") and tap **Save note**. The note is stored in the activity history with
+your name and the time, alongside the call outcomes logged from the Blitz, and it puts
+the company on the Follow-Ups list. Saving a note does not change when the company comes
+back around in the Blitz — only the four outcome buttons do that.
+
+The *Vendor / onboarding notes (research)* field is different: it holds reference
+information from research and CSV imports and is not treated as activity.
 
 **+ Add** creates a single prospect by hand.
 
@@ -117,28 +127,30 @@ these is true:
 
 - at least one outcome has been logged for it in the Blitz (No Answer, Left Voicemail,
   Spoke / Connected, or Done) — with or without a note;
+- a team note has been saved on it from the prospect editor;
 - it has been marked **Done** from the Prospects editor;
 - its **Vendor partnership status** is Application Started, Application Submitted,
   Follow-Up, Approved Vendor, or Not a Fit.
 
-Each row shows the type, contact person, tap-to-call phone, email, how many attempts have
-been logged and the last outcome, the most recent note typed in the Blitz (or the vendor /
-onboarding notes when no Blitz note exists), the queue due date, and where the research
-came from. Tapping a row opens the same editor as the Prospects page, with the full
-outreach history underneath.
+Each row shows the type, contact person, tap-to-call phone, email, the latest activity
+and when it happened (Note, Call — No Answer, Call — Left Voicemail, Spoke / Connected,
+Done), how many calls and notes have been logged, the most recent note (or the research
+notes when no team note or call note exists), the queue due date, and where the research
+came from. Tapping a row opens the same editor as the Prospects page, with the team-note
+box and full activity history underneath.
 
 Rows are flagged **Needs follow-up** when the queue says the company is due again (per the
 recycling rules in section 5) or its partnership status is set to Follow-Up.
 **Contacted — waiting** means an outcome was logged and the company is not yet due back.
 
 Filters: search by company or contact, follow-up state (Needs follow-up / Contacted /
-Done), prospect type, and partnership vs. ordinary leads.
+Note only / Done), prospect type, and partnership vs. ordinary leads.
 
-> **What does not count as activity:** the *Vendor / onboarding notes* field and the
-> Apply First / Application Needed / Vendor Contact Needed statuses are filled in by the
-> research CSV import, so having them does not mean anyone has reached out. To have a
-> company show up here, log an outcome in the Blitz (a note is optional) or move its
-> partnership status forward.
+> **What does not count as activity:** the *Vendor / onboarding notes (research)* field
+> and the Apply First / Application Needed / Vendor Contact Needed statuses are filled in
+> by the research CSV import, so having them does not mean anyone has reached out.
+> Editing a company's details does not count either. To have a company show up here, log
+> an outcome in the Blitz, save a team note, or move its partnership status forward.
 
 ---
 

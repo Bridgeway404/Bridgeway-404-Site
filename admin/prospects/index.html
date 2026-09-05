@@ -162,6 +162,7 @@
     } else {
       meta.push('unworked');
     }
+    if (p.team_notes > 0) meta.push(p.team_notes + ' note' + (p.team_notes === 1 ? '' : 's'));
     if (p.status === 'active' && p.next_due_at) meta.push('due ' + BW.esc(BW.fmtDateTime(p.next_due_at)));
     return '<button class="p-row" data-id="' + p.id + '">' +
       '<span class="name">' + BW.esc(p.company_name) + '</span>' +

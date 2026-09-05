@@ -28,7 +28,7 @@
     <span id="due-chip" class="chip gold hidden"></span>
     <span id="count-chip" class="chip hidden"></span>
   </div>
-  <p class="muted small" style="margin:0 0 .8rem">Every company we have called, logged an outcome or note on, marked Done, or moved through the vendor-partnership workflow &mdash; most recent activity first. Tap a company to see its history, edit it, or add notes.</p>
+  <p class="muted small" style="margin:0 0 .8rem">Every company we have called, left a team note on, marked Done, or moved through the vendor-partnership workflow &mdash; most recent activity first. Tap a company to see its history, edit it, or add a note.</p>
 
   <div class="card">
     <div class="filters">
@@ -37,6 +37,7 @@
         <option value="">All follow-ups</option>
         <option value="due">Needs follow-up</option>
         <option value="contacted">Contacted &mdash; waiting</option>
+        <option value="noted">Note only (no call logged)</option>
         <option value="done">Done</option>
       </select>
       <select id="f-type">
@@ -58,7 +59,7 @@
   <div id="loading" class="loading">Loading&hellip;</div>
   <div id="error" class="alert-error hidden"></div>
   <div id="empty" class="card center hidden">
-    <p class="muted" style="margin:0">Nothing here yet. Companies appear on this list as soon as an outcome is logged for them in the <a href="/admin/blitz/">Blitz</a>, or they are marked Done or moved through the vendor-partnership workflow in <a href="/admin/prospects/">Prospects</a>.</p>
+    <p class="muted" style="margin:0">Nothing here yet. Companies appear on this list as soon as an outcome is logged for them in the <a href="/admin/blitz/">Blitz</a>, a team note is saved on them, or they are marked Done or moved through the vendor-partnership workflow in <a href="/admin/prospects/">Prospects</a>.</p>
   </div>
   <div id="list"></div>
   <div class="center" style="margin:1rem 0">
@@ -85,10 +86,13 @@
     'Approved Vendor', 'Not a Fit'];
 
   // A target qualifies for this list when any of these hold:
-  //   * at least one outcome (call / voicemail / spoke / done) is logged for it
+  //   * any activity is logged for it — a call outcome (no answer / voicemail /
+  //     spoke / done) or a team note (last_activity_at covers both)
   //   * it has been marked Done
   //   * its vendor-partnership status is one of ACTED_STATUSES
-  var QUALIFY = 'attempts.gt.0,status.eq.done,application_status.in.(' +
+  // Imported research (vendor_notes) and plain record edits (updated_at) are
+  // deliberately not activity.
+  var QUALIFY = 'last_activity_at.not.is.null,status.eq.done,application_status.in.(' +
     ACTED_STATUSES.map(function (s) { return '"' + s + '"'; }).join(',') + ')';
 
   // "Needs follow-up" = the queue says it is due again (recycle rules), or the
@@ -102,6 +106,7 @@
     if (p.application_status === 'Follow-Up') return 'due';
     if (p.attempts > 0 && p.next_due_at && new Date(p.next_due_at) <= new Date()) return 'due';
     if (p.attempts > 0) return 'contacted';
+    if (p.last_activity_at) return 'noted';
     return 'partnership';
   }
 
@@ -123,23 +128,25 @@
       q = q.eq('status', 'active').gt('attempts', 0).gt('next_due_at', now)
            .or('application_status.is.null,application_status.neq.Follow-Up');
     }
+    if (state === 'noted') q = q.eq('status', 'active').eq('attempts', 0).not('last_activity_at', 'is', null);
     if (state === 'done') q = q.eq('status', 'done');
     var type = $('f-type').value;
     if (type) q = q.eq('prospect_type', type);
     var kind = $('f-kind').value;
     if (kind === 'yes') q = q.not('application_status', 'is', null);
     if (kind === 'no') q = q.is('application_status', null);
-    return q.order('last_attempt_at', { ascending: false, nullsFirst: false })
+    return q.order('last_activity_at', { ascending: false, nullsFirst: false })
             .order('updated_at', { ascending: false })
             .range(offset, offset + PAGE - 1);
   }
 
-  // Latest note per prospect, from the outreach log (notes typed in the Blitz).
+  // Latest activity carrying note text per prospect (a team note, or a call
+  // outcome that had a note typed with it).
   async function loadNotes(ids) {
     var map = {};
     if (!ids.length) return map;
     var res = await BW.sb.from('outreach_history')
-      .select('prospect_id, note, created_at, display_name')
+      .select('prospect_id, outcome, note, created_at, display_name')
       .in('prospect_id', ids).not('note', 'is', null)
       .order('created_at', { ascending: false });
     (res.data || []).forEach(function (h) {
@@ -175,13 +182,18 @@
     if (p.contact_email) {
       meta.push('<a href="mailto:' + BW.esc(p.contact_email.trim()) + '">&#9993; ' + BW.esc(p.contact_email.trim()) + '</a>');
     }
-    if (p.attempts > 0) {
-      meta.push(p.attempts + ' attempt' + (p.attempts === 1 ? '' : 's') +
-        (p.last_outcome ? ' &middot; last: ' + BW.esc(BW.OUTCOME_LABELS[p.last_outcome] || p.last_outcome) : '') +
-        ' ' + BW.esc(BW.fmtDateTime(p.last_attempt_at)));
+    if (p.last_activity_at) {
+      meta.push('<strong>' + BW.esc(BW.ACTIVITY_LABELS[p.last_activity] || p.last_activity) + '</strong> ' +
+        BW.esc(BW.fmtDateTime(p.last_activity_at)));
     } else {
-      meta.push('no calls logged &middot; updated ' + BW.esc(BW.fmtDate(p.updated_at)));
+      meta.push('no activity logged &middot; updated ' + BW.esc(BW.fmtDate(p.updated_at)));
     }
+    if (p.attempts > 0) {
+      meta.push(p.attempts + ' call' + (p.attempts === 1 ? '' : 's') +
+        (p.last_activity === 'note' && p.last_outcome
+          ? ' &middot; last call: ' + BW.esc(BW.OUTCOME_LABELS[p.last_outcome] || p.last_outcome) : ''));
+    }
+    if (p.team_notes > 0) meta.push(p.team_notes + ' note' + (p.team_notes === 1 ? '' : 's'));
     if (state === 'due' && p.attempts > 0 && p.next_due_at) meta.push('due since ' + BW.esc(BW.fmtDateTime(p.next_due_at)));
     if (state === 'contacted' && p.next_due_at) meta.push('due ' + BW.esc(BW.fmtDateTime(p.next_due_at)));
     if (state === 'done' && p.done_at) meta.push('done ' + BW.esc(BW.fmtDate(p.done_at)));
@@ -193,10 +205,11 @@
 
     var noteHTML = '';
     if (note) {
-      noteHTML = '<span class="fu-note">' + BW.esc(truncate(note.note, 160)) +
+      noteHTML = '<span class="fu-note"><span class="fu-kind">' + BW.esc(BW.ACTIVITY_LABELS[note.outcome] || note.outcome) + '</span>' +
+        BW.esc(truncate(note.note, 160)) +
         ' <span class="muted">&mdash; ' + BW.esc(note.display_name) + ', ' + BW.esc(BW.fmtDate(note.created_at)) + '</span></span>';
     } else if (p.vendor_notes) {
-      noteHTML = '<span class="fu-note"><span class="muted">Vendor notes:</span> ' + BW.esc(truncate(p.vendor_notes, 160)) + '</span>';
+      noteHTML = '<span class="fu-note"><span class="fu-kind muted">Research notes</span>' + BW.esc(truncate(p.vendor_notes, 160)) + '</span>';
     }
 
     return '<div class="p-row fu-row" role="button" tabindex="0" data-id="' + p.id + '">' +

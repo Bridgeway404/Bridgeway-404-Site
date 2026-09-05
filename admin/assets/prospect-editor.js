@@ -2,7 +2,7 @@
    Requires admin.js first. Injects the modal markup once and exposes
    BW.editor.open(prospectRow | null) / BW.editor.close() / BW.editor.onChange(fn).
    Used by the Prospects and Follow-Ups pages so there is exactly one place a
-   prospect's fields, notes, and outreach history are edited. */
+   prospect's fields, team notes, and activity history are edited. */
 (function () {
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
@@ -73,7 +73,8 @@
     '      </div>' +
     '      <div class="field"><label class="label" for="ed-vendor_registration_url">Vendor registration URL</label><input id="ed-vendor_registration_url" type="url"></div>' +
     '      <div class="field"><label class="label" for="ed-general_contact_url">General contact URL</label><input id="ed-general_contact_url" type="url"></div>' +
-    '      <div class="field"><label class="label" for="ed-vendor_notes">Vendor / onboarding notes</label><textarea id="ed-vendor_notes"></textarea></div>' +
+    '      <div class="field"><label class="label" for="ed-vendor_notes">Vendor / onboarding notes (research)</label><textarea id="ed-vendor_notes"></textarea>' +
+    '        <p class="muted small" style="margin:.3rem 0 0">Reference information from research or CSV import. It does not count as activity &mdash; use Team notes below for anything you did or learned.</p></div>' +
     '      <div class="field"><label class="label" for="ed-last_verified_date">Last verified</label><input id="ed-last_verified_date" type="date"></div>' +
     '      <div id="ed-msg"></div>' +
     '      <div style="display:flex;gap:.5rem;flex-wrap:wrap">' +
@@ -83,8 +84,14 @@
     '      </div>' +
     '    </form>' +
     '    <div id="ed-history-wrap" class="hidden" style="margin-top:1rem">' +
-    '      <p class="label">Outreach history</p>' +
-    '      <div id="ed-history"></div>' +
+    '      <p class="label">Team notes &amp; activity</p>' +
+    '      <div class="field" style="margin-bottom:.5rem">' +
+    '        <textarea id="ed-new-note" placeholder="e.g. Called property manager. Receptionist gave me Ashley&#39;s direct number. Try again Monday."></textarea>' +
+    '      </div>' +
+    '      <div id="ed-note-msg"></div>' +
+    '      <button type="button" class="btn-secondary" id="ed-note-save">Save note</button>' +
+    '      <p class="muted small" style="margin:.4rem 0 0">Saved to the activity history with your name and the time, and counts as activity on the Follow-Ups list. A note does not change when the company comes back in the Blitz.</p>' +
+    '      <div id="ed-history" style="margin-top:.6rem"></div>' +
     '    </div>' +
     '  </div>' +
     '</div>';
@@ -103,7 +110,10 @@
     });
     $('ed-done-btn').classList.toggle('hidden', !p || p.status !== 'active');
     $('ed-reactivate-btn').classList.toggle('hidden', !p || p.status !== 'done');
-    $('ed-history-wrap').classList.add('hidden');
+    $('ed-history-wrap').classList.toggle('hidden', !p);
+    $('ed-history').innerHTML = '';
+    $('ed-new-note').value = '';
+    $('ed-note-msg').innerHTML = '';
     $('editor-back').classList.remove('hidden');
     if (p) loadHistory(p.id);
   }
@@ -111,15 +121,18 @@
   async function loadHistory(id) {
     var res = await BW.sb.from('outreach_history').select('*')
       .eq('prospect_id', id).order('created_at', { ascending: false }).limit(25);
-    if (res.error || !res.data || !res.data.length) return;
+    if (res.error || !res.data) return;
+    if (!res.data.length) {
+      $('ed-history').innerHTML = '<p class="muted small" style="margin:0">No activity yet.</p>';
+      return;
+    }
     $('ed-history').innerHTML = res.data.map(function (h) {
       return '<div class="history-item"><strong>' +
-        BW.esc(BW.OUTCOME_LABELS[h.outcome] || h.outcome) + '</strong> &middot; ' +
+        BW.esc(BW.ACTIVITY_LABELS[h.outcome] || h.outcome) + '</strong> &middot; ' +
         BW.esc(h.display_name) + ' &middot; ' + BW.esc(BW.fmtDateTime(h.created_at)) +
         (h.note ? '<br><span class="muted">' + BW.esc(h.note) + '</span>' : '') +
         '</div>';
     }).join('');
-    $('ed-history-wrap').classList.remove('hidden');
   }
 
   function closeEditor() { $('editor-back').classList.add('hidden'); editing = null; }
@@ -173,6 +186,29 @@
         return;
       }
       changed();
+    });
+
+    // Team note: a dated, attributed activity record that is not a call outcome.
+    $('ed-note-save').addEventListener('click', async function () {
+      if (!editing) return;
+      var btn = this;
+      var text = $('ed-new-note').value.trim();
+      $('ed-note-msg').innerHTML = '';
+      if (!text) {
+        $('ed-note-msg').innerHTML = '<div class="alert-error">Type a note first.</div>';
+        return;
+      }
+      btn.disabled = true;
+      var res = await BW.sb.rpc('add_prospect_note', { p_prospect_id: editing.id, p_note: text });
+      btn.disabled = false;
+      if (res.error) {
+        $('ed-note-msg').innerHTML = '<div class="alert-error">' + BW.esc(res.error.message) + '</div>';
+        return;
+      }
+      $('ed-new-note').value = '';
+      $('ed-note-msg').innerHTML = '<div class="alert-ok">Note saved.</div>';
+      await loadHistory(editing.id);
+      if (changeHandler) changeHandler();
     });
 
     $('ed-close').addEventListener('click', closeEditor);

@@ -290,6 +290,14 @@ button:disabled { opacity: .55; cursor: default; }
 .fu-head { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; }
 .fu-row .meta a { color: var(--purple); font-weight: 600; text-decoration: none; }
 .fu-row .meta a:hover { text-decoration: underline; }
+.fu-kind {
+  font-size: .7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--purple-dark);
+  margin-right: .3rem;
+}
 .fu-note {
   display: block;
   margin-top: .45rem;

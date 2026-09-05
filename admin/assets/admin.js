@@ -25,7 +25,18 @@
     no_answer: 'No Answer',
     left_voicemail: 'Left Voicemail',
     spoke_connected: 'Spoke / Connected',
-    done: 'Done'
+    done: 'Done',
+    note: 'Note'
+  };
+
+  // How each outreach_log row reads in an activity history / list, where a
+  // call outcome and a team note sit side by side.
+  BW.ACTIVITY_LABELS = {
+    no_answer: 'Call — No Answer',
+    left_voicemail: 'Call — Left Voicemail',
+    spoke_connected: 'Spoke / Connected',
+    done: 'Done',
+    note: 'Note'
   };
 
   BW.esc = function (s) {
