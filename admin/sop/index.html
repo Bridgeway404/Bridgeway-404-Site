@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Scheduler SOP — Bridgeway Admin</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap">
+<link rel="stylesheet" href="/admin/assets/admin.css">
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="/admin/">Bridgeway <span>Admin</span></a>
+  <nav>
+    <a href="/admin/blitz/">Blitz</a>
+    <a href="/admin/prospects/">Prospects</a>
+    <a href="/admin/follow-ups/">Follow-Ups</a>
+  </nav>
+</header>
+
+<main class="wrap">
+  <div id="loading" class="loading">Loading&hellip;</div>
+
+  <section id="sop-view" class="hidden">
+    <div class="card">
+      <span class="chip gold">Scheduler SOP</span>
+      <h1 style="margin:.5rem 0 .2rem">Bridgeway 404 Scheduler SOP</h1>
+      <p class="label" style="margin:0 0 .6rem">Customer Scheduling and Booking Guide</p>
+      <p style="margin:0 0 1rem">
+        This is Leslie's operating guide for handling incoming leads, customer communication,
+        quoting coordination, booking, follow-up, and crew handoff.
+      </p>
+
+      <div id="doc-missing" class="alert-error hidden">
+        The SOP file has not been uploaded yet. Add it to the repository at
+        <code>admin/docs/bridgeway-404-scheduler-sop.pdf</code> and this page will pick it up automatically.
+      </div>
+
+      <div class="contact-row" id="doc-actions">
+        <a class="contact-btn call" id="open-sop"
+           href="/admin/docs/bridgeway-404-scheduler-sop.pdf"
+           target="_blank" rel="noopener">Open SOP</a>
+        <a class="contact-btn email" id="download-sop"
+           href="/admin/docs/bridgeway-404-scheduler-sop.pdf"
+           download="Bridgeway-404-Scheduler-SOP.pdf">&#8595; Download PDF</a>
+      </div>
+
+      <p class="muted small" style="margin:.8rem 0 0">
+        Version: September 2026 &middot; Opens in your browser's PDF viewer. Internal use only &mdash; do not share outside Bridgeway 404.
+      </p>
+    </div>
+  </section>
+</main>
+
+<script src="/admin/assets/supabase.js"></script>
+<script src="/admin/assets/config.js"></script>
+<script src="/admin/assets/admin.js"></script>
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var PDF_URL = '/admin/docs/bridgeway-404-scheduler-sop.pdf';
+
+  // If the PDF is ever missing or renamed, say so plainly instead of handing
+  // Leslie two buttons that 404.
+  async function checkDoc() {
+    try {
+      var res = await fetch(PDF_URL, { method: 'HEAD' });
+      if (res.ok) return;
+    } catch (e) { /* offline or blocked — fall through to the notice */ }
+    $('doc-missing').classList.remove('hidden');
+    $('doc-actions').classList.add('hidden');
+  }
+
+  (async function () {
+    var auth = await BW.requireAdmin();
+    if (!auth) return;
+    $('loading').classList.add('hidden');
+    $('sop-view').classList.remove('hidden');
+    checkDoc();
+  })();
+})();
+</script>
+</body>
+</html>
