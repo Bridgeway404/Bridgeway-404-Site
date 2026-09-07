@@ -12,6 +12,8 @@ One-page marketing and quote-request site for Bridgeway 404 (Metro Atlanta junk 
 | `netlify.toml` | Netlify configuration (headers, redirects, build settings) |
 | `assets/bridgeway404-social-preview-v2.png` | 1200 × 630 branded link-preview image (iMessage, SMS, Facebook, LinkedIn, X, Slack, WhatsApp) |
 | `favicon.png` | Bridgeway 404 logo, used as the browser/tab icon |
+| `assets/bridgeway404-moving-special-325.png` | 1080 × 1080 social graphic for the $325 / 2-hour moving special (truck, 2 movers, straps & blankets) |
+| `assets/bridgeway404-moving-special-325.html` | Self-contained source for the moving-special graphic — edit the text, open in Chrome at 1080 × 1080, and screenshot to regenerate the PNG |
 | `README.md` | This file — deployment guide |
 
 ### Link preview (share card)
