@@ -269,8 +269,11 @@ async function findOrCreateProperty(env, rec, runId, stats) {
     stats.updated_properties = (stats.updated_properties || 0) + 1;
     return { property: updated, isNew: false, how };
   }
+  // Community-level records (court calendars name the apartment community, not a
+  // street address) keep the community name in address_raw so the lead has a
+  // readable name; the dedupe and company-research code already expect that.
   const row = {
-    county, address_raw: addr, address_norm: parsed?.norm || null, street_number: parsed?.number || null, street_name: parsed?.street || null,
+    county, address_raw: addr || rec.community_name || null, address_norm: parsed?.norm || null, street_number: parsed?.number || null, street_name: parsed?.street || null,
     unit: parsed?.unit || null, city: parsed?.city || rec.city || null, zip: parsed?.zip || rec.zip || null,
     parcel_id: rec.parcel_id || null, parcel_id_norm: parcelNorm, legal_description: communityKey && !parsed ? 'community:' + communityKey : (rec.legal_description || null),
     property_type: communityKey ? 'multifamily' : (rec.property_type || 'unknown'),

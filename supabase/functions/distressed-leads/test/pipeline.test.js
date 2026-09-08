@@ -58,6 +58,7 @@ test('incremental ingestion: already-seen items are not refetched, new ones are'
   assert.equal(db.T.properties.length, 1);
   assert.equal(db.T.events.length, 2);
   assert.equal(db.T.properties[0].property_type, 'multifamily');
+  assert.equal(db.T.properties[0].address_raw, 'The Wynne', 'community name is the readable lead name');
 });
 
 test('repeated foreclosure publication updates one lead; postponement keeps the event; a new sale a year later is a new event', async () => {

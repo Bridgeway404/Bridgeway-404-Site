@@ -281,6 +281,7 @@
   }
   function leadTitle(p) {
     if (p.address_raw) return p.address_raw + (p.city ? ', ' + p.city : '') + (p.zip ? ' ' + p.zip : '');
+    if (p.plaintiff_name) return p.plaintiff_name + (p.case_number ? ' (case ' + p.case_number + ')' : '');
     return '(address pending)';
   }
 
