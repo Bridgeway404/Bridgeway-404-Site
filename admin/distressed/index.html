@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Distressed Property Leads — Bridgeway Admin</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap">
+<link rel="stylesheet" href="/admin/assets/admin.css">
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="/admin/">Bridgeway <span>Admin</span></a>
+  <nav>
+    <a href="/admin/blitz/">Blitz</a>
+    <a href="/admin/prospects/">Prospects</a>
+    <a href="/admin/follow-ups/">Follow-Ups</a>
+    <a href="/admin/distressed/" class="active">Leads</a>
+  </nav>
+</header>
+
+<main class="wrap wide">
+  <div style="display:flex;align-items:center;gap:.6rem;margin:.2rem 0 .5rem;flex-wrap:wrap">
+    <h1 style="margin:0;font-size:1.15rem">Distressed Property Leads</h1>
+    <span id="count-chip" class="chip hidden"></span>
+    <button id="run-btn" class="btn-secondary" style="margin-left:auto;min-height:40px;padding:.4rem .9rem;font-size:.85rem">Run research now</button>
+  </div>
+  <p class="muted small" style="margin:0 0 .8rem">Foreclosure notices and late-stage evictions in Fulton, DeKalb, Douglas and Henry, matched to the property-management company, owner or investor most likely to buy cleanout and turnover work. Research runs automatically every Tuesday and Thursday at 8:00 AM Eastern.</p>
+
+  <div id="run-msg"></div>
+
+  <div id="tiles" class="tiles"></div>
+
+  <div class="card small" id="run-card">
+    <div id="run-status" class="muted">Loading run status&hellip;</div>
+  </div>
+
+  <div class="card">
+    <div class="seg" role="tablist">
+      <button class="seg-btn active" data-view="leads" role="tab">Leads</button>
+      <button class="seg-btn" data-view="companies" role="tab">Companies</button>
+    </div>
+    <div id="lead-filters" class="filters" style="margin-top:.7rem">
+      <input class="full" id="f-search" type="search" placeholder="Search address, community, case number, parcel or company&hellip;" autocomplete="off">
+      <select id="f-county">
+        <option value="">All counties</option>
+        <option>Fulton</option><option>DeKalb</option><option>Douglas</option><option>Henry</option>
+      </select>
+      <select id="f-type">
+        <option value="">Foreclosures + evictions</option>
+        <option value="foreclosure">Foreclosures</option>
+        <option value="eviction">Evictions</option>
+      </select>
+      <select id="f-stage">
+        <option value="">All stages</option>
+        <option value="turnover">Turnover likely (writ / scheduled / executed / sale)</option>
+        <option value="fc_sale">Foreclosure: sale scheduled or imminent</option>
+        <option value="fc_done">Foreclosure: sale completed (REO)</option>
+        <option value="fc_notice">Foreclosure: notice only</option>
+        <option value="ev_writ">Eviction: writ issued / pending</option>
+        <option value="ev_exec">Eviction: scheduled / executed / possession</option>
+        <option value="ev_early">Eviction: filed / hearing / judgment (watch)</option>
+        <option value="ev_unknown">Eviction: status unknown</option>
+      </select>
+      <select id="f-status">
+        <option value="active">Active (not closed)</option>
+        <option value="">Any status</option>
+        <option>New</option><option>Reviewing</option><option>Outreach Ready</option>
+        <option>Contacted</option><option>Follow Up</option><option>Not a Fit</option><option>Closed</option>
+      </select>
+      <select id="f-flags">
+        <option value="">All leads</option>
+        <option value="high">High priority (score 70+)</option>
+        <option value="new_run">New from latest run</option>
+        <option value="unreviewed">Not yet reviewed</option>
+        <option value="contact">Contact available</option>
+        <option value="nocontact">Contact missing</option>
+        <option value="research">Needs research</option>
+        <option value="portfolio">Company has 2+ properties</option>
+      </select>
+      <select id="f-sort">
+        <option value="score">Sort: opportunity score</option>
+        <option value="event">Sort: event date (soonest)</option>
+        <option value="seen">Sort: most recently seen</option>
+        <option value="first">Sort: newest leads first</option>
+      </select>
+      <input id="f-from" type="date" title="Event date from">
+      <input id="f-to" type="date" title="Event date to">
+    </div>
+    <div id="company-filters" class="filters hidden" style="margin-top:.7rem">
+      <input class="full" id="c-search" type="search" placeholder="Search company name&hellip;" autocomplete="off">
+      <select id="c-type">
+        <option value="">All company types</option>
+        <option value="property_management">Property management</option>
+        <option value="multifamily_operator">Multifamily operator</option>
+        <option value="sfr_operator">Single-family rental operator</option>
+        <option value="owner_entity">Owner entity (LLC)</option>
+        <option value="institutional_investor">Institutional investor</option>
+        <option value="reit">REIT</option>
+        <option value="servicer">Servicer</option>
+        <option value="lender">Lender</option>
+        <option value="asset_manager">Asset manager</option>
+        <option value="reo">REO</option>
+      </select>
+      <select id="c-scope">
+        <option value="active">With active leads</option>
+        <option value="multi">2+ active properties</option>
+        <option value="all">All companies</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="loading" class="loading">Loading&hellip;</div>
+  <div id="error" class="alert-error hidden"></div>
+  <div id="empty" class="card center hidden">
+    <p class="muted" style="margin:0" id="empty-text">No leads match these filters.</p>
+  </div>
+  <div id="list"></div>
+  <div class="center" style="margin:1rem 0">
+    <button id="more-btn" class="btn-secondary hidden">Load more</button>
+  </div>
+
+  <div class="card">
+    <details id="tools-sources">
+      <summary style="cursor:pointer;font-weight:700;color:var(--purple)">Sources &amp; run history</summary>
+      <div id="sources-box" class="small" style="margin-top:.6rem"></div>
+      <div id="runs-box" class="small" style="margin-top:.8rem"></div>
+    </details>
+  </div>
+
+  <div class="card">
+    <details>
+      <summary style="cursor:pointer;font-weight:700;color:var(--purple)">Add a case or upload a list</summary>
+      <p class="muted small" style="margin:.5rem 0 .6rem">Use this for documents the automation cannot fetch on its own: the Fulton County Marshal's writ execution list (request it from the Marshal's civil division), a court portal case you checked by hand, a foreclosure notice PDF, or a CSV export. Nothing about tenants is stored &mdash; only the case number, plaintiff, property and stage.</p>
+      <form id="manual-form">
+        <p class="label">Single case (checked by hand)</p>
+        <div class="grid2">
+          <div class="field"><label class="label" for="m-county">County *</label>
+            <select id="m-county" required><option>Fulton</option><option>DeKalb</option><option>Douglas</option><option>Henry</option></select></div>
+          <div class="field"><label class="label" for="m-kind">Lead type *</label>
+            <select id="m-kind"><option value="eviction">Eviction</option><option value="foreclosure">Foreclosure</option></select></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label class="label" for="m-case">Case number / notice id</label><input id="m-case" type="text"></div>
+          <div class="field"><label class="label" for="m-stage">Stage</label>
+            <select id="m-stage">
+              <option value="">Let the system classify from the status text</option>
+              <optgroup label="Eviction">
+                <option value="dispossessory_filed">Dispossessory filed</option>
+                <option value="service_completed">Service completed</option>
+                <option value="hearing_scheduled">Hearing scheduled</option>
+                <option value="judgment_entered">Judgment entered</option>
+                <option value="writ_issued">Writ of possession issued</option>
+                <option value="writ_pending_execution">Writ pending execution</option>
+                <option value="eviction_scheduled">Eviction scheduled</option>
+                <option value="eviction_executed">Eviction executed</option>
+                <option value="possession_returned">Possession returned</option>
+                <option value="dismissed">Dismissed</option>
+              </optgroup>
+              <optgroup label="Foreclosure">
+                <option value="notice_published">Notice published</option>
+                <option value="sale_scheduled">Sale scheduled</option>
+                <option value="sale_imminent">Sale imminent</option>
+                <option value="sale_completed">Sale completed</option>
+                <option value="sale_cancelled">Sale cancelled</option>
+              </optgroup>
+            </select></div>
+        </div>
+        <div class="field"><label class="label" for="m-plaintiff">Plaintiff / landlord / owner entity (company name)</label><input id="m-plaintiff" type="text" placeholder="e.g. Progress Residential Borrower 11, LLC"></div>
+        <div class="grid2">
+          <div class="field"><label class="label" for="m-address">Property address or community</label><input id="m-address" type="text"></div>
+          <div class="field"><label class="label" for="m-date">Event date (writ / execution / sale)</label><input id="m-date" type="date"></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label class="label" for="m-status">Status text from the portal (optional)</label><input id="m-status" type="text" placeholder="e.g. Writ of Possession issued 09/02/2026"></div>
+          <div class="field"><label class="label" for="m-url">Source URL (optional)</label><input id="m-url" type="url"></div>
+        </div>
+        <div id="manual-msg"></div>
+        <button type="submit" class="btn-secondary">Add case</button>
+      </form>
+      <form id="upload-form" style="margin-top:1rem">
+        <p class="label">Upload a document</p>
+        <div class="grid2">
+          <div class="field"><label class="label" for="u-kind">Document type *</label>
+            <select id="u-kind">
+              <option value="eviction_list">Eviction / writ list (PDF or CSV)</option>
+              <option value="notice_pdf">Foreclosure notice PDF</option>
+              <option value="csv">CSV of cases or notices</option>
+            </select></div>
+          <div class="field"><label class="label" for="u-county">County *</label>
+            <select id="u-county" required><option>Fulton</option><option>DeKalb</option><option>Douglas</option><option>Henry</option></select></div>
+        </div>
+        <div class="field"><label class="label" for="u-label">Where it came from *</label><input id="u-label" type="text" required placeholder="e.g. Fulton County Marshal writ list, week of Sep 8"></div>
+        <div class="field"><label class="label" for="u-file">File (PDF or CSV, up to 8 MB) *</label><input id="u-file" type="file" accept=".pdf,.csv,.txt,application/pdf,text/csv" required></div>
+        <p class="muted small" style="margin:0 0 .6rem">CSV columns recognised: <code>case_number, plaintiff, address, city, zip, parcel_id, stage, status, event_date, source_url</code> (for eviction lists) or <code>address, city, zip, parcel_id, sale_date, lender, servicer, foreclosing_entity, law_firm, file_no, source_url</code> (for notices). Extra columns are ignored.</p>
+        <div id="upload-msg"></div>
+        <button type="submit" class="btn-secondary">Upload and process</button>
+      </form>
+    </details>
+  </div>
+
+  <div class="card">
+    <details>
+      <summary style="cursor:pointer;font-weight:700;color:var(--purple)">Research settings</summary>
+      <div id="secret-status" class="small muted" style="margin:.5rem 0"></div>
+      <form id="secret-form">
+        <div class="field"><label class="label" for="s-key">Anthropic API key (stored encrypted in Supabase Vault; never shown again)</label><input id="s-key" type="password" autocomplete="off" placeholder="sk-ant-&hellip;"></div>
+        <div id="secret-msg"></div>
+        <button type="submit" class="btn-secondary">Save key</button>
+      </form>
+      <p class="muted small" style="margin:.7rem 0 0">Without a key, discovery and county-GIS ownership lookups still run; only the AI company research (finding the management company, contacts and confidence) is skipped, and those leads show as <em>Needs research</em>. Company research is cached and refreshed every 90 days, so cost stays proportional to new companies, not to the number of properties.</p>
+    </details>
+  </div>
+</main>
+
+<script src="/admin/assets/supabase.js"></script>
+<script src="/admin/assets/config.js"></script>
+<script src="/admin/assets/admin.js"></script>
+<script src="/admin/assets/prospect-editor.js"></script>
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var PAGE = 50;
+  var offset = 0;
+  var rows = [];
+  var view = 'leads';
+  var summary = null;
+  var expanded = {};
+
+  var STAGE_LABELS = {
+    notice_published: 'Foreclosure notice published', sale_scheduled: 'Foreclosure sale scheduled',
+    sale_imminent: 'Foreclosure sale imminent', sale_completed: 'Foreclosure sale completed',
+    sale_cancelled: 'Foreclosure cancelled', dispossessory_filed: 'Dispossessory filed',
+    service_completed: 'Service completed', hearing_scheduled: 'Hearing scheduled',
+    judgment_entered: 'Judgment entered', writ_issued: 'Writ of possession issued',
+    writ_pending_execution: 'Writ pending execution', eviction_scheduled: 'Eviction scheduled',
+    eviction_executed: 'Eviction executed', possession_returned: 'Possession returned to landlord',
+    dismissed: 'Dismissed', status_unknown: 'Status unknown'
+  };
+  var STAGE_GROUPS = {
+    turnover: ['writ_issued', 'writ_pending_execution', 'eviction_scheduled', 'eviction_executed', 'possession_returned', 'sale_imminent', 'sale_completed'],
+    fc_sale: ['sale_scheduled', 'sale_imminent'], fc_done: ['sale_completed'], fc_notice: ['notice_published'],
+    ev_writ: ['writ_issued', 'writ_pending_execution'], ev_exec: ['eviction_scheduled', 'eviction_executed', 'possession_returned'],
+    ev_early: ['dispossessory_filed', 'service_completed', 'hearing_scheduled', 'judgment_entered'], ev_unknown: ['status_unknown']
+  };
+  var TURNOVER = STAGE_GROUPS.turnover;
+  var STATUSES = ['New', 'Reviewing', 'Outreach Ready', 'Contacted', 'Follow Up', 'Not a Fit', 'Closed'];
+  var COMPANY_TYPES = {
+    property_management: 'Property management', owner_entity: 'Owner entity', institutional_investor: 'Institutional investor',
+    reit: 'REIT', sfr_operator: 'SFR operator', multifamily_operator: 'Multifamily operator', lender: 'Lender',
+    servicer: 'Servicer', law_firm: 'Law firm', reo: 'REO', asset_manager: 'Asset manager', preservation: 'Preservation',
+    government: 'Government', nonprofit: 'Nonprofit', individual: 'Individual', other: 'Other', unknown: 'Unknown type'
+  };
+  var REL_LABELS = { owner: 'Owner of record', manager: 'Property manager', investor: 'Investor', parent: 'Parent company',
+    lender: 'Lender', servicer: 'Servicer', law_firm: 'Law firm', plaintiff: 'Plaintiff', foreclosing_entity: 'Foreclosing entity',
+    purchaser: 'Purchaser', other: 'Related' };
+  var ROLE_LABELS = { onsite_manager: 'On-site manager', regional_manager: 'Regional manager', property_management: 'Property management',
+    director_operations: 'Operations', maintenance: 'Maintenance', facilities: 'Facilities', asset_manager: 'Asset manager',
+    reo_manager: 'REO manager', preservation: 'Preservation', owner_rep: 'Owner rep', portfolio_manager: 'Portfolio manager',
+    acquisitions: 'Acquisitions', executive: 'Executive', general: 'General', other: 'Contact' };
+
+  function showError(msg) { $('error').textContent = msg; $('error').classList.remove('hidden'); }
+  function fmtD(d) { return d ? BW.fmtDate(d.length === 10 ? d + 'T12:00:00' : d) : ''; }
+  function conf(c) { return c ? '<span class="chip conf-' + BW.esc(c) + '">' + BW.esc(c) + ' confidence</span>' : ''; }
+  function scoreChip(s) {
+    var band = s >= 70 ? 'high' : s >= 40 ? 'med' : 'low';
+    return '<span class="chip score score-' + band + '" title="Opportunity score">' + s + '</span>';
+  }
+  function stageChip(stage) {
+    var turn = TURNOVER.indexOf(stage) >= 0;
+    return '<span class="chip' + (turn ? ' gold' : '') + '">' + BW.esc(STAGE_LABELS[stage] || stage || 'Unknown') + '</span>';
+  }
+  function link(url, text) {
+    if (!url) return '';
+    return '<a href="' + BW.esc(url) + '" target="_blank" rel="noopener">' + BW.esc(text || BW.host(url)) + '</a>';
+  }
+  function leadTitle(p) {
+    if (p.address_raw) return p.address_raw + (p.city ? ', ' + p.city : '') + (p.zip ? ' ' + p.zip : '');
+    return '(address pending)';
+  }
+
+  // ---------- Summary ----------
+  async function loadSummary() {
+    var res = await BW.sb.rpc('get_dpl_summary');
+    if (res.error) { showError('Could not load summary: ' + res.error.message); return; }
+    summary = res.data;
+    var t = [
+      ['new_from_latest_run', 'New from latest run', 'new_run'],
+      ['high_priority', 'High priority', 'high'],
+      ['foreclosures', 'Foreclosures', 'fc'],
+      ['evictions', 'Evictions tracked', 'ev'],
+      ['evictions_confirmed', 'Evictions at writ or later', 'evwrit'],
+      ['outreach_ready', 'Outreach ready', 'ready'],
+      ['needs_enrichment', 'Needs research', 'research'],
+      ['multi_property_companies', 'Multi-property companies', 'multi']
+    ];
+    $('tiles').innerHTML = t.map(function (x) {
+      return '<button class="tile" data-tile="' + x[2] + '"><span class="tile-n">' + (summary[x[0]] || 0) + '</span><span class="tile-l">' + x[1] + '</span></button>';
+    }).join('');
+    var lr = summary.last_run;
+    var parts = [];
+    if (lr) {
+      var c = lr.counts || {};
+      var when = lr.finished_at || lr.started_at;
+      parts.push('<strong>Last run:</strong> ' + BW.esc(lr.status.replace(/_/g, ' ')) + (when ? ' &middot; ' + BW.esc(BW.fmtDateTime(when)) : '') + ' (' + BW.esc(lr.trigger) + ')');
+      var bits = [];
+      if (c.new_properties != null) bits.push(c.new_properties + ' new');
+      if (c.updated_properties != null) bits.push(c.updated_properties + ' updated');
+      if (c.new_high_priority != null) bits.push(c.new_high_priority + ' new high priority');
+      if (c.companies_enriched != null) bits.push(c.companies_enriched + ' companies researched');
+      if (c.raw_records != null) bits.push(c.raw_records + ' source items checked');
+      if (bits.length) parts.push(bits.join(', '));
+      if ((lr.sources_failed || []).length) parts.push('<span style="color:var(--error)">Sources failed: ' + BW.esc(lr.sources_failed.join(', ')) + '</span>');
+      if (lr.status === 'running' || lr.status === 'queued') parts.push('<span class="chip gold">In progress</span>');
+    } else {
+      parts.push('<strong>No research run yet.</strong>');
+    }
+    if (summary.next_scheduled_run) parts.push('<strong>Next scheduled:</strong> ' + BW.esc(BW.fmtDateTime(summary.next_scheduled_run)) + ' (Tue/Thu 8:00 AM Eastern)');
+    if (summary.run_enabled === 'false') parts.push('<span style="color:var(--error)">Scheduled runs are paused (dpl_settings.run_enabled).</span>');
+    var errs = (summary.source_errors || []).filter(function (s) { return s.enabled && s.last_error; });
+    if (errs.length) parts.push('<span class="muted">' + errs.length + ' source' + (errs.length === 1 ? '' : 's') + ' reporting errors &mdash; see Sources below.</span>');
+    $('run-status').innerHTML = parts.join(' <span class="muted">&middot;</span> ');
+    renderSources();
+  }
+
+  function renderSources() {
+    var srcs = (summary && summary.sources) || [];
+    if (!srcs.length) { $('sources-box').innerHTML = '<p class="muted">No sources registered yet &mdash; they appear after the first run.</p>'; return; }
+    $('sources-box').innerHTML = '<table class="mini"><thead><tr><th>Source</th><th>County</th><th>Status</th><th>Last success</th><th>Notes</th></tr></thead><tbody>' +
+      srcs.map(function (s) {
+        var st = !s.enabled ? '<span class="chip done">disabled</span>' : s.last_error ? '<span class="chip" style="background:var(--error-bg);color:var(--error)" title="' + BW.esc(s.last_error) + '">error</span>' : '<span class="chip">ok</span>';
+        return '<tr><td>' + BW.esc(s.label || s.source_id) + '</td><td>' + BW.esc(s.county || '') + '</td><td>' + st +
+          ' <button class="btn-quiet src-toggle" data-src="' + BW.esc(s.source_id) + '" data-on="' + (s.enabled ? '0' : '1') + '" style="min-height:0;padding:.1rem .3rem;font-size:.75rem">' + (s.enabled ? 'disable' : 'enable') + '</button></td>' +
+          '<td>' + (s.last_success_at ? BW.esc(BW.fmtDateTime(s.last_success_at)) : '<span class="muted">never</span>') + '</td>' +
+          '<td class="muted">' + BW.esc((s.last_error ? s.last_error + ' ' : '') + (s.notes || '')) + '</td></tr>';
+      }).join('') + '</tbody></table>';
+  }
+
+  async function loadRuns() {
+    var res = await BW.sb.from('dpl_runs').select('id,trigger,status,started_at,finished_at,counts,sources_failed,errors').order('created_at', { ascending: false }).limit(10);
+    if (res.error || !res.data.length) { $('runs-box').innerHTML = ''; return; }
+    $('runs-box').innerHTML = '<p class="label">Recent runs</p>' + res.data.map(function (r) {
+      var c = r.counts || {};
+      var e = (r.errors || []).length;
+      return '<div class="history-item"><strong>' + BW.esc(BW.fmtDateTime(r.started_at || r.finished_at)) + '</strong> &middot; ' + BW.esc(r.trigger) + ' &middot; ' + BW.esc(r.status.replace(/_/g, ' ')) +
+        ' &middot; ' + (c.raw_records || 0) + ' items seen, ' + (c.new_properties || 0) + ' new, ' + (c.updated_properties || 0) + ' updated' +
+        ((r.sources_failed || []).length ? ' &middot; <span style="color:var(--error)">failed: ' + BW.esc(r.sources_failed.join(', ')) + '</span>' : '') +
+        (e ? ' &middot; ' + e + ' error' + (e === 1 ? '' : 's') : '') + '</div>';
+    }).join('');
+  }
+
+  // ---------- Leads ----------
+  function leadQuery() {
+    var q = BW.sb.from('dpl_lead_list').select('*');
+    var s = $('f-search').value.trim().replace(/[,()]/g, ' ');
+    if (s) {
+      var like = '%' + s + '%';
+      q = q.or(['address_raw', 'city', 'case_number', 'parcel_id', 'target_company_name', 'owner_company_name', 'manager_company_name',
+        'investor_company_name', 'parent_company_name', 'owner_name', 'plaintiff_name', 'lender', 'servicer']
+        .map(function (f) { return f + '.ilike.' + like; }).join(','));
+    }
+    var county = $('f-county').value; if (county) q = q.eq('county', county);
+    var type = $('f-type').value; if (type) q = q.in('lead_type', [type, 'both']);
+    var stage = $('f-stage').value; if (stage) q = q.in('current_stage', STAGE_GROUPS[stage]);
+    var status = $('f-status').value;
+    if (status === 'active') q = q.not('workflow_status', 'in', '("Closed","Not a Fit")');
+    else if (status) q = q.eq('workflow_status', status);
+    var flag = $('f-flags').value;
+    if (flag === 'high') q = q.gte('opportunity_score', 70);
+    if (flag === 'unreviewed') q = q.is('reviewed_at', null);
+    if (flag === 'contact') q = q.not('target_contact_id', 'is', null);
+    if (flag === 'nocontact') q = q.is('target_contact_id', null);
+    if (flag === 'research') q = q.in('enrichment_status', ['pending', 'queued', 'partial', 'failed']);
+    if (flag === 'portfolio') q = q.gte('company_active_properties', 2);
+    if (flag === 'new_run') {
+      var lr = summary && summary.last_successful_run;
+      if (lr && lr.id) q = q.eq('first_run_id', lr.id); else q = q.is('reviewed_at', null);
+    }
+    var from = $('f-from').value; if (from) q = q.gte('event_date', from);
+    var to = $('f-to').value; if (to) q = q.lte('event_date', to);
+    var sort = $('f-sort').value;
+    if (sort === 'event') q = q.order('event_date', { ascending: true, nullsFirst: false }).order('opportunity_score', { ascending: false });
+    else if (sort === 'seen') q = q.order('last_seen_at', { ascending: false });
+    else if (sort === 'first') q = q.order('first_seen_at', { ascending: false });
+    else q = q.order('opportunity_score', { ascending: false }).order('event_date', { ascending: true, nullsFirst: false });
+    return q.range(offset, offset + PAGE - 1);
+  }
+
+  function leadRow(p) {
+    var chips = [];
+    chips.push(scoreChip(p.opportunity_score));
+    chips.push('<span class="chip">' + BW.esc(p.county) + '</span>');
+    chips.push(stageChip(p.current_stage));
+    if (p.workflow_status !== 'New') chips.push('<span class="chip' + (p.workflow_status === 'Closed' || p.workflow_status === 'Not a Fit' ? ' done' : ' status') + '">' + BW.esc(p.workflow_status) + '</span>');
+    if (p.company_active_properties >= 2) chips.push('<span class="chip gold">' + p.company_active_properties + ' properties</span>');
+    if (['pending', 'queued', 'partial', 'failed'].indexOf(p.enrichment_status) >= 0) chips.push('<span class="chip done">needs research</span>');
+    var meta = [];
+    if (p.event_date) meta.push('<strong>' + BW.esc(p.event_type === 'foreclosure' ? 'Sale' : 'Event') + ':</strong> ' + BW.esc(fmtD(p.event_date)));
+    if (p.target_company_name) meta.push('<strong>Target:</strong> ' + BW.esc(p.target_company_name) + (p.target_company_type && p.target_company_type !== 'unknown' ? ' <span class="muted">(' + BW.esc(COMPANY_TYPES[p.target_company_type] || p.target_company_type) + ')</span>' : ''));
+    else if (p.owner_name) meta.push('<strong>Owner of record:</strong> ' + BW.esc(p.owner_name));
+    else if (p.plaintiff_name) meta.push('<strong>Plaintiff:</strong> ' + BW.esc(p.plaintiff_name));
+    if (p.contact_name) meta.push(BW.esc([p.contact_name, p.contact_title].filter(Boolean).join(' — ')) + ' ' + conf(p.contact_confidence));
+    if (p.contact_phone) meta.push('<a href="' + BW.esc(BW.telHref(p.contact_phone)) + '">&#9742; ' + BW.esc(p.contact_phone) + '</a>');
+    else if (p.target_main_phone) meta.push('<a href="' + BW.esc(BW.telHref(p.target_main_phone)) + '">&#9742; ' + BW.esc(p.target_main_phone) + ' (main)</a>');
+    if (p.contact_email) meta.push('<a href="mailto:' + BW.esc(p.contact_email) + '">&#9993; ' + BW.esc(p.contact_email) + '</a>');
+    if (p.case_number) meta.push('<span class="muted">Case ' + BW.esc(p.case_number) + '</span>');
+    if (p.note_count) meta.push(p.note_count + ' note' + (p.note_count === 1 ? '' : 's'));
+    meta.push('<span class="muted">seen ' + BW.esc(BW.fmtDate(p.last_seen_at)) + '</span>');
+    var expl = p.research_explanation ? '<span class="fu-note">' + BW.esc(p.research_explanation.length > 220 ? p.research_explanation.slice(0, 219) + '…' : p.research_explanation) + '</span>' : '';
+    return '<div class="p-row fu-row lead-row" role="button" tabindex="0" data-id="' + p.id + '">' +
+      '<span class="fu-head"><span class="name">' + BW.esc(leadTitle(p)) + '</span>' + chips.join('') + '</span>' +
+      '<span class="meta">' + meta.join(' <span>&middot;</span> ') + '</span>' + expl +
+      '<div class="lead-detail hidden" id="detail-' + p.id + '"></div></div>';
+  }
+
+  async function loadLeads(reset) {
+    if (reset) { offset = 0; rows = []; $('list').innerHTML = ''; expanded = {}; }
+    $('error').classList.add('hidden'); $('empty').classList.add('hidden'); $('loading').classList.remove('hidden');
+    var res = await leadQuery();
+    $('loading').classList.add('hidden');
+    if (res.error) { showError('Could not load leads: ' + res.error.message); return; }
+    rows = rows.concat(res.data);
+    $('list').insertAdjacentHTML('beforeend', res.data.map(leadRow).join(''));
+    $('empty-text').textContent = 'No leads match these filters.' + (summary && !summary.last_run ? ' The first research run has not happened yet — use "Run research now" or wait for Tuesday/Thursday 8:00 AM.' : '');
+    $('empty').classList.toggle('hidden', rows.length > 0);
+    $('count-chip').textContent = rows.length + (res.data.length === PAGE ? '+' : '') + ' shown';
+    $('count-chip').classList.remove('hidden');
+    $('more-btn').classList.toggle('hidden', res.data.length < PAGE);
+    offset += PAGE;
+  }
+
+  // ---------- Lead detail ----------
+  async function loadDetail(p, box) {
+    box.innerHTML = '<div class="muted small">Loading details&hellip;</div>';
+    var ev = await BW.sb.from('dpl_events').select('*').eq('property_id', p.id).order('last_detected_at', { ascending: false });
+    var events = ev.data || [];
+    var eventIds = events.map(function (e) { return e.id; });
+    var subjectIds = [p.id].concat(eventIds);
+    if (p.target_company_id) subjectIds.push(p.target_company_id);
+    var results = await Promise.all([
+      BW.sb.from('dpl_property_companies').select('relationship,evidence,source_url,confidence,company:dpl_companies(id,name,company_type,website,main_phone,main_email,contact_page_url,confidence,confidence_reason,research_status,research_summary,prospect_id,is_individual,do_not_contact,hq_address)').eq('property_id', p.id),
+      BW.sb.from('dpl_evidence').select('*').in('subject_id', subjectIds).order('captured_at', { ascending: false }).limit(60),
+      eventIds.length ? BW.sb.from('dpl_event_history').select('*').in('event_id', eventIds).order('changed_at', { ascending: true }) : Promise.resolve({ data: [] }),
+      BW.sb.from('dpl_source_items').select('source_id,url,external_id,first_seen_at,last_seen_at,seen_count').eq('property_id', p.id).order('last_seen_at', { ascending: false }).limit(20),
+      p.target_company_id ? BW.sb.from('dpl_contacts').select('*').eq('company_id', p.target_company_id).order('is_primary', { ascending: false }) : Promise.resolve({ data: [] }),
+      BW.sb.from('dpl_lead_activity_view').select('*').eq('property_id', p.id).order('created_at', { ascending: false }).limit(50)
+    ]);
+    var rels = results[0].data || [], evidence = results[1].data || [], history = results[2].data || [],
+        items = results[3].data || [], contacts = results[4].data || [], activity = results[5].data || [];
+    var h = [];
+
+    // Why this lead
+    h.push('<div class="why-box small">' + BW.esc(p.research_explanation || 'Not yet researched.') +
+      (p.target_reason ? '<div class="muted" style="font-weight:400;margin-top:.3rem">Target choice: ' + BW.esc(p.target_reason) + '</div>' : '') + '</div>');
+
+    // Score breakdown
+    var bd = Array.isArray(p.score_breakdown) ? p.score_breakdown : [];
+    if (bd.length) h.push('<p class="label">Score ' + p.opportunity_score + ' / 100</p><ul class="bd">' + bd.map(function (b) {
+      return '<li><span class="bd-pts">' + (b.points > 0 ? '+' : '') + BW.esc(b.points) + '</span> ' + BW.esc(b.reason || b.factor) + '</li>';
+    }).join('') + '</ul>');
+
+    // Workflow
+    h.push('<div class="kv"><div><p class="label">Workflow status</p><select class="wf-status" data-id="' + p.id + '">' +
+      STATUSES.map(function (s) { return '<option' + (s === p.workflow_status ? ' selected' : '') + '>' + s + '</option>'; }).join('') + '</select></div>' +
+      '<div><p class="label">Target company</p>' + (p.target_company_id ?
+        '<div><strong>' + BW.esc(p.target_company_name) + '</strong> ' + conf(p.target_company_confidence) + '</div>' +
+        '<div class="src-links">' + link(p.target_website, 'website') + ' ' + (p.target_main_phone ? '<a href="' + BW.esc(BW.telHref(p.target_main_phone)) + '">' + BW.esc(p.target_main_phone) + '</a>' : '') + '</div>' +
+        '<div style="margin-top:.4rem"><button class="btn-secondary link-prospect" data-company="' + p.target_company_id + '" style="min-height:36px;padding:.3rem .7rem;font-size:.82rem">' + (p.target_prospect_id ? 'Open in Prospects' : 'Add to Prospects') + '</button></div>'
+        : '<span class="muted">No company target yet' + (p.owner_name ? ' &mdash; owner of record: ' + BW.esc(p.owner_name) : '') + '</span>') + '</div></div>');
+
+    // Contacts
+    if (contacts.length) {
+      h.push('<p class="label">Contacts at ' + BW.esc(p.target_company_name) + '</p>' + contacts.map(function (c) {
+        return '<div class="history-item"><strong>' + BW.esc(c.name || '(no name)') + '</strong>' + (c.title ? ' &middot; ' + BW.esc(c.title) : '') +
+          ' <span class="chip">' + BW.esc(ROLE_LABELS[c.role_category] || c.role_category) + '</span> ' + conf(c.confidence) +
+          (c.id === p.target_contact_id ? ' <span class="chip gold">best contact</span>' : '') +
+          '<div class="src-links">' + (c.phone ? '<a href="' + BW.esc(BW.telHref(c.phone)) + '">' + BW.esc(c.phone) + '</a>' + (c.phone_type ? ' <span class="muted">(' + BW.esc(c.phone_type.replace(/_/g, ' ')) + ')</span> ' : ' ') : '') +
+          (c.email ? '<a href="mailto:' + BW.esc(c.email) + '">' + BW.esc(c.email) + '</a> ' : '') + link(c.profile_url, 'profile') + ' ' + link(c.source_url, 'source') + '</div>' +
+          (c.evidence ? '<div class="muted small">' + BW.esc(c.evidence) + '</div>' : '') +
+          (c.confidence_reason ? '<div class="muted small">' + BW.esc(c.confidence_reason) + '</div>' : '') + '</div>';
+      }).join(''));
+    }
+
+    // Property facts
+    var facts = [];
+    if (p.parcel_id) facts.push(['Parcel', p.parcel_id]);
+    if (p.property_type && p.property_type !== 'unknown') facts.push(['Property type', p.property_type.replace(/_/g, ' ')]);
+    if (p.owner_name) facts.push(['Owner of record', p.owner_name + (p.owner_mailing_address ? ' — ' + p.owner_mailing_address : '')]);
+    if (p.owner_source) facts.push(['Owner source', p.owner_source + (p.owner_source_url ? ' ' : '')]);
+    if (facts.length) h.push('<p class="label">Property</p><div class="small">' + facts.map(function (f) {
+      return '<div><span class="muted">' + BW.esc(f[0]) + ':</span> ' + BW.esc(f[1]) + (f[0] === 'Owner source' && p.owner_source_url ? ' ' + link(p.owner_source_url, 'open') : '') + '</div>';
+    }).join('') + '</div>');
+
+    // Events
+    h.push('<p class="label">Events</p>' + (events.length ? events.map(function (e) {
+      var dates = [];
+      ['filed_date', 'hearing_date', 'judgment_date', 'writ_date', 'execution_date', 'publication_date', 'sale_date'].forEach(function (k) {
+        if (e[k]) dates.push(k.replace('_date', '').replace(/_/g, ' ') + ' ' + fmtD(e[k]));
+      });
+      var parties = [];
+      if (e.plaintiff_name) parties.push('Plaintiff: ' + e.plaintiff_name);
+      if (e.lender) parties.push('Lender: ' + e.lender);
+      if (e.foreclosing_entity) parties.push('Foreclosing: ' + e.foreclosing_entity);
+      if (e.servicer) parties.push('Servicer: ' + e.servicer);
+      if (e.law_firm) parties.push('Law firm: ' + e.law_firm);
+      if (e.borrower_names) parties.push('Borrower on notice: ' + e.borrower_names);
+      var hist = history.filter(function (x) { return x.event_id === e.id; });
+      return '<div class="history-item">' + stageChip(e.stage) + ' <span class="chip">' + BW.esc(e.event_type) + '</span>' +
+        (e.status !== 'active' ? ' <span class="chip done">' + BW.esc(e.status) + '</span>' : '') +
+        (e.case_number ? ' <strong>Case ' + BW.esc(e.case_number) + '</strong>' : '') + (e.foreclosure_identifier ? ' <span class="muted">file ' + BW.esc(e.foreclosure_identifier) + '</span>' : '') +
+        (e.publication_count > 1 ? ' <span class="muted">published ' + e.publication_count + '&times;</span>' : '') +
+        (dates.length ? '<div class="small">' + BW.esc(dates.join(' · ')) + '</div>' : '') +
+        (parties.length ? '<div class="small muted">' + BW.esc(parties.join(' · ')) + '</div>' : '') +
+        (e.source_url ? '<div class="src-links">' + link(e.source_url, 'source: ' + BW.host(e.source_url)) + '</div>' : '') +
+        (hist.length ? '<div class="small muted" style="margin-top:.2rem">History: ' + hist.map(function (x) { return BW.esc((STAGE_LABELS[x.to_stage] || x.to_stage) + ' (' + BW.fmtDate(x.changed_at) + (x.source_id ? ', ' + x.source_id : '') + ')'); }).join(' → ') + '</div>' : '') +
+        '<div class="stage-form small" style="margin-top:.4rem"><select class="st-stage" data-event="' + e.id + '"><option value="">Update stage by hand&hellip;</option>' +
+        Object.keys(STAGE_LABELS).filter(function (k) { return e.event_type === 'foreclosure' ? /^(notice|sale)/.test(k) : !/^(notice|sale)/.test(k); }).map(function (k) { return '<option value="' + k + '">' + BW.esc(STAGE_LABELS[k]) + '</option>'; }).join('') +
+        '</select><input type="date" class="st-date" title="Event date"><input type="text" class="st-note" placeholder="Why (e.g. portal shows writ issued 9/2)"><button class="btn-secondary st-save" data-event="' + e.id + '" style="min-height:40px">Save</button></div></div>';
+    }).join('') : '<div class="muted small">No events recorded.</div>'));
+
+    // Related companies
+    if (rels.length) h.push('<p class="label">Related companies</p>' + rels.map(function (r) {
+      var c = r.company || {};
+      return '<div class="history-item"><span class="chip">' + BW.esc(REL_LABELS[r.relationship] || r.relationship) + '</span> <strong>' + BW.esc(c.name) + '</strong> <span class="muted">' + BW.esc(COMPANY_TYPES[c.company_type] || c.company_type || '') + '</span> ' + conf(r.confidence) +
+        (c.research_status ? ' <span class="chip done">' + BW.esc(c.research_status) + '</span>' : '') +
+        (c.research_summary ? '<div class="small">' + BW.esc(c.research_summary) + '</div>' : '') +
+        (r.evidence ? '<div class="small muted">' + BW.esc(r.evidence) + '</div>' : '') +
+        '<div class="src-links">' + link(c.website, 'website') + ' ' + link(c.contact_page_url, 'contact page') + ' ' + link(r.source_url, 'evidence') + '</div>' +
+        (c.id && !c.is_individual && ['law_firm', 'government', 'individual'].indexOf(c.company_type) < 0 && c.id !== p.target_company_id ?
+          '<button class="btn-quiet link-prospect" data-company="' + c.id + '" style="min-height:0;padding:.2rem .4rem;font-size:.8rem">' + (c.prospect_id ? 'Open in Prospects' : 'Add to Prospects') + '</button>' : '') + '</div>';
+    }).join(''));
+
+    // Sources & evidence
+    if (items.length || evidence.length) {
+      h.push('<p class="label">Sources &amp; evidence</p><div class="small">' +
+        items.map(function (i) { return '<div>' + link(i.url, i.source_id + ': ' + BW.host(i.url || '')) + ' <span class="muted">first seen ' + BW.esc(BW.fmtDate(i.first_seen_at)) + (i.seen_count > 1 ? ', seen ' + i.seen_count + '×' : '') + '</span></div>'; }).join('') +
+        evidence.map(function (e) { return '<div class="ev"><span class="muted">' + BW.esc(BW.fmtDate(e.captured_at)) + '</span> ' + BW.esc(e.claim) + (e.excerpt ? ' <span class="muted">“' + BW.esc(e.excerpt.slice(0, 200)) + '”</span>' : '') + ' ' + link(e.source_url, 'source') + ' ' + (e.confidence ? '<span class="chip conf-' + BW.esc(e.confidence) + '">' + BW.esc(e.confidence) + '</span>' : '') + '</div>'; }).join('') +
+        '</div>');
+    }
+
+    // Notes & activity
+    h.push('<p class="label">Team notes &amp; activity</p><div class="note-form"><textarea class="note-text" placeholder="What did you do or learn? (e.g. Called regional manager, asked for turnover vendor contact)"></textarea><button class="btn-secondary note-save" data-id="' + p.id + '">Save note</button></div>' +
+      (activity.length ? activity.map(function (a) {
+        return '<div class="history-item"><span class="fu-kind">' + BW.esc(a.kind === 'status_change' ? (a.from_status || '') + ' → ' + (a.to_status || '') : a.kind) + '</span>' + BW.esc(a.note || '') +
+          ' <span class="muted">&mdash; ' + BW.esc(a.display_name || 'system') + ', ' + BW.esc(BW.fmtDateTime(a.created_at)) + '</span></div>';
+      }).join('') : '<div class="muted small">No notes yet.</div>'));
+    box.innerHTML = h.join('');
+  }
+
+  function toggleLead(el) {
+    var id = el.dataset.id;
+    var box = $('detail-' + id);
+    var p = rows.find(function (r) { return r.id === id; });
+    if (!p || !box) return;
+    if (expanded[id]) { box.classList.add('hidden'); expanded[id] = false; return; }
+    expanded[id] = true;
+    box.classList.remove('hidden');
+    loadDetail(p, box);
+  }
+
+  // ---------- Companies ----------
+  function companyQuery() {
+    var q = BW.sb.from('dpl_company_summary').select('*').eq('is_individual', false);
+    var s = $('c-search').value.trim().replace(/[,()]/g, ' ');
+    if (s) q = q.ilike('name', '%' + s + '%');
+    var t = $('c-type').value; if (t) q = q.eq('company_type', t);
+    var scope = $('c-scope').value;
+    if (scope === 'active') q = q.gte('active_properties', 1);
+    if (scope === 'multi') q = q.gte('active_properties', 2);
+    if (scope === 'all') q = q.gte('total_properties', 1);
+    return q.order('active_properties', { ascending: false }).order('max_score', { ascending: false, nullsFirst: false }).range(offset, offset + PAGE - 1);
+  }
+  function companyRow(c) {
+    var chips = ['<span class="chip">' + BW.esc(COMPANY_TYPES[c.company_type] || c.company_type) + '</span>'];
+    if (c.active_properties) chips.push('<span class="chip gold">' + c.active_properties + ' active propert' + (c.active_properties === 1 ? 'y' : 'ies') + '</span>');
+    if (c.high_priority) chips.push('<span class="chip">' + c.high_priority + ' high priority</span>');
+    if (c.research_status !== 'researched') chips.push('<span class="chip done">' + BW.esc(c.research_status) + '</span>');
+    if (c.prospect_id) chips.push('<span class="chip">in Prospects</span>');
+    var meta = [];
+    if ((c.counties || []).length) meta.push(BW.esc(c.counties.join(', ')));
+    if (c.contact_name) meta.push(BW.esc([c.contact_name, c.contact_title].filter(Boolean).join(' — ')) + ' ' + conf(c.contact_confidence));
+    if (c.contact_phone) meta.push('<a href="' + BW.esc(BW.telHref(c.contact_phone)) + '">&#9742; ' + BW.esc(c.contact_phone) + '</a>');
+    else if (c.main_phone) meta.push('<a href="' + BW.esc(BW.telHref(c.main_phone)) + '">&#9742; ' + BW.esc(c.main_phone) + '</a>');
+    if (c.contact_email) meta.push('<a href="mailto:' + BW.esc(c.contact_email) + '">&#9993; ' + BW.esc(c.contact_email) + '</a>');
+    if (c.website) meta.push(link(c.website));
+    if (c.max_score != null) meta.push('best score ' + c.max_score);
+    return '<div class="p-row fu-row company-row" role="button" tabindex="0" data-id="' + c.id + '">' +
+      '<span class="fu-head"><span class="name">' + BW.esc(c.name) + '</span>' + chips.join('') + '</span>' +
+      '<span class="meta">' + meta.join(' <span>&middot;</span> ') + '</span>' +
+      (c.research_summary ? '<span class="fu-note">' + BW.esc(c.research_summary.length > 220 ? c.research_summary.slice(0, 219) + '…' : c.research_summary) + '</span>' : '') +
+      '<div class="lead-detail hidden" id="detail-' + c.id + '"></div></div>';
+  }
+  async function loadCompanies(reset) {
+    if (reset) { offset = 0; rows = []; $('list').innerHTML = ''; expanded = {}; }
+    $('error').classList.add('hidden'); $('empty').classList.add('hidden'); $('loading').classList.remove('hidden');
+    var res = await companyQuery();
+    $('loading').classList.add('hidden');
+    if (res.error) { showError('Could not load companies: ' + res.error.message); return; }
+    rows = rows.concat(res.data);
+    $('list').insertAdjacentHTML('beforeend', res.data.map(companyRow).join(''));
+    $('empty-text').textContent = 'No companies match these filters.';
+    $('empty').classList.toggle('hidden', rows.length > 0);
+    $('count-chip').textContent = rows.length + (res.data.length === PAGE ? '+' : '') + ' shown';
+    $('count-chip').classList.remove('hidden');
+    $('more-btn').classList.toggle('hidden', res.data.length < PAGE);
+    offset += PAGE;
+  }
+  async function loadCompanyDetail(c, box) {
+    box.innerHTML = '<div class="muted small">Loading&hellip;</div>';
+    var r = await Promise.all([
+      BW.sb.from('dpl_lead_list').select('id,county,address_raw,city,current_stage,event_date,opportunity_score,workflow_status,target_company_id,owner_company_id,manager_company_id').or('target_company_id.eq.' + c.id + ',owner_company_id.eq.' + c.id + ',manager_company_id.eq.' + c.id + ',investor_company_id.eq.' + c.id).order('opportunity_score', { ascending: false }).limit(100),
+      BW.sb.from('dpl_contacts').select('*').eq('company_id', c.id).order('is_primary', { ascending: false }),
+      BW.sb.from('dpl_companies').select('sources,confidence_reason,portfolio_notes,hq_address,sos_control_number,parent_company_id').eq('id', c.id).maybeSingle()
+    ]);
+    var props = r[0].data || [], contacts = r[1].data || [], full = r[2].data || {};
+    var h = [];
+    if (c.research_summary || c.confidence_reason) h.push('<div class="why-box small">' + BW.esc(c.research_summary || '') + (c.confidence_reason ? '<div class="muted" style="font-weight:400;margin-top:.3rem">' + conf(c.confidence) + ' ' + BW.esc(c.confidence_reason) + '</div>' : '') + '</div>');
+    var facts = [];
+    if (full.hq_address) facts.push('HQ: ' + full.hq_address);
+    if (c.parent_company_name) facts.push('Parent: ' + c.parent_company_name);
+    if (full.portfolio_notes) facts.push('Portfolio: ' + full.portfolio_notes);
+    if (full.sos_control_number) facts.push('GA SOS control #: ' + full.sos_control_number);
+    if (c.researched_at) facts.push('Researched ' + BW.fmtDate(c.researched_at));
+    if (facts.length) h.push('<div class="small">' + facts.map(function (f) { return '<div>' + BW.esc(f) + '</div>'; }).join('') + '</div>');
+    h.push('<div style="margin:.5rem 0"><button class="btn-secondary link-prospect" data-company="' + c.id + '" style="min-height:36px;padding:.3rem .7rem;font-size:.82rem">' + (c.prospect_id ? 'Open in Prospects' : 'Add to Prospects') + '</button> ' + link(c.website, 'website') + ' ' + link(c.contact_page_url, 'contact page') + '</div>');
+    if (contacts.length) h.push('<p class="label">Contacts</p>' + contacts.map(function (x) {
+      return '<div class="history-item"><strong>' + BW.esc(x.name || '(no name)') + '</strong>' + (x.title ? ' &middot; ' + BW.esc(x.title) : '') + ' <span class="chip">' + BW.esc(ROLE_LABELS[x.role_category] || x.role_category) + '</span> ' + conf(x.confidence) +
+        '<div class="src-links">' + (x.phone ? '<a href="' + BW.esc(BW.telHref(x.phone)) + '">' + BW.esc(x.phone) + '</a> ' : '') + (x.email ? '<a href="mailto:' + BW.esc(x.email) + '">' + BW.esc(x.email) + '</a> ' : '') + link(x.profile_url, 'profile') + ' ' + link(x.source_url, 'source') + '</div>' +
+        (x.evidence ? '<div class="muted small">' + BW.esc(x.evidence) + '</div>' : '') + '</div>';
+    }).join(''));
+    h.push('<p class="label">Properties (' + props.length + ')</p>' + (props.length ? props.map(function (p) {
+      return '<div class="history-item">' + scoreChip(p.opportunity_score) + ' <strong>' + BW.esc(leadTitle(p)) + '</strong> <span class="chip">' + BW.esc(p.county) + '</span> ' + stageChip(p.current_stage) +
+        (p.event_date ? ' <span class="muted">' + BW.esc(fmtD(p.event_date)) + '</span>' : '') + (p.workflow_status !== 'New' ? ' <span class="chip done">' + BW.esc(p.workflow_status) + '</span>' : '') + '</div>';
+    }).join('') : '<div class="muted small">None.</div>'));
+    var srcs = Array.isArray(full.sources) ? full.sources : [];
+    if (srcs.length) h.push('<p class="label">Research sources</p><div class="small">' + srcs.map(function (s) { return '<div>' + link(s.url, s.title || BW.host(s.url || '')) + (s.note ? ' <span class="muted">' + BW.esc(s.note) + '</span>' : '') + '</div>'; }).join('') + '</div>');
+    box.innerHTML = h.join('');
+  }
+  function toggleCompany(el) {
+    var id = el.dataset.id, box = $('detail-' + id);
+    var c = rows.find(function (r) { return r.id === id; });
+    if (!c || !box) return;
+    if (expanded[id]) { box.classList.add('hidden'); expanded[id] = false; return; }
+    expanded[id] = true; box.classList.remove('hidden'); loadCompanyDetail(c, box);
+  }
+
+  function reload() { if (view === 'leads') loadLeads(true); else loadCompanies(true); }
+
+  // ---------- Actions ----------
+  async function linkProspect(companyId, btn) {
+    btn.disabled = true;
+    var res = await BW.sb.rpc('dpl_link_prospect', { p_company_id: companyId });
+    btn.disabled = false;
+    if (res.error) { alert('Could not add to Prospects: ' + res.error.message); return; }
+    var pr = await BW.sb.from('prospect_list').select('*').eq('id', res.data).maybeSingle();
+    if (pr.data) BW.editor.open(pr.data); else alert('Added to Prospects.');
+    btn.textContent = 'Open in Prospects';
+  }
+
+  $('list').addEventListener('click', async function (e) {
+    var t = e.target;
+    if (t.closest('a')) return;
+    var btn = t.closest('button');
+    if (btn && btn.classList.contains('link-prospect')) { e.stopPropagation(); linkProspect(btn.dataset.company, btn); return; }
+    if (btn && btn.classList.contains('note-save')) {
+      e.stopPropagation();
+      var ta = btn.parentNode.querySelector('.note-text');
+      if (!ta.value.trim()) return;
+      btn.disabled = true;
+      var r1 = await BW.sb.rpc('dpl_add_lead_note', { p_property_id: btn.dataset.id, p_note: ta.value.trim() });
+      btn.disabled = false;
+      if (r1.error) { alert('Could not save note: ' + r1.error.message); return; }
+      var p = rows.find(function (x) { return x.id === btn.dataset.id; });
+      if (p) { p.note_count = (p.note_count || 0) + 1; loadDetail(p, $('detail-' + p.id)); }
+      return;
+    }
+    if (btn && btn.classList.contains('st-save')) {
+      e.stopPropagation();
+      var form = btn.parentNode;
+      var stage = form.querySelector('.st-stage').value;
+      if (!stage) { alert('Pick a stage first.'); return; }
+      btn.disabled = true;
+      var r2 = await BW.sb.rpc('dpl_set_event_stage', { p_event_id: btn.dataset.event, p_stage: stage, p_note: form.querySelector('.st-note').value.trim() || null, p_event_date: form.querySelector('.st-date').value || null });
+      btn.disabled = false;
+      if (r2.error) { alert('Could not update stage: ' + r2.error.message); return; }
+      reload(); loadSummary();
+      return;
+    }
+    if (t.closest('.lead-detail')) return; // clicks inside the detail panel (selects, inputs) do not collapse it
+    var row = t.closest('.lead-row');
+    if (row) { toggleLead(row); return; }
+    var crow = t.closest('.company-row');
+    if (crow) toggleCompany(crow);
+  });
+  $('list').addEventListener('keydown', function (e) {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('fu-row')) {
+      e.preventDefault();
+      if (e.target.classList.contains('lead-row')) toggleLead(e.target); else toggleCompany(e.target);
+    }
+  });
+  $('list').addEventListener('change', async function (e) {
+    var sel = e.target;
+    if (!sel.classList.contains('wf-status')) return;
+    var p = rows.find(function (x) { return x.id === sel.dataset.id; });
+    var res = await BW.sb.rpc('dpl_set_lead_status', { p_property_id: sel.dataset.id, p_status: sel.value });
+    if (res.error) { alert('Could not update status: ' + res.error.message); return; }
+    if (p) { p.workflow_status = sel.value; p.reviewed_at = new Date().toISOString(); }
+    loadSummary();
+  });
+
+  $('sources-box').addEventListener('click', async function (e) {
+    var b = e.target.closest('.src-toggle');
+    if (!b) return;
+    var on = b.dataset.on === '1';
+    if (!on && !confirm('Disable this source? It will be skipped on future runs until re-enabled.')) return;
+    var res = await BW.sb.from('dpl_source_state').update({ enabled: on }).eq('source_id', b.dataset.src);
+    if (res.error) { alert(res.error.message); return; }
+    loadSummary();
+  });
+
+  $('run-btn').addEventListener('click', async function () {
+    var btn = $('run-btn'); btn.disabled = true; $('run-msg').innerHTML = '';
+    var res = await BW.sb.rpc('dpl_request_run', { p_trigger: 'manual' });
+    btn.disabled = false;
+    if (res.error) { $('run-msg').innerHTML = '<div class="alert-error">' + BW.esc(res.error.message) + '</div>'; return; }
+    $('run-msg').innerHTML = '<div class="alert-ok">Research run started. Sources are fetched with rate limiting, so a full run takes several minutes; refresh this page to see progress.</div>';
+    setTimeout(loadSummary, 4000);
+  });
+
+  $('tiles').addEventListener('click', function (e) {
+    var t = e.target.closest('.tile'); if (!t) return;
+    var k = t.dataset.tile;
+    setView('leads');
+    $('f-type').value = ''; $('f-stage').value = ''; $('f-flags').value = ''; $('f-status').value = 'active';
+    if (k === 'high') $('f-flags').value = 'high';
+    if (k === 'new_run') $('f-flags').value = 'new_run';
+    if (k === 'fc') $('f-type').value = 'foreclosure';
+    if (k === 'ev') $('f-type').value = 'eviction';
+    if (k === 'evwrit') { $('f-type').value = 'eviction'; $('f-stage').value = 'turnover'; }
+    if (k === 'ready') $('f-status').value = 'Outreach Ready';
+    if (k === 'research') $('f-flags').value = 'research';
+    if (k === 'multi') { setView('companies'); $('c-scope').value = 'multi'; }
+    reload();
+  });
+
+  function setView(v) {
+    view = v;
+    document.querySelectorAll('.seg-btn').forEach(function (b) { b.classList.toggle('active', b.dataset.view === v); });
+    $('lead-filters').classList.toggle('hidden', v !== 'leads');
+    $('company-filters').classList.toggle('hidden', v !== 'companies');
+  }
+  document.querySelectorAll('.seg-btn').forEach(function (b) { b.addEventListener('click', function () { setView(b.dataset.view); reload(); }); });
+
+  var timer = null;
+  ['f-search', 'c-search'].forEach(function (id) { $(id).addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(reload, 300); }); });
+  ['f-county', 'f-type', 'f-stage', 'f-status', 'f-flags', 'f-sort', 'f-from', 'f-to', 'c-type', 'c-scope'].forEach(function (id) { $(id).addEventListener('change', reload); });
+  $('more-btn').addEventListener('click', function () { if (view === 'leads') loadLeads(false); else loadCompanies(false); });
+  BW.editor.onChange(function () { reload(); });
+
+  // ---------- Manual case & uploads ----------
+  $('manual-form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var msg = $('manual-msg'); msg.innerHTML = '';
+    var kind = $('m-kind').value;
+    var payload = {
+      lead_type: kind, county: $('m-county').value, case_number: $('m-case').value.trim() || null,
+      plaintiff_name: $('m-plaintiff').value.trim() || null, address: $('m-address').value.trim() || null,
+      stage: $('m-stage').value || null, status_text: $('m-status').value.trim() || null,
+      source_url: $('m-url').value.trim() || null, event_date: $('m-date').value || null
+    };
+    if (!payload.case_number && !payload.address) { msg.innerHTML = '<div class="alert-error">Enter a case number or a property address.</div>'; return; }
+    var res = await BW.sb.rpc('dpl_submit_upload', { p_kind: 'manual_case', p_county: payload.county, p_source_label: 'manual entry', p_filename: null, p_mime: null, p_content_b64: '', p_payload: payload });
+    if (res.error) { msg.innerHTML = '<div class="alert-error">' + BW.esc(res.error.message) + '</div>'; return; }
+    msg.innerHTML = '<div class="alert-ok">Case queued. It is processed by the next worker pass (usually within a minute) and then appears in the list.</div>';
+    e.target.reset();
+  });
+
+  $('upload-form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var msg = $('upload-msg'); msg.innerHTML = '';
+    var f = $('u-file').files[0];
+    if (!f) return;
+    if (f.size > 8 * 1024 * 1024) { msg.innerHTML = '<div class="alert-error">File is larger than 8 MB.</div>'; return; }
+    var b64 = await new Promise(function (resolve, reject) {
+      var r = new FileReader();
+      r.onload = function () { resolve(String(r.result).split(',')[1] || ''); };
+      r.onerror = reject; r.readAsDataURL(f);
+    });
+    var res = await BW.sb.rpc('dpl_submit_upload', { p_kind: $('u-kind').value, p_county: $('u-county').value, p_source_label: $('u-label').value.trim(), p_filename: f.name, p_mime: f.type || null, p_content_b64: b64, p_payload: {} });
+    if (res.error) { msg.innerHTML = '<div class="alert-error">' + BW.esc(res.error.message) + '</div>'; return; }
+    msg.innerHTML = '<div class="alert-ok">Uploaded. The worker parses it on its next pass; check Sources &amp; run history for the result.</div>';
+    e.target.reset();
+  });
+
+  // ---------- Secrets ----------
+  async function loadSecretStatus() {
+    var res = await BW.sb.rpc('dpl_secret_status');
+    if (res.error) { $('secret-status').textContent = ''; return; }
+    $('secret-status').innerHTML = res.data.anthropic_api_key ? '<span class="chip">Anthropic API key is set</span> Enter a new key below to replace it.' : '<span class="chip gold">No Anthropic API key set</span> AI company research is skipped until one is saved.';
+  }
+  $('secret-form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var msg = $('secret-msg'); msg.innerHTML = '';
+    var v = $('s-key').value.trim();
+    if (!v) return;
+    var res = await BW.sb.rpc('dpl_set_secret', { p_name: 'anthropic_api_key', p_value: v });
+    if (res.error) { msg.innerHTML = '<div class="alert-error">' + BW.esc(res.error.message) + '</div>'; return; }
+    msg.innerHTML = '<div class="alert-ok">Key saved to the vault.</div>';
+    $('s-key').value = '';
+    loadSecretStatus();
+  });
+
+  (async function boot() {
+    var auth = await BW.requireAdmin();
+    if (!auth) return;
+    await loadSummary();
+    loadLeads(true);
+    loadRuns();
+    loadSecretStatus();
+  })();
+})();
+</script>
+</body>
+</html>
