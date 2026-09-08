@@ -154,6 +154,77 @@ Note only / Done), prospect type, and partnership vs. ordinary leads.
 
 ---
 
+## 3d. Distressed Property Leads (`/admin/distressed`)
+
+Foreclosure notices and evictions in Fulton, DeKalb, Douglas and Henry, turned
+into B2B leads: each property is matched to the management company, owner
+entity or investor most likely to buy cleanout, turnover or REO work. The
+research runs by itself every **Tuesday and Thursday at 8:00 AM Eastern**
+(daylight-saving safe, nothing to run on anyone's computer); **Run research
+now** starts an extra run.
+
+**Top of the page.** Counts for new leads from the latest run, high-priority
+leads (score 70+), foreclosures, evictions tracked, evictions at writ stage or
+later, outreach-ready leads, leads that still need research, and companies
+with two or more active properties. Tap a tile to filter the list. Below it:
+when the last run happened, what it found, which sources failed, and when the
+next run is.
+
+**Leads list.** One row per property: address (or community name), county,
+stage, score, workflow status, target company and best contact with confidence,
+key dates and case number. Filters: search, county, foreclosure vs eviction,
+stage group ("Turnover likely" = writ issued or later, or a sale that is
+imminent or completed), workflow status, quick flags (high priority, new from
+latest run, not reviewed, contact available/missing, needs research, company
+with 2+ properties), sort, and an event-date range.
+
+Tap a row to expand it: why the lead scored the way it did (every factor is
+listed), the target company and its contacts with their source pages, property
+facts and owner of record, every event with its dates, parties and stage
+history, related companies, the source documents and evidence, and the team's
+notes.
+
+**Eviction stages.** A filing is never called an eviction. Stages are:
+dispossessory filed → service completed → hearing scheduled → judgment entered
+→ writ of possession issued → writ pending execution → eviction scheduled →
+eviction executed → possession returned (plus dismissed / status unknown).
+Automated sources only ever move a case forward. Court calendars give the
+hearing stage; writs and executions come from the Fulton Marshal list (upload)
+or from checking the court portal by hand and using **Update stage by hand**
+on the event, with a note and date.
+
+**Workflow statuses:** New → Reviewing → Outreach Ready → Contacted → Follow Up,
+plus Not a Fit and Closed. Changing the status records who did it and when.
+Notes work like team notes elsewhere. **Add to Prospects** creates (or opens)
+the company in the regular prospect database so the Blitz and Follow-Ups
+machinery take over from there.
+
+**Companies view.** The same data grouped by company: how many active
+properties each has, the best score, counties, best contact, research summary
+and source pages. Companies with several properties are the strongest
+targets.
+
+**Add a case or upload a list.** For anything the automation cannot fetch on
+its own: a case you checked on a court portal, the Fulton County Marshal's
+writ execution list (ask the Marshal's civil division for it), a foreclosure
+notice PDF, an e-Edition legal section, or a CSV. Only case number, plaintiff,
+property and stage are stored — never anything about tenants.
+
+**Research settings.** Paste an Anthropic API key to turn on AI company
+research (finding the management company, contacts, confidence). It is stored
+encrypted in Supabase Vault and never shown again. Without a key, discovery and
+county-GIS owner lookups still run; leads just show "needs research".
+Research is cached per company for 90 days, so cost tracks the number of new
+companies, not the number of properties.
+
+**Sources & run history** lists every source with its last success and last
+error, lets you disable one, and shows recent runs. One source failing never
+stops the others. Where the data comes from, what could not be automated and
+why, and which paid options exist are written up in
+`docs/distressed-leads-sources.md`.
+
+---
+
 ## 4. Adding and removing people
 
 On the admin home page:
@@ -212,6 +283,7 @@ Admin pages are marked `noindex`, so they never appear in search results.
 |---|---|
 | Admin pages | `admin/` in the `Bridgeway-404-Site` repo |
 | Database schema | `supabase/migrations/` in the same repo |
+| Distressed-leads research worker | `supabase/functions/distressed-leads/` (Supabase Edge Function, scheduled by pg_cron) |
 | Prospect + outreach data | Supabase project **bridgeway-404** |
 | Deployment | Netlify, automatically on push to `main` |
 

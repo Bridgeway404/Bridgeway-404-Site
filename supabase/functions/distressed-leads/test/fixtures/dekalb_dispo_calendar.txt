@@ -1,0 +1,409 @@
+Warning: TT: undefined function: 32
+Magistrate Court Civil Calendar
+ Judge Berryl A. Anderson
+ Dispossessory
+ Dispossessory Virtual CT2 Calendar (Attorney)
+ 1:00 PM
+ 09/08/2026
+ Mirna G. Andrews
+ Dispossessory Virtual CT2
+ Case   Party   Attorney
+ 1   26D15710   Colony Holdings, LLC
+ D BRADLEY FOLSOM
+ Magistrate Dispossessory -
+ Tenant at Sufferance  
+--- versus ---
+ Tenant Placeholder 1; or
+ Tenant(s)  
+ Occupant Placeholder 2  
+ Occupant Placeholder 3  
+ Comment:
+ 2   26D16609   EZ GA PAD 1 LLC
+ Monica K Gilroy
+ Magistrate Dispossessory - Non
+ Payment of Rent  
+--- versus ---
+ Occupant Placeholder 4  
+ Occupant Placeholder 5  
+Pro Se; Pro Se
+ Comment:   Reset per judge
+ 3   26D17941  
+Cobbs Creek Apartment Homes LLC d/b/a
+ Cobb Creek
+ Elizabeth Cruikshank
+ Magistrate Dispossessory - Non
+ Payment of Rent  
+--- versus ---
+ Occupant Placeholder 6  
+ Occupant Placeholder 7  
+Pro Se; Pro Se
+ Sign
+ Comment:
+ Page   1   of   10
+Magistrate Court Civil Calendar
+ Judge Berryl A. Anderson
+ Dispossessory
+ Dispossessory Virtual CT2 Calendar (Attorney)
+ 1:00 PM
+ 09/08/2026
+ Mirna G. Andrews
+ Dispossessory Virtual CT2
+ Case   Party   Attorney
+ 4   26D19206   Up&Up Fund II GA LLC
+ Sarah Skinner
+ Magistrate Dispossessory - Non
+ Payment of Rent  
+--- versus ---
+ Occupant Placeholder 8  
+ Occupant Placeholder 9  
+Pro Se; Pro Se; Pro Se
+ Comment:
+ 5   26D19569  
+SFR XII ATL Owner 1 LP c/o Brock & Scott,
+ PLLC
+ Michael Stearsman
+ Magistrate Dispossessory - Non
+ Payment of Rent  
+--- versus ---
+ Occupant Placeholder 10  
+ Occupant Placeholder 11  
+Pro Se; Pro Se
+ Comment:
+ 6   26D20297  
+S2 PLEASANTDALE LLC The Wynne (fka The
+ Landing at Pleasantdale)
+ Brandi McNeal
+ Magistrate Dispossessory - Non
+ Payment of Rent  
+--- versus ---
+ Occupant Placeholder 12  
+ Occupant Placeholder 13  
+Pro Se; Pro Se
+ Comment:
+ Page   2   of   10
+Magistrate Court Civil Calendar
+ Judge Berryl A. Anderson
+ Dispossessory
+ Dispossessory Virtual CT2 Calendar (Attorney)
+ 1:00 PM
+ 09/08/2026
+ Mirna G. Andrews
+ Dispossessory Virtual CT2
+ Case   Party   Attorney
+ 7   26D20301  
+S2 PLEASANTDALE LLC The Wynne (fka The
+ Landing at Pleasantdale)
+ Brandi McNeal
+ Magistrate Dispossessory - Non
+ Payment of Rent  
+--- versus ---
+ Occupant Placeholder 14  
+ Occupant Placeholder 15  
+Pro Se; Pro Se
+ Comment:
+ 8   26D20302  
+S2 PLEASANTDALE LLC The Wynne (fka The
+ Landing at Pleasantdale)
+ Brandi McNeal
+ Magistrate Dispossessory - Non
+ Payment of Rent  
+--- versus ---
+ Occupant Placeholder 16  
+ Occupant Placeholder 17  
+Pro Se; Pro Se
+ Comment:
+ 9   26D20420  
+Gray Property 3401 LLC d/b/a Jackson
+ Square Apartments
+ ABIGAIL Ersin
+ Magistrate Dispossessory - Non
+ Payment of Rent  
+--- versus ---
+ Occupant Placeholder 18  
+ Occupant Placeholder 19  
+Pro Se; Pro Se
+ Comment:
+ Page   3   of   10
+Magistrate Court Civil Calendar
+ Judge Berryl A. Anderson
+ Dispossessory
+ Dispossessory Virtual CT2 Calendar (Attorney)
+ 1:00 PM
+ 09/08/2026
+ Mirna G. Andrews
+ Dispossessory Virtual CT2
+ Case   Party   Attorney
+ 10   26D20430   LHA MANAGEMENT SERVICES LLC
+ Robert Dukes
+ Magistrate Dispossessory - Non
+ Payment of Rent  
+--- versus ---
+ Occupant Placeholder 20  
+ Occupant Placeholder 21  
+ Occupant Placeholder 22  
+ Pro Se; Pro Se
+ Comment:
+ 11   26D20742  
+ATLANTA HOLDINGS 196 LLC Rio at Lenox
+ Apartments
+ Brandi McNeal
+ Magistrate Dispossessory - Non
+ Payment of Rent  
+--- versus ---
+ Occupant Placeholder 23  
+ Occupant Placeholder 24  
+Pro Se; Pro Se
+ Comment:
+ 12   26D20748   WOP KESWICK LLC Keswick Apartments
+ Brandi McNeal
+ Magistrate Dispossessory - Non
+ Payment of Rent  
+--- versus ---
+ Occupant Placeholder 25  
+ Occupant Placeholder 26  
+Pro Se; Pro Se
+ Comment:
+ Page   4   of   10
+Magistrate Court Civil Calendar
+ Judge Berryl A. Anderson
+ Dispossessory
+ Dispossessory Virtual CT2 Calendar (Attorney)
+ 1:00 PM
+ 09/08/2026
+ Mirna G. Andrews
+ Dispossessory Virtual CT2
+ Case   Party   Attorney
+ 13   26D20854  
+Heritage Family Development LC dba
+ Heritage Townhomes
+ Mario Breedlove
+ Magistrate Dispossessory - Non
+ Payment of Rent  
+--- versus ---
+ Occupant Placeholder 27  
+ Occupant Placeholder 28  
+Pro Se; Pro Se
+ Comment:
+ 14   26D20882  
+LDG Candler Family Development, LLC dba
+ Candler Reserve
+ Mario Breedlove
+ Magistrate Dispossessory - Non
+ Payment of Rent  
+--- versus ---
+ Occupant Placeholder 29  
+ Occupant Placeholder 30  
+Pro Se; Pro Se
+ Comment:
+ 15   26D20989  
+LDG Candler Family Development, LLC dba
+ Candler Reserve
+ Mario Breedlove
+ Magistrate Dispossessory - Non
+ Payment of Rent  
+--- versus ---
+ Occupant Placeholder 31  
+ Occupant Placeholder 32  
+Pro Se; Pro Se; Pro Se
+ Comment:
+ Page   5   of   10
+Magistrate Court Civil Calendar
+ Judge Berryl A. Anderson
+ Dispossessory
+ Dispossessory Virtual CT2 Calendar (Attorney)
+ 1:00 PM
+ 09/08/2026
+ Mirna G. Andrews
+ Dispossessory Virtual CT2
+ Case   Party   Attorney
+ 16   26D20994  
+LDG Candler Family Development, LLC dba
+ Candler Reserve
+ Mario Breedlove
+ Magistrate Dispossessory - Non
+ Payment of Rent  
+--- versus ---
+ Occupant Placeholder 33  
+ Occupant Placeholder 34  
+Pro Se; Pro Se
+ Comment:
+ 17   26D21030  
+1000 Montreal Rd PCPRE LLC dba Flourish
+ Park
+ June L. James
+ Magistrate Dispossessory - Non
+ Payment of Rent  
+--- versus ---
+ Occupant Placeholder 35  
+ Occupant Placeholder 36  
+ Comment:
+ 18   26D21090   Abbington Reserve Abbington Reserve
+ Mario Breedlove
+ Magistrate Dispossessory - Non
+ Payment of Rent  
+--- versus ---
+ Occupant Placeholder 37  
+ Occupant Placeholder 38  
+Pro Se; Pro Se
+ Comment:
+ Page   6   of   10
+Magistrate Court Civil Calendar
+ Judge Berryl A. Anderson
+ Dispossessory
+ Dispossessory Virtual CT2 Calendar (Attorney)
+ 1:00 PM
+ 09/08/2026
+ Mirna G. Andrews
+ Dispossessory Virtual CT2
+ Case   Party   Attorney
+ 19   26D21128  
+RTO MONTREAL ROAD APARTMENT LLC
+ DBA RESERVE AT TWIN OAKS
+ June L. James
+ Magistrate Dispossessory - Non
+ Payment of Rent  
+--- versus ---
+ Occupant Placeholder 39  
+ Occupant Placeholder 40  
+Pro Se; Pro Se
+ Comment:
+ 20   26D21133  
+RTO MONTREAL ROAD APARTMENT LLC
+ DBA RESERVE AT TWIN OAKS
+ June L. James
+ Magistrate Dispossessory - Non
+ Payment of Rent  
+--- versus ---
+ Occupant Placeholder 41  
+ Occupant Placeholder 42  
+Pro Se; Pro Se
+ Comment:
+ 21   26D21137  
+3548 Rockbridge Road LLC dba Avondale
+ Place
+ Elizabeth Cruikshank
+ Magistrate Dispossessory - Non
+ Payment of Rent  
+--- versus ---
+ Occupant Placeholder 43  
+ Occupant Placeholder 44  
+Pro Se; Pro Se
+ Comment:
+ Page   7   of   10
+Magistrate Court Civil Calendar
+ Judge Berryl A. Anderson
+ Dispossessory
+ Dispossessory Virtual CT2 Calendar (Attorney)
+ 1:00 PM
+ 09/08/2026
+ Mirna G. Andrews
+ Dispossessory Virtual CT2
+ Case   Party   Attorney
+ 22   26D21182  
+Indian Creek Family Development, LLC dba
+ Sunrise View
+ Mario Breedlove
+ Magistrate Dispossessory - Non
+ Payment of Rent  
+--- versus ---
+ Occupant Placeholder 45  
+ Occupant Placeholder 46  
+Pro Se; Pro Se
+ Comment:
+ 23   26D21187  
+Indian Creek Family Development, LLC dba
+ Sunrise View
+ Mario Breedlove
+ Magistrate Dispossessory - Non
+ Payment of Rent  
+--- versus ---
+ Occupant Placeholder 47  
+ Occupant Placeholder 48  
+Pro Se; Pro Se
+ Comment:
+ 24   26D21188  
+Indian Creek Family Development, LLC dba
+ Sunrise View
+ Mario Breedlove
+ Magistrate Dispossessory - Non
+ Payment of Rent  
+--- versus ---
+ Occupant Placeholder 49  
+ Occupant Placeholder 50  
+Pro Se; Pro Se
+ Comment:
+ Page   8   of   10
+Magistrate Court Civil Calendar
+ Judge Berryl A. Anderson
+ Dispossessory
+ Dispossessory Virtual CT2 Calendar (Attorney)
+ 1:00 PM
+ 09/08/2026
+ Mirna G. Andrews
+ Dispossessory Virtual CT2
+ Case   Party   Attorney
+ 25   26D21192  
+Indian Creek Family Development, LLC dba
+ Sunrise View
+ Mario Breedlove
+ Magistrate Dispossessory - Non
+ Payment of Rent  
+--- versus ---
+ Occupant Placeholder 51  
+ Occupant Placeholder 52  
+Pro Se; Pro Se
+ Comment:
+ 26   26D21195  
+3594 MEMORIAL OWNER, LLC dba
+ Woodside Village Apartments
+ Mario Breedlove
+ Magistrate Dispossessory - Non
+ Payment of Rent  
+--- versus ---
+ Occupant Placeholder 53  
+ Comment:
+ 27   26D21231   4719 Central Dr LLC dba Mountain Place
+ Elizabeth Cruikshank
+ Magistrate Dispossessory - Non
+ Payment of Rent  
+--- versus ---
+ Occupant Placeholder 54  
+ Occupant Placeholder 55  
+Pro Se; Pro Se
+ Comment:
+ Page   9   of   10
+Magistrate Court Civil Calendar
+ Judge Berryl A. Anderson
+ Dispossessory
+ Dispossessory Virtual CT2 Calendar (Attorney)
+ 1:00 PM
+ 09/08/2026
+ Mirna G. Andrews
+ Dispossessory Virtual CT2
+ Case   Party   Attorney
+ 28   26D21251   HIDDEN WOODS EQUITIES LLC
+ Robert Dukes
+ Magistrate Dispossessory - Non
+ Payment of Rent  
+--- versus ---
+ Occupant Placeholder 56  
+ Comment:
+ 29   26D21263   HIDDEN WOODS EQUITIES LLC
+ Robert Dukes
+ Magistrate Dispossessory - Non
+ Payment of Rent  
+--- versus ---
+ Occupant Placeholder 57  
+ Occupant Placeholder 58  
+Pro Se; Pro Se
+ Comment:
+ 30   26D21275   HIDDEN WOODS EQUITIES LLC
+ Robert Dukes
+ Magistrate Dispossessory - Non
+ Payment of Rent  
+--- versus ---
+ Occupant Placeholder 59  
+ Occupant Placeholder 60  
+Pro Se; Pro Se; Pro Se
+ Comment:
+ Page   10   of   10

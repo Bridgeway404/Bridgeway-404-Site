@@ -14,6 +14,10 @@ One-page marketing and quote-request site for Bridgeway 404 (Metro Atlanta junk 
 | `favicon.png` | Bridgeway 404 logo, used as the browser/tab icon |
 | `assets/bridgeway404-moving-special-325.png` | 1080 × 1080 social graphic for the $325 / 2-hour moving special (truck, 2 movers, straps & blankets) |
 | `assets/bridgeway404-moving-special-325.html` | Self-contained source for the moving-special graphic — edit the text, open in Chrome at 1080 × 1080, and screenshot to regenerate the PNG |
+| `admin/` | Internal admin panel (Blitz, Prospects, Follow-Ups, Distressed Property Leads) — see `docs/admin-panel-operations.md` |
+| `supabase/migrations/` | Database schema for the admin panel (Supabase project `bridgeway-404`) |
+| `supabase/functions/distressed-leads/` | Scheduled research worker behind the Distressed Property Leads tab (Supabase Edge Function; tests with `node --test`) |
+| `docs/distressed-leads-sources.md` | Per-county source matrix, what is and is not automated, paid options |
 | `README.md` | This file — deployment guide |
 
 ### Link preview (share card)

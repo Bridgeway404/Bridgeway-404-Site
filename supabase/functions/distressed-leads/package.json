@@ -1,0 +1,9 @@
+{
+  "name": "distressed-leads-worker",
+  "private": true,
+  "type": "module",
+  "description": "Bridgeway Admin — distressed property lead research worker (Supabase Edge Function). Tests run with Node 22's built-in runner; no dependencies.",
+  "scripts": {
+    "test": "node --test"
+  }
+}
