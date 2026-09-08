@@ -21,11 +21,11 @@ export const fultonMagistrateCalendars = {
     const links = parseCivicPlusCalendarLinks(res.text);
     const records = [];
     const seenBefore = ctx.seen || (() => false);
-    let fetched = 0, empty = 0;
+    let fetched = 0, empty = 0, more = false;
     for (const l of links) {
       const externalId = 'doc:' + l.id;
       if (seenBefore(externalId)) continue;
-      if (fetched >= (ctx.maxNewItems || 12)) break;
+      if (fetched >= (ctx.maxNewItems || 12)) { more = true; break; }
       fetched++;
       const doc = await ctx.http.get(l.url, { binary: true, accept: '*/*' });
       if (!doc.ok || !doc.bytes) { ctx.log(`calendar doc ${doc.status} ${l.url}`); continue; }
@@ -50,6 +50,6 @@ export const fultonMagistrateCalendars = {
         });
       }
     }
-    return { records, cursor: { last_check: new Date().toISOString(), calendars_listed: links.length }, diagnostics: { calendars_listed: links.length, calendars_fetched: fetched, empty_documents: empty } };
+    return { records, more, cursor: { last_check: new Date().toISOString(), calendars_listed: links.length }, diagnostics: { calendars_listed: links.length, calendars_fetched: fetched, empty_documents: empty } };
   },
 };

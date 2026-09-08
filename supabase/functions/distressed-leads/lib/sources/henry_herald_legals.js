@@ -23,13 +23,13 @@ export const henryHeraldLegals = {
     const items = parseRss(res.text);
     const seenBefore = ctx.seen || (() => false);
     const records = [];
-    let fetched = 0;
+    let fetched = 0, more = false;
     for (const it of items) {
       if (!it.link) continue;
       if (!/sale under power|foreclos|notice of sale/i.test(it.title || '')) continue;
       const externalId = (it.guid || it.link).replace(/^.*\/([a-f0-9-]{36})$/, '$1');
       if (seenBefore(externalId)) { records.push({ source_id: this.id, external_id: externalId, url: it.link, seen_only: true }); continue; }
-      if (fetched >= (ctx.maxNewItems || 5)) break;
+      if (fetched >= (ctx.maxNewItems || 5)) { more = true; break; }
       fetched++;
       const page = await ctx.http.get(it.link);
       if (!page.ok) { ctx.log(`asset page ${page.status} ${it.link}`); continue; }
@@ -47,6 +47,6 @@ export const henryHeraldLegals = {
         evidence: [{ claim: 'Foreclosure notice published by the Henry County legal organ', url: it.link, excerpt: (text || it.title || '').slice(0, 300) }],
       });
     }
-    return { records, cursor: { last_check: new Date().toISOString(), items_in_feed: items.length }, diagnostics: { feed_items: items.length } };
+    return { records, more, cursor: { last_check: new Date().toISOString(), items_in_feed: items.length }, diagnostics: { feed_items: items.length } };
   },
 };

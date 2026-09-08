@@ -97,6 +97,7 @@ update. Either way `verify_jwt` stays **on**.
 | `max_notice_extractions_per_run` | `150` | budget for AI notice extraction per run |
 | `company_refresh_days` | `90` | how long cached company research is reused |
 | `lookback_days` | `14` | how far back calendars/feeds are read |
+| `max_documents_per_job` | `3` | PDF/Word documents fetched per discovery job; the job re-queues itself for the rest so no single isolate exceeds the edge runtime's CPU budget |
 
 ## Privacy rules built into the code
 

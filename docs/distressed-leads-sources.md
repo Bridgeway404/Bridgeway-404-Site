@@ -23,8 +23,8 @@ in its terms, and does not block server requests.
 | Douglas | Foreclosure notices | **douglascountysentinel.com** classifieds (Paxton Media / TownNews) | Listing check only | High | Public HTML, but the site terms prohibit automated collection and it returns 429 to server IPs. The adapter records new notice URLs from one listing request per run so staff can pull them; bodies are ingested by upload. |
 | Douglas | Eviction cases | courts.dcga.us/WebSearchMagistrate | **No** | — | Resets connections from cloud servers; no calendars are published. Adapter reports "unavailable"; Douglas cases enter through manual entry / upload. |
 | Douglas | Owner of record | Douglas County GIS LandRecords layer 0 | Yes | High (owner, mailing, legal, homestead flag, deed date) | Free JSON. |
-| Henry | Foreclosure notices | **henryherald.com** "Legals" RSS (Paxton / TownNews) | One request per run | High | Same terms and 429 behaviour as Douglas; foreclosure classifieds path is 404. Weekly legal section by e‑Edition upload. |
-| Henry | Eviction hearings | **iframe.henrycountyga.gov** — per‑judge dispossessory calendar PDFs | Yes | Medium‑high (case no., plaintiff, a/a/f community, time) | Hearing stage only. |
+| Henry | Foreclosure notices | **henryherald.com** "Legals" RSS (Paxton / TownNews) | One request per run | High | Same terms and 429 behaviour as Douglas (the live runs got HTTP 429 on every attempt); foreclosure classifieds path is 404. Weekly legal section by e‑Edition upload. |
+| Henry | Eviction hearings | **iframe.henrycountyga.gov** — per‑judge dispossessory calendar PDFs | Yes | Medium‑high (case no., plaintiff, a/a/f community, time) | Hearing stage only. The ASP.NET page renders its link tree only for Mozilla‑style user agents, so the worker identifies itself as `Mozilla/5.0 (compatible; BridgewayResearch/1.0; …)`. Person‑vs‑person rows are dropped (no reliable plaintiff/tenant boundary). |
 | Henry | Eviction writs | Henry County civil e‑filing (micropact) | No | — | Behind Incapsula bot protection. |
 | Henry | Owner of record | Henry County GIS Parcels layer 12 | Parcel only | Medium | Layer has no owner field; it links to qPublic, which sits behind a Cloudflare challenge. Owner name must be read by a person or come from the notice/plaintiff. |
 | All | Corporate registrations | Georgia Secretary of State (ecorp), qPublic, OpenCorporates | No (403 / JS challenge from servers) | High | Used through the AI researcher's web search (citing the page) rather than scraped. |
@@ -69,7 +69,12 @@ in its terms, and does not block server requests.
 * **Public feed.** `search/?f=rss&t=pdf&c=legals&l=50&s=start_time&sd=desc`
   returns the posted notice PDFs as RSS. The adapter reads that feed once per
   run, fetches only items it has not seen, and extracts the notice fields from
-  the PDF text.
+  the PDF text. **Observed in the live runs (2026‑09‑08):** the feed answered
+  HTTP 429 to the Supabase edge runtime on every attempt, including after the
+  15 s and 30 s back‑offs, so from a cloud IP the feed is not currently
+  usable. The adapter stays enabled (it costs one request per run and will
+  pick up notices if the limit lifts), but Fulton foreclosure coverage today
+  depends on the upload path until the publisher grants access.
 * **Access controls.** `robots.txt` disallows several named AI crawlers
   (ClaudeBot, anthropic‑ai, GPTBot and others), `/classifieds/*?` and
   `/tncms/search/`. The site rate‑limits datacenter IPs with HTTP 429 on

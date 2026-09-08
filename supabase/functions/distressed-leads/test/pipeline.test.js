@@ -169,3 +169,38 @@ test('ownership enrichment uses the county GIS and records evidence; corporate o
   assert.equal(db.T.rels.find(r => r.relationship === 'owner').confidence, 'high');
   assert.equal(p.target_company_id, p.owner_company_id, 'pre-sale corporate owner is the target');
 });
+
+test('chunked discovery: a source that reports `more` is re-queued until done, totals accumulate, each chunk ends the invocation', async () => {
+  const db = createFakeDb({ max_documents_per_job: '2' });
+  let calls = 0;
+  const docs = ['d1', 'd2', 'd3', 'd4', 'd5'];
+  const src = source('fulton_cal', 'Fulton', 'eviction', async (ctx) => {
+    calls++;
+    const records = []; let fetched = 0, more = false;
+    for (const id of docs) {
+      if (ctx.seen('doc:' + id)) continue;
+      if (fetched >= ctx.maxNewItems) { more = true; break; }
+      fetched++;
+      records.push({ source_id: 'fulton_cal', external_id: 'doc:' + id, url: 'https://f/' + id, kind: 'calendar_document', county: 'Fulton', rows: 1 });
+      records.push({ source_id: 'fulton_cal', external_id: 'case:' + id, url: 'https://f/' + id, kind: 'eviction_case', county: 'Fulton', case_number: '26ED' + id, plaintiff_name: 'Owner ' + id + ' LLC', plaintiff_is_entity: true, stage: 'hearing_scheduled', hearing_date: '2026-09-09' });
+    }
+    return { records, more, cursor: {}, diagnostics: { calendars_fetched: fetched } };
+  });
+  const env = { db, http: fakeHttp(), sources: [src], ai: null, log: () => {} };
+  const run = await db.createRun('manual');
+  // Each processJobs call stops after one heavy chunk, like a fresh edge invocation.
+  const r1 = await processJobs(env, { timeBudgetMs: 5000 });
+  assert.equal(calls, 1);
+  assert.ok(r1.remaining > 0, 'the next chunk is queued');
+  let guard = 0; let r = r1;
+  while (r.remaining > 0 && ++guard < 20) r = await processJobs(env, { timeBudgetMs: 5000 });
+  assert.equal(calls, 3, 'five documents in chunks of two = three discovery jobs');
+  const rs = db.T.run_sources.find(x => x.source_id === 'fulton_cal');
+  assert.equal(rs.status, 'ok');
+  assert.equal(rs.items_seen, 10);
+  assert.equal(rs.detail.calendars_fetched, 5);
+  assert.equal(rs.detail.chunks, 3);
+  assert.equal(db.T.properties.length, 5);
+  const finished = await db.getRun(run.id);
+  assert.equal(finished.status, 'completed');
+});

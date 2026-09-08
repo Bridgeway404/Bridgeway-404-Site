@@ -22,11 +22,11 @@ export const henryMagistrateCalendars = {
       .sort((a, b) => (a.date < b.date ? 1 : -1));
     const records = [];
     const seenBefore = ctx.seen || (() => false);
-    let fetched = 0, empty = 0;
+    let fetched = 0, empty = 0, more = false;
     for (const l of links) {
       const externalId = 'pdf:' + l.url.split('/').slice(-1)[0];
       if (seenBefore(externalId)) continue;
-      if (fetched >= (ctx.maxNewItems || 20)) break;
+      if (fetched >= (ctx.maxNewItems || 20)) { more = true; break; }
       fetched++;
       const pdf = await ctx.http.get(l.url, { binary: true, accept: 'application/pdf,*/*' });
       if (!pdf.ok || !pdf.bytes) { ctx.log(`calendar pdf ${pdf.status} ${l.url}`); continue; }
@@ -50,6 +50,6 @@ export const henryMagistrateCalendars = {
         });
       }
     }
-    return { records, cursor: { last_check: new Date().toISOString(), calendars_listed: links.length }, diagnostics: { calendars_listed: links.length, fetched, empty_documents: empty } };
+    return { records, more, cursor: { last_check: new Date().toISOString(), calendars_listed: links.length }, diagnostics: { calendars_listed: links.length, fetched, empty_documents: empty } };
   },
 };

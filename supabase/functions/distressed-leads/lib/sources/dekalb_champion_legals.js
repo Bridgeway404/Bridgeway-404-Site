@@ -25,11 +25,11 @@ export const dekalbChampionLegals = {
     const items = parseWpMedia(res.text);
     const records = [];
     const seenBefore = ctx.seen || (() => false);
-    let fetched = 0;
+    let fetched = 0, more = false;
     for (const m of items) {
       const externalId = 'media:' + m.id;
       if (seenBefore(externalId)) continue;
-      if (fetched >= (ctx.maxNewItems || 2)) break;
+      if (fetched >= (ctx.maxNewItems || 2)) { more = true; break; }
       fetched++;
       const pdf = await ctx.http.get(m.url, { binary: true, accept: 'application/pdf,*/*' });
       if (!pdf.ok || !pdf.bytes) { ctx.log(`legal pdf ${pdf.status} ${m.url}`); continue; }
@@ -40,6 +40,6 @@ export const dekalbChampionLegals = {
         title: m.title,
       });
     }
-    return { records, cursor: { last_check: new Date().toISOString() }, diagnostics: { media_listed: items.length, fetched } };
+    return { records, more, cursor: { last_check: new Date().toISOString() }, diagnostics: { media_listed: items.length, fetched } };
   },
 };

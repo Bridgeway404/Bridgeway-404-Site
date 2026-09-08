@@ -54,7 +54,8 @@ insert into public.dpl_settings (key, value) values
   ('max_company_research_per_run', '20'),
   ('max_notice_extractions_per_run', '150'),
   ('company_refresh_days', '90'),
-  ('lookback_days', '14')
+  ('lookback_days', '14'),
+  ('max_documents_per_job', '3')
 on conflict (key) do nothing;
 
 -- ---------- Runs ----------

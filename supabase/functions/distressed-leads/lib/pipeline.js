@@ -30,8 +30,11 @@ export async function processJobs(env, { timeBudgetMs = 90000 } = {}) {
     const run = job.run_id ? await env.db.getRun(job.run_id) : null;
     if (run && run.status === 'running') await env.db.updateRun(run.id, { heartbeat_at: new Date().toISOString() });
     try {
-      await handleJob(env, job, run);
+      const res = await handleJob(env, job, run);
       await env.db.completeJob(job.id);
+      // A job that fetched and parsed documents used most of an isolate's CPU
+      // budget: stop here and let the worker re-invoke itself in a fresh isolate.
+      if (res && res.heavy) break;
     } catch (e) {
       log(`job ${job.kind} failed: ${e.message}`);
       const retry = job.attempts < 2 && !/permanent/i.test(e.message);
@@ -122,9 +125,23 @@ export async function discoverSource(env, runId, sourceId) {
   const settings = await db.settings();
   await db.upsertRunSource(runId, sourceId, { county: src.county, status: 'running', started_at: new Date().toISOString() });
   const seen = await db.seenExternalIds(sourceId);
+  const prev = (await db.runSources(runId)).find(s => s.source_id === sourceId) || {};
+  // Long discoveries (a dozen throttled document fetches) must keep the run's
+  // heartbeat fresh, or the dpl_tick watchdog starts a second worker.
+  let lastBeat = Date.now();
+  const beat = async () => {
+    if (Date.now() - lastBeat < 30000) return;
+    lastBeat = Date.now();
+    await db.updateRun(runId, { heartbeat_at: new Date().toISOString() });
+  };
+  const http = { ...env.http, get: async (...args) => { const r = await env.http.get(...args); await beat(); return r; } };
   const ctx = {
-    http: env.http, log: env.log || (() => {}), pdfExtract: env.pdfExtract,
-    seen: (id) => seen.has(id), maxNewItems: undefined,
+    http, log: env.log || (() => {}), pdfExtract: env.pdfExtract,
+    seen: (id) => seen.has(id),
+    // Documents per job: each PDF/Word calendar costs ~0.1-0.5 s of CPU and the
+    // edge runtime kills an isolate that exceeds its CPU budget, so a job takes
+    // a few documents, reports `more`, and is re-queued (see below).
+    maxNewItems: Math.max(1, parseInt(settings.max_documents_per_job || '3', 10)),
     sinceDate: new Date(Date.now() - (parseInt(settings.lookback_days || '14', 10) + 7) * 86400000).toISOString().slice(0, 10),
     aiExtractCalendar: env.ai ? (text, c) => env.ai.extractCalendar(text, c) : null,
   };
@@ -146,6 +163,7 @@ export async function discoverSource(env, runId, sourceId) {
   const stats = { new_properties: 0, updated_properties: 0, new_events: 0, advanced: 0, high_priority: 0, unmatched: 0 };
   for (const rec of result.records || []) {
     seenCount++;
+    await beat();
     try {
       const r = await ingestRecord(env, rec, runId, stats);
       if (r && r.isNew) newCount++; else if (r && r.updated) updatedCount++;
@@ -154,13 +172,27 @@ export async function discoverSource(env, runId, sourceId) {
       await appendRunError(env, runId, { job: 'ingest', source: sourceId, external_id: rec.external_id, error: String(e.message).slice(0, 300) });
     }
   }
-  await db.upsertRunSource(runId, sourceId, { status: 'ok', finished_at: new Date().toISOString(), items_seen: seenCount, items_new: newCount, items_updated: updatedCount, detail: { ...(result.diagnostics || {}), ...stats } });
-  await db.upsertSourceState({ source_id: sourceId, county: src.county, label: src.label, last_attempt_at: new Date().toISOString(), last_success_at: new Date().toISOString(), last_error: null, last_error_at: null, consecutive_failures: 0, cursor: result.cursor || {}, notes: src.notes || null });
+  // Totals accumulate across the chunks of one source within a run.
+  const prevDetail = prev.detail || {};
+  const detail = { ...prevDetail, ...(result.diagnostics || {}) };
+  for (const k of Object.keys(stats)) detail[k] = (prevDetail[k] || 0) + stats[k];
+  for (const k of Object.keys(result.diagnostics || {})) if (typeof result.diagnostics[k] === 'number' && typeof prevDetail[k] === 'number') detail[k] = prevDetail[k] + result.diagnostics[k];
+  const totals = { items_seen: (prev.items_seen || 0) + seenCount, items_new: (prev.items_new || 0) + newCount, items_updated: (prev.items_updated || 0) + updatedCount };
   const run = await db.getRun(runId);
   const counts = Object.assign({}, run?.counts || {});
   for (const k of ['new_properties', 'updated_properties', 'new_events', 'advanced', 'high_priority', 'unmatched']) counts[k] = (counts[k] || 0) + stats[k];
   counts[src.kind === 'foreclosure' ? 'foreclosure_records' : 'eviction_records'] = (counts[src.kind === 'foreclosure' ? 'foreclosure_records' : 'eviction_records'] || 0) + seenCount;
   await db.updateRun(runId, { counts, heartbeat_at: new Date().toISOString() });
+  const heavy = (result.records || []).some(r => r.pdf_bytes || r.kind === 'calendar_document' || r.kind === 'notice_document');
+  if (result.more) {
+    // More unseen documents remain: record progress and queue the next chunk.
+    await db.upsertRunSource(runId, sourceId, { status: 'running', ...totals, detail: { ...detail, chunks: (prevDetail.chunks || 0) + 1 } });
+    await db.enqueue(runId, 'discover', { run_id: runId, source_id: sourceId }, PRIORITY.discover);
+    return { heavy: true, more: true };
+  }
+  await db.upsertRunSource(runId, sourceId, { status: 'ok', finished_at: new Date().toISOString(), ...totals, detail: { ...detail, chunks: (prevDetail.chunks || 0) + 1 } });
+  await db.upsertSourceState({ source_id: sourceId, county: src.county, label: src.label, last_attempt_at: new Date().toISOString(), last_success_at: new Date().toISOString(), last_error: null, last_error_at: null, consecutive_failures: 0, cursor: result.cursor || {}, notes: src.notes || null });
+  return { heavy };
 }
 
 // ---------------------------------------------------------------- ingestion
