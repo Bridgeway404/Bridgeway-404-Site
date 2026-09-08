@@ -87,7 +87,14 @@ export function parseDeKalbCalendar(text) {
       if (isAttorney) { attorney = last.replace(/^D\s+/, ''); plaintiff = lines.slice(0, -1).join(' '); }
       else plaintiff = lines.join(' ');
     }
-    if (plaintiff) plaintiff = cleanWhitespace(plaintiff);
+    if (plaintiff) {
+      plaintiff = cleanWhitespace(plaintiff);
+      // A long plaintiff ("... AS TRUSTEE OF LSF9 MASTER ET AL") can wrap so
+      // that the attorney's name lands on its last line: split it off.
+      const et = /^(.*?\bET\s+AL\.?)\s+([A-Z][A-Za-z.'-]+(?:\s+[A-Z][A-Za-z.'-]*){1,3})$/i.exec(plaintiff);
+      if (et) { plaintiff = et[1]; attorney = attorney || et[2]; }
+      plaintiff = plaintiff.replace(/,?\s*ET\s+AL\.?$/i, '').trim();
+    }
     const split = splitPlaintiff(plaintiff);
     rows.push({
       case_number: caseNumber,

@@ -137,3 +137,13 @@ test('document sniffing and legacy .doc text runs', () => {
   const runs = docTextRuns(new Uint8Array(utf16));
   assert.ok(runs.includes('26ED390159') && runs.includes('Some Landlord LLC'));
 });
+
+test('DeKalb: an attorney name wrapped onto the plaintiff line is split off and "ET AL" is dropped', () => {
+  const text = 'Magistrate Court Civil Calendar\nJudge Test Judge\nDispossessory\n1:00 PM\n09/08/2026\n' +
+    '1 26D09318 U.S. BANK TRUST NATIONAL ASSOCIATION, SOLELY AS\nTRUSTEE OF LSF9 MASTER ET AL Corey P Sims\nMagistrate Dispossessory - Non\nPayment of Rent --- versus ---\nOccupant Placeholder\nComment:\n';
+  const r = parseDeKalbCalendar(text);
+  assert.equal(r.rows.length, 1);
+  assert.equal(r.rows[0].plaintiff_name, 'U.S. BANK TRUST NATIONAL ASSOCIATION, SOLELY AS TRUSTEE OF LSF9 MASTER');
+  assert.equal(r.rows[0].plaintiff_attorney, 'Corey P Sims');
+  assert.ok(!/Placeholder/.test(JSON.stringify(r.rows)));
+});
