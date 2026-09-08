@@ -27,6 +27,11 @@ pg_cron (UTC)  ──▶ dpl_scheduled_kick()  ──▶ dpl_request_run('schedu
 * **Nothing depends on a local machine.** The database schedules, the
   database invokes the worker, and the worker chains itself until the queue is
   empty. A crashed invocation is picked up by `dpl_tick()`.
+* **Work is chunked to the edge runtime's limits** (about 2 s of CPU per
+  request, 400 s wall clock per isolate). A discovery job fetches at most
+  `max_documents_per_job` documents, re-queues itself for the rest, and ends
+  the invocation so the next chunk runs in a fresh isolate; a full run is a
+  chain of short invocations (a few dozen on a typical Tuesday).
 * **Authentication.** The gateway requires the project's anon JWT, and the
   worker additionally requires a one-time token minted by
   `dpl_invoke_worker()` (table `dpl_invocations`). Nobody can start work with

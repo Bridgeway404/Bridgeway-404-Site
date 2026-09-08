@@ -176,7 +176,8 @@ export async function discoverSource(env, runId, sourceId) {
   const prevDetail = prev.detail || {};
   const detail = { ...prevDetail, ...(result.diagnostics || {}) };
   for (const k of Object.keys(stats)) detail[k] = (prevDetail[k] || 0) + stats[k];
-  for (const k of Object.keys(result.diagnostics || {})) if (typeof result.diagnostics[k] === 'number' && typeof prevDetail[k] === 'number') detail[k] = prevDetail[k] + result.diagnostics[k];
+  // Per-chunk work counters add up; listing sizes ("calendars_listed") are the same every chunk and are kept as-is.
+  for (const k of Object.keys(result.diagnostics || {})) if (/fetched|empty_documents|foreclosure_links/.test(k) && typeof result.diagnostics[k] === 'number' && typeof prevDetail[k] === 'number') detail[k] = prevDetail[k] + result.diagnostics[k];
   const totals = { items_seen: (prev.items_seen || 0) + seenCount, items_new: (prev.items_new || 0) + newCount, items_updated: (prev.items_updated || 0) + updatedCount };
   const run = await db.getRun(runId);
   const counts = Object.assign({}, run?.counts || {});
