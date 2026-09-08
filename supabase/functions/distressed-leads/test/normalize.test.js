@@ -24,6 +24,9 @@ test('entity detection separates companies from individuals', () => {
   assert.equal(looksLikeEntity('PROGRESS RESIDENTIAL BORROWER 11, LLC'), true);
   assert.equal(looksLikeEntity('Wells Fargo Bank, N.A.'), true);
   assert.equal(looksLikeEntity('PHILLIPS EDNA M'), false);
+  assert.equal(looksLikeEntity('588 PAINES'), true);
+  assert.equal(looksLikeEntity('EMBARCADERO CLUB'), true);
+  assert.equal(looksLikeEntity('WESTWOOD GLEN'), true);
   assert.equal(looksLikeEntity('marzieh zamani'), false);
 });
 

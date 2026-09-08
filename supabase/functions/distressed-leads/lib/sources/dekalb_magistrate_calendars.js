@@ -20,7 +20,7 @@ export const dekalbMagistrateCalendars = {
     const items = parseWpMedia(res.text).filter(m => /dispo/i.test(m.slug || '') || /dispo/i.test(m.title || ''));
     const records = [];
     const seenBefore = ctx.seen || (() => false);
-    let fetched = 0;
+    let fetched = 0, empty = 0;
     for (const m of items) {
       const externalId = 'media:' + m.id;
       if (seenBefore(externalId)) continue;
@@ -35,6 +35,7 @@ export const dekalbMagistrateCalendars = {
       if (!parsed.rows.length && ctx.aiExtractCalendar) {
         try { parsed = await ctx.aiExtractCalendar(text, { county: 'DeKalb' }); } catch (e) { ctx.log('ai calendar failed: ' + e.message); }
       }
+      if (!parsed.rows.length) { ctx.log(`no rows parsed from ${m.url}; will retry next run`); empty++; continue; }
       records.push({ source_id: this.id, external_id: externalId, url: m.url, kind: 'calendar_document', county: 'DeKalb', content_hash: contentHash(text), rows: parsed.rows.length });
       for (const r of parsed.rows) {
         records.push({
@@ -47,6 +48,6 @@ export const dekalbMagistrateCalendars = {
         });
       }
     }
-    return { records, cursor: { last_check: new Date().toISOString(), media_listed: items.length }, diagnostics: { media_listed: items.length, fetched } };
+    return { records, cursor: { last_check: new Date().toISOString(), media_listed: items.length }, diagnostics: { media_listed: items.length, fetched, empty_documents: empty } };
   },
 };

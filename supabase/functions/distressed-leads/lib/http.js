@@ -2,7 +2,9 @@
 // in-run response cache. The fetch implementation is injected so tests never
 // touch the network.
 
-const DEFAULT_UA = 'BridgewayResearch/1.0 (+https://bridgeway404.com; info@bridgeway404.com)';
+// Self-identifying, but browser-shaped: ASP.NET sites (Henry County's calendar
+// page) render their link tree only for user agents that start with "Mozilla/5.0".
+const DEFAULT_UA = 'Mozilla/5.0 (compatible; BridgewayResearch/1.0; +https://bridgeway404.com; info@bridgeway404.com)';
 
 export function createHttp({ fetchImpl, minIntervalMs = {}, defaultIntervalMs = 4000, userAgent = DEFAULT_UA, maxRetries = 2, log = () => {} } = {}) {
   const f = fetchImpl || globalThis.fetch;

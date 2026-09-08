@@ -34,14 +34,37 @@ test('Henry dispossessory calendar: wrapped rows, a/a/f and d/b/a communities, d
   const r = parseHenryCalendar(fixture('henry_dispo_calendar.txt'));
   assert.equal(r.header.judge, 'Amanda R. Flora');
   assert.equal(r.header.date, '2026-09-01');
-  assert.equal(r.rows.length, 9);
+  // 9 rows on the calendar; the one person-vs-person row (no entity, no
+  // occupants phrase) is dropped because the plaintiff/tenant boundary cannot
+  // be found reliably.
+  assert.equal(r.rows.length, 8);
   const byCase = Object.fromEntries(r.rows.map(x => [x.case_number, x]));
   assert.equal(byCase.MGCD2026006167.plaintiff_name, 'PROGRESS RESIDENTIAL BORROWER 11, LLC');
   assert.equal(byCase.MGCD2026006243.plaintiff_name, 'PEGASUS RESIDENTIAL, LLC');
   assert.equal(byCase.MGCD2026006243.community_name, 'SOMERSET LUXURY APARTMENTS');
   assert.equal(byCase.MGCD2026006306.community_name, 'ARGENTO AT THE BRIDGES');
-  assert.equal(byCase.MGCD2026006214.plaintiff_is_entity, false);
+  assert.equal(byCase.MGCD2026006214, undefined, 'person-vs-person row is not kept');
   assert.ok(!/OCCUPANT|PLACEHOLDER/.test(JSON.stringify(r.rows)));
+});
+
+test('calendar parsers tolerate single-space column gaps (unpdf output in the edge runtime)', () => {
+  // pdf.js keeps 2+ spaces between columns; unpdf collapses them to one.
+  const collapse = (s) => s.replace(/[ \t]{2,}/g, ' ');
+  const d = parseDeKalbCalendar(collapse(fixture('dekalb_dispo_calendar.txt')));
+  assert.equal(d.rows.length, parseDeKalbCalendar(fixture('dekalb_dispo_calendar.txt')).rows.length);
+  assert.equal(d.rows[0].plaintiff_name, 'Colony Holdings, LLC');
+  const h = parseHenryCalendar(collapse(fixture('henry_dispo_calendar.txt')));
+  assert.equal(h.rows.length, 8);
+  assert.equal(h.rows.find(x => x.case_number === 'MGCD2026006167').plaintiff_name, 'PROGRESS RESIDENTIAL BORROWER 11, LLC');
+  assert.ok(!/OCCUPANT|PLACEHOLDER/.test(JSON.stringify(h.rows)));
+});
+
+test('Fulton "Community, Management Company" captions attribute to the operator', () => {
+  assert.deepEqual(splitPlaintiff('Briar Park Senior Living, Dominium Management Inc'), { entity: 'Dominium Management Inc', community: 'Briar Park Senior Living', agentFor: null, careOf: null });
+  assert.equal(splitPlaintiff('Mechanicsville Cityside - 30312, Columbia Residential').entity, 'Columbia Residential');
+  assert.equal(splitPlaintiff('Mechanicsville Cityside - 30312, Columbia Residential').community, 'Mechanicsville Cityside');
+  assert.equal(splitPlaintiff('Aviva Property Management, Aviva Property Management').community, null);
+  assert.equal(splitPlaintiff('Pitts and Pitts Properties, LLC').entity, 'Pitts and Pitts Properties, LLC');
 });
 
 test('Fulton .doc calendar text: plaintiff from the caption line, defendants ignored', () => {

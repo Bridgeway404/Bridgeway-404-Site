@@ -22,7 +22,7 @@ export const henryMagistrateCalendars = {
       .sort((a, b) => (a.date < b.date ? 1 : -1));
     const records = [];
     const seenBefore = ctx.seen || (() => false);
-    let fetched = 0;
+    let fetched = 0, empty = 0;
     for (const l of links) {
       const externalId = 'pdf:' + l.url.split('/').slice(-1)[0];
       if (seenBefore(externalId)) continue;
@@ -37,6 +37,7 @@ export const henryMagistrateCalendars = {
       if (!parsed.rows.length && ctx.aiExtractCalendar && /MGCD/.test(text)) {
         try { parsed = await ctx.aiExtractCalendar(text, { county: 'Henry', hearingDate: l.date }); } catch (e) { ctx.log('ai calendar failed: ' + e.message); }
       }
+      if (!parsed.rows.length) { ctx.log(`no rows parsed from ${l.url}; will retry next run`); empty++; continue; }
       records.push({ source_id: this.id, external_id: externalId, url: l.url, kind: 'calendar_document', county: 'Henry', content_hash: contentHash(text), rows: parsed.rows.length });
       for (const r of parsed.rows) {
         records.push({
@@ -49,6 +50,6 @@ export const henryMagistrateCalendars = {
         });
       }
     }
-    return { records, cursor: { last_check: new Date().toISOString(), calendars_listed: links.length }, diagnostics: { calendars_listed: links.length, fetched } };
+    return { records, cursor: { last_check: new Date().toISOString(), calendars_listed: links.length }, diagnostics: { calendars_listed: links.length, fetched, empty_documents: empty } };
   },
 };

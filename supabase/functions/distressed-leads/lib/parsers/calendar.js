@@ -24,6 +24,19 @@ export function splitPlaintiff(name) {
   if (m) { entity = m[1]; community = cleanWhitespace(m[2]); }
   m = /^(.*?)\s+(?:a\/a\/f|aaf|as agent for)\s+(.+)$/i.exec(entity);
   if (m) { entity = m[1]; agentFor = cleanWhitespace(m[2]); community = community || agentFor; }
+  // Fulton captions: "Community Name, Management Company" (e.g. "Briar Park
+  // Senior Living, Dominium Management Inc"). The operator after the comma is
+  // the plaintiff entity; the part before is the community.
+  if (!community) {
+    m = /^([^,]{3,80}),\s+([^,]*?\b(?:Management|Mgmt|Residential|Properties|Property|Realty|Partners|Group|Communities|Living|Homes|Housing|Investments|Apartments|Associates)\b[^,]*)$/i.exec(entity);
+    if (m && cleanWhitespace(m[1]).toLowerCase() !== cleanWhitespace(m[2]).toLowerCase()) {
+      community = cleanWhitespace(m[1]).replace(/\s+-\s+\d{5}$/, '');
+      entity = cleanWhitespace(m[2]);
+    } else if (m) {
+      // "Aviva Property Management, Aviva Property Management" — a repeated name is no community.
+      entity = cleanWhitespace(m[2]);
+    }
+  }
   if (!community) {
     const sm = ENTITY_SUFFIX.exec(entity);
     if (sm) {
@@ -46,8 +59,10 @@ export function parseDeKalbCalendar(text) {
   if (tm) header.time = tm[1].toUpperCase().replace(/\s+/g, ' ');
   const virtual = /virtual/i.test(t.slice(0, 600));
 
-  // Split into rows: a row starts with "<n>   <caseNo>"
-  const rowRe = /(?:^|\n)\s*(\d{1,3})\s{2,}(\d{2}[A-Z]{1,2}\d{4,7})\s*([\s\S]*?)(?=(?:\n\s*\d{1,3}\s{2,}\d{2}[A-Z]{1,2}\d{4,7})|\n\s*Page\s+\d+\s+of|$)/g;
+  // Split into rows: a row starts with "<n> <caseNo>". Column gaps are 2+
+  // spaces with pdf.js but a single space with unpdf (the edge runtime), so
+  // only single whitespace is assumed.
+  const rowRe = /(?:^|\n)\s*(\d{1,3})\s+(\d{2}[A-Z]{1,2}\d{4,7})\s*([\s\S]*?)(?=(?:\n\s*\d{1,3}\s+\d{2}[A-Z]{1,2}\d{4,7})|\n\s*Page\s+\d+\s+of|$)/g;
   const rows = [];
   let m;
   while ((m = rowRe.exec(t))) {
@@ -174,7 +189,12 @@ export function cutDefendant(flat) {
     const toks = flat.split(' ');
     let last = -1;
     toks.forEach((tk, i) => { if (SUFFIX_TOKEN.test(tk.replace(/,$/, '')) || COMMUNITY_TOKEN.test(tk)) last = i; });
-    return last >= 0 ? toks.slice(0, last + 1).join(' ') : flat.split(/\s(?=[A-Z][A-Z'-]+ [A-Z][A-Z'-]+,)/)[0];
+    if (last >= 0) return toks.slice(0, last + 1).join(' ');
+    // "PHILLIPS EDNA M BANKS LYNETT": a person suing a person with no
+    // delimiter between them. The boundary cannot be found reliably, so the
+    // row is dropped rather than risk storing the tenant's name; individual
+    // landlords are never targets anyway.
+    return null;
   }
   const before = flat.slice(0, m.index);
   const toks = before.split(' ');
@@ -193,20 +213,15 @@ export function parseHenryCalendar(text) {
   const dm = /Dispossessory\s+[A-Za-z]+,?\s+([A-Z][a-z]+\s+\d{1,2},?\s+\d{4})/.exec(t.replace(/\s{2,}/g, ' '));
   if (dm) header.date = parseDateLoose(dm[1]);
   const rows = [];
-  const re = /(MGCD\d{10})\s{2,}(\d{4}-\d{3,6}[A-Z]{1,3})\s{2,}([\s\S]*?)\n\s*(\d{1,2}:\d{2}\s+[AP]M)/g;
+  // Column gaps are 2+ spaces with pdf.js but a single space with unpdf (the
+  // edge runtime), so the plaintiff/defendant boundary is always found by
+  // cutDefendant() on the flattened row rather than by column spacing.
+  const re = /(MGCD\d{10})\s+(\d{4}-\d{3,6}[A-Z]{1,3})\s+([\s\S]*?)\n\s*(\d{1,2}:\d{2}\s+[AP]M)/g;
   let m;
   while ((m = re.exec(t))) {
-    const joined = m[3].replace(/\n/g, ' ').replace(/\s{2,}/g, '  ').trim();
-    const cols = joined.split(/\s{2,}/);
-    let plaintiff = cols[0] || '';
-    // If the plaintiff wrapped onto continuation lines, the defendant is the
-    // trailing "LAST FIRST ..., AND ALL OTHER OCCUPANTS" segment: cut at the
-    // first personal-name-followed-by-comma or "ALL OTHER OCCUPANTS" pattern
-    // that occurs after an entity suffix or community phrase.
-    if (cols.length === 1) {
-      const flat = joined.replace(/\s{2,}/g, ' ');
-      plaintiff = cutDefendant(flat);
-    }
+    const flat = m[3].replace(/\s+/g, ' ').trim();
+    let plaintiff = cutDefendant(flat);
+    if (!plaintiff) continue; // person-vs-person row with no reliable boundary: dropped (see cutDefendant)
     plaintiff = cleanWhitespace(plaintiff).replace(/[,\s]+$/, '');
     const split = splitPlaintiff(plaintiff);
     rows.push({

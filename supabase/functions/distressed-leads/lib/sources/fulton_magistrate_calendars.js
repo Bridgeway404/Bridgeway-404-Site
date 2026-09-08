@@ -21,7 +21,7 @@ export const fultonMagistrateCalendars = {
     const links = parseCivicPlusCalendarLinks(res.text);
     const records = [];
     const seenBefore = ctx.seen || (() => false);
-    let fetched = 0;
+    let fetched = 0, empty = 0;
     for (const l of links) {
       const externalId = 'doc:' + l.id;
       if (seenBefore(externalId)) continue;
@@ -37,6 +37,7 @@ export const fultonMagistrateCalendars = {
         try { parsed = await ctx.aiExtractCalendar(text, { county: 'Fulton', hearingDate: l.date }); } catch (e) { ctx.log('ai calendar failed: ' + e.message); }
       }
       // The calendar document itself is one source item; each case becomes a record.
+      if (!parsed.rows.length) { ctx.log(`no rows parsed from ${l.url}; will retry next run`); empty++; continue; }
       records.push({ source_id: this.id, external_id: externalId, url: l.url, kind: 'calendar_document', county: 'Fulton', content_hash: contentHash(text), rows: parsed.rows.length });
       for (const r of parsed.rows) {
         records.push({
@@ -49,6 +50,6 @@ export const fultonMagistrateCalendars = {
         });
       }
     }
-    return { records, cursor: { last_check: new Date().toISOString(), calendars_listed: links.length }, diagnostics: { calendars_listed: links.length, calendars_fetched: fetched } };
+    return { records, cursor: { last_check: new Date().toISOString(), calendars_listed: links.length }, diagnostics: { calendars_listed: links.length, calendars_fetched: fetched, empty_documents: empty } };
   },
 };
