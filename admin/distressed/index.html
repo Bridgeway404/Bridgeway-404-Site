@@ -392,31 +392,98 @@
     return q.range(offset, offset + PAGE - 1);
   }
 
+  function needsResearch(p) { return ['pending', 'queued', 'partial', 'failed'].indexOf(p.enrichment_status) >= 0; }
+  function bestPhone(p) {
+    if (p.contact_phone) return { num: p.contact_phone, main: false };
+    if (p.target_main_phone) return { num: p.target_main_phone, main: true };
+    return null;
+  }
+  function firstName(n) { return n ? String(n).trim().split(/\s+/)[0] : ''; }
+
+  // One or two plain sentences answering "why might there be work here?",
+  // built from the structured stage/date/portfolio fields. The raw research
+  // explanation and score factors stay under "View evidence & details".
+  function whySummary(p) {
+    var st = p.current_stage || 'status_unknown';
+    var label = STAGE_LABELS[st] || 'Status unknown';
+    var when = p.event_date ? fmtD(p.event_date) : '';
+    var s;
+    if (st === 'sale_completed') s = 'Foreclosure sale completed' + (when ? ' ' + when : '') + ' — the new owner will likely need a cleanout.';
+    else if (st === 'sale_scheduled' || st === 'sale_imminent') s = 'Foreclosure sale' + (when ? ' set for ' + when : ' scheduled') + ' — cleanout work is likely once the sale completes.';
+    else if (st === 'notice_published') s = 'Foreclosure notice published' + (when ? ', sale ' + when : '') + ' — early signal; cleanout is likely if the sale goes through.';
+    else if (st === 'sale_cancelled' || st === 'dismissed') s = label + ' — no turnover expected from this case.';
+    else if (TURNOVER.indexOf(st) >= 0) s = label + (when ? ' ' + when : '') + ' — the unit is being cleared now, so turnover and haul-away work is likely.';
+    else if (st === 'status_unknown') s = 'Eviction case on file, status unknown — check the portal before calling.';
+    else s = label + (when ? ' ' + when : '') + ' — early in the eviction; a turnover is likely if the case reaches a writ.';
+    if (p.company_active_properties >= 2 && p.target_company_name) s += ' ' + p.target_company_name + ' has ' + p.company_active_properties + ' active properties in this list.';
+    return s;
+  }
+
+  // Derived from workflow status, stage and what contact data exists.
+  function recommendedAction(p) {
+    var ws = p.workflow_status;
+    var ph = bestPhone(p);
+    var who = p.contact_name ? firstName(p.contact_name) : (p.target_company_name || 'the target company');
+    if (ws === 'Closed' || ws === 'Not a Fit') return 'No action — ' + ws.toLowerCase() + '.';
+    if (ws === 'Contacted') return 'Log the outcome in notes, then set Follow Up or Closed.';
+    if (ws === 'Follow Up') return 'Follow up with ' + who + '.';
+    if (!p.target_company_id) {
+      if (needsResearch(p)) return 'Wait for research to identify the company' + (p.owner_name ? ' (owner of record: ' + p.owner_name + ')' : '') + '.';
+      return 'Identify who manages this property' + (p.owner_name ? ' — owner of record is ' + p.owner_name : '') + '.';
+    }
+    if (!ph) return 'Find a phone number for ' + p.target_company_name + (p.target_website ? ' (start with their website)' : '') + '.';
+    if (p.current_stage === 'dismissed' || p.current_stage === 'sale_cancelled') return 'Low priority — case closed; consider marking Not a Fit.';
+    if (TURNOVER.indexOf(p.current_stage) >= 0) return 'Call ' + who + ' now — turnover is underway; offer cleanout and haul-away.';
+    return 'Call ' + who + ' to get on their vendor list before turnover.';
+  }
+
   function leadRow(p) {
+    var closed = p.workflow_status === 'Closed' || p.workflow_status === 'Not a Fit';
     var chips = [];
-    chips.push(scoreChip(p.opportunity_score));
     chips.push('<span class="chip">' + BW.esc(p.county) + '</span>');
     chips.push(stageChip(p.current_stage));
-    if (p.workflow_status !== 'New') chips.push('<span class="chip' + (p.workflow_status === 'Closed' || p.workflow_status === 'Not a Fit' ? ' done' : ' status') + '">' + BW.esc(p.workflow_status) + '</span>');
-    if (p.company_active_properties >= 2) chips.push('<span class="chip gold">' + p.company_active_properties + ' properties</span>');
-    if (['pending', 'queued', 'partial', 'failed'].indexOf(p.enrichment_status) >= 0) chips.push('<span class="chip done">needs research</span>');
-    var meta = [];
-    if (p.event_date) meta.push('<strong>' + BW.esc(p.event_type === 'foreclosure' ? 'Sale' : 'Event') + ':</strong> ' + BW.esc(fmtD(p.event_date)));
-    if (p.target_company_name) meta.push('<strong>Target:</strong> ' + BW.esc(p.target_company_name) + (p.target_company_type && p.target_company_type !== 'unknown' ? ' <span class="muted">(' + BW.esc(COMPANY_TYPES[p.target_company_type] || p.target_company_type) + ')</span>' : ''));
-    else if (p.owner_name) meta.push('<strong>Owner of record:</strong> ' + BW.esc(p.owner_name));
-    else if (p.plaintiff_name) meta.push('<strong>Plaintiff:</strong> ' + BW.esc(p.plaintiff_name));
-    if (p.contact_name) meta.push(BW.esc([p.contact_name, p.contact_title].filter(Boolean).join(' — ')) + ' ' + conf(p.contact_confidence));
-    if (p.contact_phone) meta.push('<a href="' + BW.esc(BW.telHref(p.contact_phone)) + '">&#9742; ' + BW.esc(p.contact_phone) + '</a>');
-    else if (p.target_main_phone) meta.push('<a href="' + BW.esc(BW.telHref(p.target_main_phone)) + '">&#9742; ' + BW.esc(p.target_main_phone) + ' (main)</a>');
-    if (p.contact_email) meta.push('<a href="mailto:' + BW.esc(p.contact_email) + '">&#9993; ' + BW.esc(p.contact_email) + '</a>');
-    if (p.case_number) meta.push('<span class="muted">Case ' + BW.esc(p.case_number) + '</span>');
-    if (p.note_count) meta.push(p.note_count + ' note' + (p.note_count === 1 ? '' : 's'));
-    meta.push('<span class="muted">seen ' + BW.esc(BW.fmtDate(p.last_seen_at)) + '</span>');
-    var expl = p.research_explanation ? '<span class="fu-note">' + BW.esc(p.research_explanation.length > 220 ? p.research_explanation.slice(0, 219) + '…' : p.research_explanation) + '</span>' : '';
-    return '<div class="p-row fu-row lead-row" role="button" tabindex="0" data-id="' + p.id + '">' +
-      '<span class="fu-head"><span class="name">' + BW.esc(leadTitle(p)) + '</span>' + chips.join('') + '</span>' +
-      '<span class="meta">' + meta.join(' <span>&middot;</span> ') + '</span>' + expl +
-      '<div class="lead-detail hidden" id="detail-' + p.id + '"></div></div>';
+    chips.push('<span class="chip wf-chip' + (closed ? ' done' : p.workflow_status !== 'New' ? ' status' : '') + '">' + BW.esc(p.workflow_status) + '</span>');
+    if (p.company_active_properties >= 2) chips.push('<span class="chip gold">' + p.company_active_properties + ' active properties</span>');
+    if (needsResearch(p)) chips.push('<span class="chip done">needs research</span>');
+    var ph = bestPhone(p);
+    var target = p.target_company_name
+      ? '<strong>' + BW.esc(p.target_company_name) + '</strong>' + (p.target_company_type && p.target_company_type !== 'unknown' ? ' <span class="muted">&middot; ' + BW.esc(COMPANY_TYPES[p.target_company_type] || p.target_company_type) + '</span>' : '')
+      : p.owner_name ? '<span class="muted">Not yet identified &middot; owner of record: ' + BW.esc(p.owner_name) + '</span>'
+      : p.plaintiff_name ? '<span class="muted">Not yet identified &middot; plaintiff: ' + BW.esc(p.plaintiff_name) + '</span>'
+      : '<span class="muted">Not yet identified</span>';
+    var contact = p.contact_name
+      ? '<strong>' + BW.esc(p.contact_name) + '</strong>' + (p.contact_title ? ' <span class="muted">&middot; ' + BW.esc(p.contact_title) + '</span>' : '') + ' ' + conf(p.contact_confidence)
+      : '<span class="muted">' + (ph ? 'No named contact &middot; company main line' : 'No contact yet') + '</span>';
+    var reach = [];
+    if (ph) reach.push('<a href="' + BW.esc(BW.telHref(ph.num)) + '">&#9742; ' + BW.esc(ph.num) + (ph.main ? ' (main)' : '') + '</a>');
+    if (p.contact_email) reach.push('<a href="mailto:' + BW.esc(p.contact_email) + '">&#9993; ' + BW.esc(p.contact_email) + '</a>');
+    var actions = [];
+    if (ph) actions.push('<a class="btn-call" href="' + BW.esc(BW.telHref(ph.num)) + '">&#9742; Call</a>');
+    if (p.target_company_id) actions.push('<button class="btn-secondary link-prospect" data-company="' + p.target_company_id + '">' + (p.target_prospect_id ? 'Open in Prospects' : 'Add to Prospects') + '</button>');
+    if (!closed && p.workflow_status !== 'Contacted') actions.push('<button class="btn-secondary mark-contacted" data-id="' + p.id + '">Mark Contacted</button>');
+    var open = !!expanded[p.id];
+    return '<div class="p-row lead-row" data-id="' + p.id + '">' +
+      '<div class="lead-top"><span class="name">' + BW.esc(leadTitle(p)) + '</span>' + scoreChip(p.opportunity_score) + '</div>' +
+      '<div class="lead-chips">' + chips.join('') + '</div>' +
+      '<p class="lead-why">' + BW.esc(whySummary(p)) + '</p>' +
+      '<div class="lead-grid"><div><span class="lead-k">Target company</span>' + target + '</div>' +
+      '<div><span class="lead-k">Best contact</span>' + contact + (reach.length ? '<div class="lead-reach">' + reach.join('') + '</div>' : '') + '</div></div>' +
+      '<div class="lead-next"><span class="lead-k">Recommended action</span>' + BW.esc(recommendedAction(p)) + '</div>' +
+      (actions.length ? '<div class="lead-actions">' + actions.join('') + '</div>' : '') +
+      '<button type="button" class="btn-quiet lead-toggle" aria-expanded="' + open + '" aria-controls="detail-' + p.id + '">' + (open ? 'Hide' : 'View') + ' evidence &amp; details</button>' +
+      '<div class="lead-detail' + (open ? '' : ' hidden') + '" id="detail-' + p.id + '"></div></div>';
+  }
+
+  // Re-render one card in place after its data changed (status, prospect link).
+  function rerenderRow(p) {
+    var old = document.querySelector('.lead-row[data-id="' + p.id + '"]');
+    if (!old) return;
+    var detail = old.querySelector('.lead-detail');
+    old.insertAdjacentHTML('afterend', leadRow(p));
+    var fresh = old.nextElementSibling;
+    old.remove();
+    // Keep the loaded detail panel (and any note being typed) instead of refetching it.
+    if (expanded[p.id] && detail) fresh.replaceChild(detail, fresh.querySelector('.lead-detail'));
   }
 
   async function loadLeads(reset) {
@@ -455,28 +522,28 @@
         items = results[3].data || [], contacts = results[4].data || [], activity = results[5].data || [];
     var h = [];
 
-    // Why this lead
-    h.push('<div class="why-box small">' + BW.esc(p.research_explanation || 'Not yet researched.') +
-      (p.target_reason ? '<div class="muted" style="font-weight:400;margin-top:.3rem">Target choice: ' + BW.esc(p.target_reason) + '</div>' : '') + '</div>');
-
-    // Score breakdown
+    // Score breakdown (structured) and the raw research explanation. The
+    // explanation's trailing "Score factors:" line repeats the breakdown, so it
+    // is not shown twice; the stored text is untouched.
     var bd = Array.isArray(p.score_breakdown) ? p.score_breakdown : [];
     if (bd.length) h.push('<p class="label">Score ' + p.opportunity_score + ' / 100</p><ul class="bd">' + bd.map(function (b) {
       return '<li><span class="bd-pts">' + (b.points > 0 ? '+' : '') + BW.esc(b.points) + '</span> ' + BW.esc(b.reason || b.factor) + '</li>';
     }).join('') + '</ul>');
+    var expl = p.research_explanation || 'Not yet researched.';
+    if (bd.length) expl = expl.split('\n').filter(function (l) { return !/^Score factors:/.test(l); }).join('\n');
+    h.push('<p class="label">Research explanation</p><div class="small pre">' + BW.esc(expl) + '</div>');
 
-    // Workflow
+    // Workflow + target selection
     h.push('<div class="kv"><div><p class="label">Workflow status</p><select class="wf-status" data-id="' + p.id + '">' +
       STATUSES.map(function (s) { return '<option' + (s === p.workflow_status ? ' selected' : '') + '>' + s + '</option>'; }).join('') + '</select></div>' +
-      '<div><p class="label">Target company</p>' + (p.target_company_id ?
-        '<div><strong>' + BW.esc(p.target_company_name) + '</strong> ' + conf(p.target_company_confidence) + '</div>' +
-        '<div class="src-links">' + link(p.target_website, 'website') + ' ' + (p.target_main_phone ? '<a href="' + BW.esc(BW.telHref(p.target_main_phone)) + '">' + BW.esc(p.target_main_phone) + '</a>' : '') + '</div>' +
-        '<div style="margin-top:.4rem"><button class="btn-secondary link-prospect" data-company="' + p.target_company_id + '" style="min-height:36px;padding:.3rem .7rem;font-size:.82rem">' + (p.target_prospect_id ? 'Open in Prospects' : 'Add to Prospects') + '</button></div>'
-        : '<span class="muted">No company target yet' + (p.owner_name ? ' &mdash; owner of record: ' + BW.esc(p.owner_name) : '') + '</span>') + '</div></div>');
+      '<div><p class="label">Target selection</p>' + (p.target_company_id ?
+        '<div class="small">' + conf(p.target_company_confidence) + ' ' + BW.esc(p.target_reason || '') + '</div>' +
+        '<div class="src-links">' + link(p.target_website, 'website') + ' ' + (p.target_main_phone ? '<a href="' + BW.esc(BW.telHref(p.target_main_phone)) + '">main line ' + BW.esc(p.target_main_phone) + '</a>' : '') + (p.target_main_email ? ' <a href="mailto:' + BW.esc(p.target_main_email) + '">' + BW.esc(p.target_main_email) + '</a>' : '') + '</div>'
+        : '<span class="small muted">No company target yet' + (p.target_reason ? ' &mdash; ' + BW.esc(p.target_reason) : '') + '</span>') + '</div></div>');
 
     // Contacts
     if (contacts.length) {
-      h.push('<p class="label">Contacts at ' + BW.esc(p.target_company_name) + '</p>' + contacts.map(function (c) {
+      h.push('<p class="label">All contacts at ' + BW.esc(p.target_company_name) + '</p>' + contacts.map(function (c) {
         return '<div class="history-item"><strong>' + BW.esc(c.name || '(no name)') + '</strong>' + (c.title ? ' &middot; ' + BW.esc(c.title) : '') +
           ' <span class="chip">' + BW.esc(ROLE_LABELS[c.role_category] || c.role_category) + '</span> ' + conf(c.confidence) +
           (c.id === p.target_contact_id ? ' <span class="chip gold">best contact</span>' : '') +
@@ -553,14 +620,20 @@
     box.innerHTML = h.join('');
   }
 
-  function toggleLead(el) {
-    var id = el.dataset.id;
+  function toggleLead(row) {
+    var id = row.dataset.id;
     var box = $('detail-' + id);
+    var btn = row.querySelector('.lead-toggle');
     var p = rows.find(function (r) { return r.id === id; });
     if (!p || !box) return;
-    if (expanded[id]) { box.classList.add('hidden'); expanded[id] = false; return; }
+    if (expanded[id]) {
+      box.classList.add('hidden'); expanded[id] = false;
+      if (btn) { btn.textContent = 'View evidence & details'; btn.setAttribute('aria-expanded', 'false'); }
+      return;
+    }
     expanded[id] = true;
     box.classList.remove('hidden');
+    if (btn) { btn.textContent = 'Hide evidence & details'; btn.setAttribute('aria-expanded', 'true'); }
     loadDetail(p, box);
   }
 
@@ -661,6 +734,7 @@
     var pr = await BW.sb.from('prospect_list').select('*').eq('id', res.data).maybeSingle();
     if (pr.data) BW.editor.open(pr.data); else alert('Added to Prospects.');
     btn.textContent = 'Open in Prospects';
+    rows.forEach(function (r) { if (r.target_company_id === companyId) r.target_prospect_id = res.data; });
   }
 
   $('list').addEventListener('click', async function (e) {
@@ -668,6 +742,18 @@
     if (t.closest('a')) return;
     var btn = t.closest('button');
     if (btn && btn.classList.contains('link-prospect')) { e.stopPropagation(); linkProspect(btn.dataset.company, btn); return; }
+    if (btn && btn.classList.contains('mark-contacted')) {
+      e.stopPropagation();
+      btn.disabled = true;
+      var r0 = await BW.sb.rpc('dpl_set_lead_status', { p_property_id: btn.dataset.id, p_status: 'Contacted' });
+      btn.disabled = false;
+      if (r0.error) { alert('Could not update status: ' + r0.error.message); return; }
+      var p0 = rows.find(function (x) { return x.id === btn.dataset.id; });
+      if (p0) { p0.workflow_status = 'Contacted'; p0.reviewed_at = new Date().toISOString(); rerenderRow(p0); }
+      loadSummary();
+      return;
+    }
+    if (btn && btn.classList.contains('lead-toggle')) { e.stopPropagation(); toggleLead(btn.closest('.lead-row')); return; }
     if (btn && btn.classList.contains('note-save')) {
       e.stopPropagation();
       var ta = btn.parentNode.querySelector('.note-text');
@@ -693,15 +779,13 @@
       return;
     }
     if (t.closest('.lead-detail')) return; // clicks inside the detail panel (selects, inputs) do not collapse it
-    var row = t.closest('.lead-row');
-    if (row) { toggleLead(row); return; }
     var crow = t.closest('.company-row');
     if (crow) toggleCompany(crow);
   });
   $('list').addEventListener('keydown', function (e) {
-    if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('fu-row')) {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('company-row')) {
       e.preventDefault();
-      if (e.target.classList.contains('lead-row')) toggleLead(e.target); else toggleCompany(e.target);
+      toggleCompany(e.target);
     }
   });
   $('list').addEventListener('change', async function (e) {
@@ -710,7 +794,7 @@
     var p = rows.find(function (x) { return x.id === sel.dataset.id; });
     var res = await BW.sb.rpc('dpl_set_lead_status', { p_property_id: sel.dataset.id, p_status: sel.value });
     if (res.error) { alert('Could not update status: ' + res.error.message); return; }
-    if (p) { p.workflow_status = sel.value; p.reviewed_at = new Date().toISOString(); }
+    if (p) { p.workflow_status = sel.value; p.reviewed_at = new Date().toISOString(); rerenderRow(p); }
     loadSummary();
   });
 

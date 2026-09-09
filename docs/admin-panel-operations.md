@@ -170,19 +170,25 @@ with two or more active properties. Tap a tile to filter the list. Below it:
 when the last run happened, what it found, which sources failed, and when the
 next run is.
 
-**Leads list.** One row per property: address (or community name), county,
-stage, score, workflow status, target company and best contact with confidence,
-key dates and case number. Filters: search, county, foreclosure vs eviction,
+**Leads list.** One card per property, kept short so a lead can be understood
+and called without scrolling: address (or community name), score, county,
+stage, workflow status, "N active properties" when the target company has two
+or more, a one- or two-sentence reason there may be work, the target company
+and its type, the best contact with title, confidence, phone and email, a
+recommended next action, and **Call**, **Add to Prospects** and **Mark
+Contacted** buttons. Filters: search, county, foreclosure vs eviction,
 stage group ("Turnover likely" = writ issued or later, or a sale that is
 imminent or completed), workflow status, quick flags (high priority, new from
 latest run, not reviewed, contact available/missing, needs research, company
 with 2+ properties), sort, and an event-date range.
 
-Tap a row to expand it: why the lead scored the way it did (every factor is
-listed), the target company and its contacts with their source pages, property
-facts and owner of record, every event with its dates, parties and stage
-history, related companies, the source documents and evidence, and the team's
-notes.
+Tap **View evidence & details** on a card to see the rest: why the lead scored
+the way it did (every factor is listed) and the full research explanation, the
+workflow status selector, why that company was chosen as the target with its
+website and main line, every contact at the company with their source pages,
+property facts and owner of record, every event with its case number, dates,
+parties and stage history, related companies, the source documents and
+evidence, and the team's notes.
 
 **Eviction stages.** A filing is never called an eviction. Stages are:
 dispossessory filed → service completed → hearing scheduled → judgment entered
