@@ -266,7 +266,10 @@ button:disabled { opacity: .55; cursor: default; }
 .btn-done      { background: var(--gold); color: #3d2f0a; }
 
 /* ---------- Prospects list ---------- */
-.filters { display: grid; gap: .5rem; grid-template-columns: 1fr 1fr; }
+/* minmax(0, 1fr) rather than 1fr: a bare 1fr will not shrink below a date
+   input's intrinsic width, which pushed the row 8px past a 390px viewport. */
+.filters { display: grid; gap: .5rem; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.filters > * { min-width: 0; }
 .filters .full { grid-column: 1 / -1; }
 .p-row {
   width: 100%;
@@ -333,7 +336,7 @@ button:disabled { opacity: .55; cursor: default; }
   .modal { border-radius: 16px; max-height: 86vh; }
   .contact-row { flex-direction: row; }
   .contact-row .contact-btn { flex: 1; }
-  .filters { grid-template-columns: 1fr 1fr 1fr; }
+  .filters { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 .modal .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
 .history-item { border-top: 1px solid var(--line); padding: .5rem 0; font-size: .88rem; }
@@ -392,7 +395,8 @@ table.mini th { border-top: none; color: var(--muted); font-size: .7rem; text-tr
 .lead-grid > div { min-width: 0; overflow-wrap: anywhere; }
 @media (min-width: 700px) { .lead-grid { grid-template-columns: 1fr 1fr; } }
 .lead-k { display: block; font-size: .66rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
-.lead-reach { display: flex; flex-wrap: wrap; gap: .2rem .8rem; margin-top: .15rem; }
+.lead-reach { margin-top: .25rem; }
+.lead-reach .muted { font-size: .8rem; }
 .lead-reach a { font-weight: 600; text-decoration: none; }
 .lead-reach a:hover { text-decoration: underline; }
 .lead-next {

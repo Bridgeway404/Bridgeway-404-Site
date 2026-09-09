@@ -172,18 +172,26 @@ next run is.
 
 **Leads list.** One card per property, kept short so a lead can be understood
 and called without scrolling: address (or community name), score, county,
-stage, workflow status, "N active properties" when the target company has two
-or more, a one- or two-sentence reason there may be work, the target company
-and its type, the best contact with title, confidence, phone and email, a
-recommended next action, and **Call**, **Add to Prospects** and **Mark
-Contacted** buttons. Filters: search, county, foreclosure vs eviction,
+workflow status, a "Turnover underway" badge when the case is at writ stage or
+later (or a sale is imminent or done), "N active properties" when the target
+company has two or more, a plain-English one- or two-sentence reason there may
+be work, the target company and its type, the best contact with title and how
+confident research is that they are the right person, then how to reach them,
+a recommended next action, and **Call**, **Add to Prospects** and **Mark
+Contacted** buttons. Who the right person is and whose phone line a number is
+are two different questions, so each number is labelled by what the evidence
+supports: **Direct** (a business mobile recorded for that person), **Office
+line** (reaches the office, not verified as their own line), **Company main
+line** (the company's general number, or a contact number identical to it,
+shown with "No verified direct number found"), or **Listed number, line type
+unverified**. The Call button says which it dials. Filters: search, county, foreclosure vs eviction,
 stage group ("Turnover likely" = writ issued or later, or a sale that is
 imminent or completed), workflow status, quick flags (high priority, new from
 latest run, not reviewed, contact available/missing, needs research, company
 with 2+ properties), sort, and an event-date range.
 
-Tap **View evidence & details** on a card to see the rest: why the lead scored
-the way it did (every factor is listed) and the full research explanation, the
+Tap **View evidence & details** on a card to see the rest: the technical stage
+with key dates and case number, why the lead scored the way it did (every factor is listed) and the full research explanation, the
 workflow status selector, why that company was chosen as the target with its
 website and main line, every contact at the company with their source pages,
 property facts and owner of record, every event with its case number, dates,

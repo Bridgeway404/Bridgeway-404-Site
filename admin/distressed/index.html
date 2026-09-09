@@ -393,28 +393,75 @@
   }
 
   function needsResearch(p) { return ['pending', 'queued', 'partial', 'failed'].indexOf(p.enrichment_status) >= 0; }
-  function bestPhone(p) {
-    if (p.contact_phone) return { num: p.contact_phone, main: false };
-    if (p.target_main_phone) return { num: p.target_main_phone, main: true };
+  function firstName(n) { return n ? String(n).trim().split(/\s+/)[0] : ''; }
+  function digits(s) { var d = String(s || '').replace(/\D/g, ''); return d.length > 10 ? d.slice(-10) : d; }
+  function confChip(c) { return c ? '<span class="chip conf-' + BW.esc(c) + '">' + BW.esc(c.charAt(0).toUpperCase() + c.slice(1)) + '</span>' : '<span class="muted">unknown</span>'; }
+
+  // Two different confidences are kept apart on purpose: contact_confidence
+  // says how sure research is that this PERSON is the right decision-maker;
+  // it says nothing about whether a phone number is that person's own line.
+  // The only stored evidence about a number is dpl_contacts.phone_type (as
+  // tagged by research) and whether it is the same number as the company's
+  // main line, so the classification is deliberately conservative:
+  //   direct      business mobile recorded for this person
+  //   office      office / property-office line: reaches the office, not verified as the person's own line
+  //   main        the company's main line, or a contact number identical to it
+  //   unverified  a number stored for the contact with no line type recorded
+  function phoneInfo(p) {
+    var num = p.contact_phone, main = p.target_main_phone;
+    if (num && main && digits(num) === digits(main)) return { num: num, kind: 'main' };
+    if (num) {
+      var t = p.contact_phone_type;
+      if (t === 'mobile_business') return { num: num, kind: 'direct' };
+      if (t === 'office' || t === 'property_office') return { num: num, kind: 'office' };
+      if (t === 'corporate') return { num: num, kind: 'main' };
+      return { num: num, kind: 'unverified' };
+    }
+    if (main) return { num: main, kind: 'main' };
     return null;
   }
-  function firstName(n) { return n ? String(n).trim().split(/\s+/)[0] : ''; }
+  var PHONE_KIND = { direct: 'Direct', office: 'Office / regional', main: 'Company main line', unverified: 'Unverified' };
+  // "Call Bryce" / "Call the office and ask for Bryce" / "Call Greystar's main line and ask for Bryce"
+  function reachPhrase(p, ph) {
+    var who = firstName(p.contact_name), co = p.target_company_name || 'the company';
+    if (ph.kind === 'direct') return 'Call ' + (who || co);
+    if (ph.kind === 'office') return 'Call the office' + (who ? ' and ask for ' + who : '');
+    if (ph.kind === 'main') return 'Call ' + co + '’s main line' + (who ? ' and ask for ' + who : '');
+    return 'Try the listed number' + (who ? ' for ' + who : '') + ' (line unverified)';
+  }
+  function callLabel(p, ph) {
+    var who = firstName(p.contact_name);
+    if (ph.kind === 'direct') return 'Call ' + (who || 'now');
+    if (ph.kind === 'office') return 'Call office';
+    if (ph.kind === 'main') return 'Call main line';
+    return 'Call (unverified)';
+  }
 
-  // One or two plain sentences answering "why might there be work here?",
-  // built from the structured stage/date/portfolio fields. The raw research
-  // explanation and score factors stay under "View evidence & details".
+  // Sales meaning of the stage in plain English. The technical stage value
+  // stays under "View evidence & details"; a badge is kept only where it
+  // changes how the call is made (turnover underway, or nothing to sell).
+  function salesBadge(p) {
+    var st = p.current_stage;
+    if (TURNOVER.indexOf(st) >= 0) return '<span class="chip gold">Turnover underway</span>';
+    if (st === 'dismissed' || st === 'sale_cancelled') return '<span class="chip done">No turnover expected</span>';
+    return '';
+  }
   function whySummary(p) {
     var st = p.current_stage || 'status_unknown';
-    var label = STAGE_LABELS[st] || 'Status unknown';
     var when = p.event_date ? fmtD(p.event_date) : '';
+    var on = when ? ' on ' + when : '';
     var s;
-    if (st === 'sale_completed') s = 'Foreclosure sale completed' + (when ? ' ' + when : '') + ' — the new owner will likely need a cleanout.';
-    else if (st === 'sale_scheduled' || st === 'sale_imminent') s = 'Foreclosure sale' + (when ? ' set for ' + when : ' scheduled') + ' — cleanout work is likely once the sale completes.';
-    else if (st === 'notice_published') s = 'Foreclosure notice published' + (when ? ', sale ' + when : '') + ' — early signal; cleanout is likely if the sale goes through.';
-    else if (st === 'sale_cancelled' || st === 'dismissed') s = label + ' — no turnover expected from this case.';
-    else if (TURNOVER.indexOf(st) >= 0) s = label + (when ? ' ' + when : '') + ' — the unit is being cleared now, so turnover and haul-away work is likely.';
-    else if (st === 'status_unknown') s = 'Eviction case on file, status unknown — check the portal before calling.';
-    else s = label + (when ? ' ' + when : '') + ' — early in the eviction; a turnover is likely if the case reaches a writ.';
+    if (st === 'sale_completed') s = 'The foreclosure sale completed' + on + ', so the new owner will likely need a cleanout.';
+    else if (st === 'sale_scheduled' || st === 'sale_imminent') s = 'A foreclosure sale is set' + (when ? ' for ' + when : '') + ', so the property is likely to change hands and need a cleanout.';
+    else if (st === 'notice_published') s = 'A foreclosure notice has been published' + (when ? ' with a sale date of ' + when : '') + '; a cleanout is likely if the sale goes through.';
+    else if (st === 'sale_cancelled') s = 'The foreclosure sale was cancelled, so no turnover is expected from this notice.';
+    else if (st === 'dismissed') s = 'The eviction case was dismissed, so no turnover is expected from it.';
+    else if (st === 'writ_issued' || st === 'writ_pending_execution') s = 'A writ of possession has been issued' + on + ', so the unit is likely to be cleared soon and need turnover work.';
+    else if (st === 'eviction_scheduled') s = 'The eviction is scheduled' + (when ? ' for ' + when : '') + ', so the unit is about to be turned over.';
+    else if (st === 'eviction_executed' || st === 'possession_returned') s = 'The eviction was completed' + on + ', so the unit is being turned over now.';
+    else if (st === 'judgment_entered') s = 'A judgment was entered' + on + '; a writ and unit turnover may follow within weeks.';
+    else if (st === 'status_unknown') s = 'An eviction case is on file but its status is unknown; check the court portal before calling.';
+    else s = 'Recent dispossessory activity' + (when ? ' (hearing ' + when + ')' : '') + ' suggests a possible upcoming unit turnover.';
     if (p.company_active_properties >= 2 && p.target_company_name) s += ' ' + p.target_company_name + ' has ' + p.company_active_properties + ' active properties in this list.';
     return s;
   }
@@ -422,7 +469,7 @@
   // Derived from workflow status, stage and what contact data exists.
   function recommendedAction(p) {
     var ws = p.workflow_status;
-    var ph = bestPhone(p);
+    var ph = phoneInfo(p);
     var who = p.contact_name ? firstName(p.contact_name) : (p.target_company_name || 'the target company');
     if (ws === 'Closed' || ws === 'Not a Fit') return 'No action — ' + ws.toLowerCase() + '.';
     if (ws === 'Contacted') return 'Log the outcome in notes, then set Follow Up or Closed.';
@@ -433,32 +480,45 @@
     }
     if (!ph) return 'Find a phone number for ' + p.target_company_name + (p.target_website ? ' (start with their website)' : '') + '.';
     if (p.current_stage === 'dismissed' || p.current_stage === 'sale_cancelled') return 'Low priority — case closed; consider marking Not a Fit.';
-    if (TURNOVER.indexOf(p.current_stage) >= 0) return 'Call ' + who + ' now — turnover is underway; offer cleanout and haul-away.';
-    return 'Call ' + who + ' to get on their vendor list before turnover.';
+    if (TURNOVER.indexOf(p.current_stage) >= 0) return reachPhrase(p, ph) + ' now — turnover is underway; offer cleanout and haul-away.';
+    return reachPhrase(p, ph) + ' to get on their vendor list before turnover.';
   }
 
   function leadRow(p) {
     var closed = p.workflow_status === 'Closed' || p.workflow_status === 'Not a Fit';
     var chips = [];
     chips.push('<span class="chip">' + BW.esc(p.county) + '</span>');
-    chips.push(stageChip(p.current_stage));
+    var badge = salesBadge(p); if (badge) chips.push(badge);
     chips.push('<span class="chip wf-chip' + (closed ? ' done' : p.workflow_status !== 'New' ? ' status' : '') + '">' + BW.esc(p.workflow_status) + '</span>');
     if (p.company_active_properties >= 2) chips.push('<span class="chip gold">' + p.company_active_properties + ' active properties</span>');
     if (needsResearch(p)) chips.push('<span class="chip done">needs research</span>');
-    var ph = bestPhone(p);
+    var ph = phoneInfo(p);
+    var co = p.target_company_name || 'Company';
     var target = p.target_company_name
       ? '<strong>' + BW.esc(p.target_company_name) + '</strong>' + (p.target_company_type && p.target_company_type !== 'unknown' ? ' <span class="muted">&middot; ' + BW.esc(COMPANY_TYPES[p.target_company_type] || p.target_company_type) + '</span>' : '')
       : p.owner_name ? '<span class="muted">Not yet identified &middot; owner of record: ' + BW.esc(p.owner_name) + '</span>'
       : p.plaintiff_name ? '<span class="muted">Not yet identified &middot; plaintiff: ' + BW.esc(p.plaintiff_name) + '</span>'
       : '<span class="muted">Not yet identified</span>';
+    // Person first (who, title, how sure we are it is the right person), then
+    // how to reach them, labelled by what the stored evidence supports.
     var contact = p.contact_name
-      ? '<strong>' + BW.esc(p.contact_name) + '</strong>' + (p.contact_title ? ' <span class="muted">&middot; ' + BW.esc(p.contact_title) + '</span>' : '') + ' ' + conf(p.contact_confidence)
-      : '<span class="muted">' + (ph ? 'No named contact &middot; company main line' : 'No contact yet') + '</span>';
+      ? '<strong>' + BW.esc(p.contact_name) + '</strong>' + (p.contact_title ? '<div class="muted">' + BW.esc(p.contact_title) + '</div>' : '') +
+        '<div class="small">Contact confidence: ' + confChip(p.contact_confidence) + '</div>'
+      : '<span class="muted">No named contact yet</span>';
     var reach = [];
-    if (ph) reach.push('<a href="' + BW.esc(BW.telHref(ph.num)) + '">&#9742; ' + BW.esc(ph.num) + (ph.main ? ' (main)' : '') + '</a>');
-    if (p.contact_email) reach.push('<a href="mailto:' + BW.esc(p.contact_email) + '">&#9993; ' + BW.esc(p.contact_email) + '</a>');
+    if (ph) {
+      var tel = '<a href="' + BW.esc(BW.telHref(ph.num)) + '">' + BW.esc(ph.num) + '</a>';
+      if (ph.kind === 'direct') reach.push('<div>&#9742; Direct: ' + tel + '</div>');
+      else if (ph.kind === 'office') reach.push('<div>&#9742; Office line: ' + tel + '</div><div class="muted">Reaches the office; not verified as a direct line</div>');
+      else if (ph.kind === 'main') reach.push('<div>&#9742; ' + BW.esc(co) + ' main line: ' + tel + '</div>' + (p.contact_name ? '<div class="muted">No verified direct number found</div>' : ''));
+      else reach.push('<div>&#9742; Listed number: ' + tel + '</div><div class="muted">Line type unverified</div>');
+    } else if (p.contact_name) reach.push('<div class="muted">No phone number found</div>');
+    if (p.contact_email) {
+      var generic = p.target_main_email && p.contact_email.toLowerCase() === String(p.target_main_email).toLowerCase();
+      reach.push('<div>&#9993; ' + (generic ? BW.esc(co) + ' email: ' : 'Email: ') + '<a href="mailto:' + BW.esc(p.contact_email) + '">' + BW.esc(p.contact_email) + '</a></div>');
+    }
     var actions = [];
-    if (ph) actions.push('<a class="btn-call" href="' + BW.esc(BW.telHref(ph.num)) + '">&#9742; Call</a>');
+    if (ph) actions.push('<a class="btn-call" href="' + BW.esc(BW.telHref(ph.num)) + '" title="' + BW.esc(PHONE_KIND[ph.kind] + ': ' + ph.num) + '">&#9742; ' + BW.esc(callLabel(p, ph)) + '</a>');
     if (p.target_company_id) actions.push('<button class="btn-secondary link-prospect" data-company="' + p.target_company_id + '">' + (p.target_prospect_id ? 'Open in Prospects' : 'Add to Prospects') + '</button>');
     if (!closed && p.workflow_status !== 'Contacted') actions.push('<button class="btn-secondary mark-contacted" data-id="' + p.id + '">Mark Contacted</button>');
     var open = !!expanded[p.id];
@@ -492,6 +552,15 @@
     var res = await leadQuery();
     $('loading').classList.add('hidden');
     if (res.error) { showError('Could not load leads: ' + res.error.message); return; }
+    // The list view does not carry the contact's line type, which decides
+    // whether a number is shown as direct, office or the company main line.
+    var cids = res.data.map(function (p) { return p.target_contact_id; }).filter(Boolean);
+    if (cids.length) {
+      var ct = await BW.sb.from('dpl_contacts').select('id,phone_type').in('id', cids);
+      var types = {};
+      (ct.data || []).forEach(function (c) { types[c.id] = c.phone_type; });
+      res.data.forEach(function (p) { p.contact_phone_type = p.target_contact_id ? types[p.target_contact_id] || null : null; });
+    }
     rows = rows.concat(res.data);
     $('list').insertAdjacentHTML('beforeend', res.data.map(leadRow).join(''));
     $('empty-text').textContent = 'No leads match these filters.' + (summary && !summary.last_run ? ' The first research run has not happened yet — use "Run research now" or wait for Tuesday/Thursday 8:00 AM.' : '');
@@ -521,6 +590,12 @@
     var rels = results[0].data || [], evidence = results[1].data || [], history = results[2].data || [],
         items = results[3].data || [], contacts = results[4].data || [], activity = results[5].data || [];
     var h = [];
+
+    // Technical stage and key dates (kept off the card; the card says it in plain English).
+    var when = [];
+    if (p.event_date) when.push((p.event_type === 'foreclosure' ? 'sale ' : 'event ') + fmtD(p.event_date));
+    if (p.case_number) when.push('case ' + p.case_number);
+    h.push('<p class="label">Stage</p><div class="small">' + stageChip(p.current_stage) + (when.length ? ' <span class="muted">' + BW.esc(when.join(' · ')) + '</span>' : '') + '</div>');
 
     // Score breakdown (structured) and the raw research explanation. The
     // explanation's trailing "Score factors:" line repeats the breakdown, so it
