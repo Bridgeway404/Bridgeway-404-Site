@@ -11,7 +11,12 @@ One-page marketing and quote-request site for Bridgeway 404 (Metro Atlanta junk 
 | `index.html` | The entire website — all sections, styles, and scripts in one file |
 | `netlify.toml` | Netlify configuration (headers, redirects, build settings) |
 | `assets/bridgeway404-social-preview-v2.png` | 1200 × 630 branded link-preview image (iMessage, SMS, Facebook, LinkedIn, X, Slack, WhatsApp) |
-| `favicon.png` | Bridgeway 404 logo, used as the browser/tab icon |
+| `favicon.png` | Bridgeway 404 logo, used as the browser/tab icon (512 × 512, transparent) |
+| `assets/logo/bridgeway404-logo.png` | **Brand master** — full Bridgeway 404 lockup, transparent background, for use on *light* backgrounds |
+| `assets/logo/bridgeway404-logo-reversed.png` | **Brand master** — reversed lockup (black artwork flipped to white, purple and gold kept) for use on *dark* backgrounds |
+| `assets/logo/bridgeway404-logo-reversed-640.png` | Web size of the reversed lockup — used in the hero |
+| `assets/logo/bridgeway404-logo-reversed-320.png` | Web size of the reversed lockup — used in the footer |
+| `assets/logo/bridgeway404-emblem-reversed-360.png` | Skyline-and-arch emblem only, reversed — used as the compact mark in the nav bar |
 | `assets/bridgeway404-moving-special-325.png` | 1080 × 1080 social graphic for the $325 / 2-hour moving special (truck, 2 movers, straps & blankets) |
 | `assets/bridgeway404-moving-special-325.html` | Self-contained source for the moving-special graphic — edit the text, open in Chrome at 1080 × 1080, and screenshot to regenerate the PNG |
 | `admin/` | Internal admin panel (Blitz, Prospects, Follow-Ups, Distressed Property Leads) — see `docs/admin-panel-operations.md` |
@@ -19,6 +24,31 @@ One-page marketing and quote-request site for Bridgeway 404 (Metro Atlanta junk 
 | `supabase/functions/distressed-leads/` | Scheduled research worker behind the Distressed Property Leads tab (Supabase Edge Function; tests with `node --test`) |
 | `docs/distressed-leads-sources.md` | Per-county source matrix, what is and is not automated, paid options |
 | `README.md` | This file — deployment guide |
+
+### Logo / brand artwork
+
+The logo lives in `assets/logo/`. Two masters, both with real transparency:
+
+| Background | Use |
+|---|---|
+| Light (white, cream) | `bridgeway404-logo.png` — black wordmark, purple arch, gold tagline |
+| Dark (the site's black nav, hero and footer) | `bridgeway404-logo-reversed.png` — the black artwork is flipped to white; purple and gold are unchanged |
+
+**Always use the reversed version on dark backgrounds.** The standard logo's
+wordmark is black and is effectively invisible on `--color-black` / the hero gradient.
+
+On the landing page the logo appears in three places:
+
+- **Nav** — `bridgeway404-emblem-reversed-360.png`, the skyline-and-arch emblem only, next
+  to the "Bridgeway 404" text. The full stacked lockup is unreadable at nav height (~34px),
+  so the emblem carries the brand there and the wordmark is set in type.
+- **Hero** — the full reversed lockup at 150px (104px on mobile).
+- **Footer** — the full reversed lockup at 84px (64px on mobile).
+
+Sizes are pinned with `width`/`height` attributes so the images reserve space and
+don't cause layout shift. If you resize a logo, regenerate from the master with
+Lanczos resampling and re-quantize (128 colours keeps these files under ~30 KB with
+no visible loss).
 
 ### Link preview (share card)
 

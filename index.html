@@ -201,12 +201,18 @@
       gap: 16px;
     }
     .nav-logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
       font-size: 1.15rem;
       font-weight: 800;
       color: var(--color-white);
       letter-spacing: -0.01em;
     }
     .nav-logo span { color: var(--color-gold); }
+    /* Bridgeway 404 emblem (skyline + arch), reversed artwork for the black nav */
+    .nav-logo-mark { display: block; height: 34px; width: auto; flex-shrink: 0; }
+    .nav-logo-text { font-weight: inherit; }
     .nav-logo-desc { font-weight: 400; font-size: 0.8em; color: rgba(255,255,255,0.55); letter-spacing: 0; }
     .nav-cta { display: flex; gap: 10px; align-items: center; }
     .nav-phone {
@@ -238,6 +244,8 @@
       pointer-events: none;
     }
     .hero-content { position: relative; z-index: 1; max-width: 720px; }
+    /* Full Bridgeway 404 lockup, reversed artwork for the dark hero */
+    .hero-logo { display: block; height: 150px; width: auto; margin: 0 0 26px; }
     .hero-badge {
       display: inline-flex;
       align-items: center;
@@ -731,6 +739,7 @@
       color: var(--color-white);
     }
     .footer-logo span { color: var(--color-gold); }
+    .footer-logo-img { display: block; height: 84px; width: auto; }
     .footer-copy {
       font-size: 0.82rem;
       color: var(--color-gray-400);
@@ -754,6 +763,10 @@
       .section-pad-sm { padding: 40px 0; }
       .hero { padding: 64px 0 56px; }
       .hero h1 { font-size: 2rem; }
+      .hero-logo { height: 104px; margin-bottom: 20px; }
+      .nav-logo { gap: 9px; font-size: 1rem; }
+      .nav-logo-mark { height: 28px; }
+      .footer-logo-img { height: 64px; margin: 0 auto; }
       .hero-actions { flex-direction: column; }
       .hero-actions .btn { width: 100%; text-align: center; padding: 16px; }
       .trust-items { gap: 12px; }
@@ -772,6 +785,9 @@
     }
     @media (max-width: 480px) {
       .nav-phone { display: none; }
+      /* Keep the nav lockup on one line — the emblem already carries the brand */
+      .nav-logo-desc { display: none; }
+      .nav-logo-text { white-space: nowrap; }
       .visuals-grid { grid-template-columns: 1fr; }
       .visual-item.wide { grid-column: span 1; }
       .visual-item.wide img { height: 220px; }
@@ -1034,7 +1050,11 @@
   <nav class="nav" aria-label="Main navigation">
     <div class="container nav-inner">
       <!-- LOGO — update business name here if needed -->
-      <a href="/" class="nav-logo">Bridgeway <span>404</span> <em class="nav-logo-desc">Junk Removal</em></a>
+      <a href="/" class="nav-logo" aria-label="Bridgeway 404 Junk Removal — home">
+        <img class="nav-logo-mark" src="/assets/logo/bridgeway404-emblem-reversed-360.png"
+             alt="" width="360" height="159" decoding="async">
+        <b class="nav-logo-text">Bridgeway <span>404</span> <em class="nav-logo-desc">Junk Removal</em></b>
+      </a>
       <div class="nav-cta">
         <!-- PHONE — update phone number here -->
         <span class="nav-phone">404-565-4216</span>
@@ -1049,6 +1069,9 @@
   <section class="hero" id="home" aria-label="Hero">
     <div class="container">
       <div class="hero-content">
+        <img class="hero-logo" src="/assets/logo/bridgeway404-logo-reversed-640.png"
+             alt="Bridgeway 404 Junk Removal — Strong Service. Clean Results."
+             width="640" height="578" fetchpriority="high" decoding="async">
         <span class="hero-badge">Metro Atlanta Junk Removal</span>
         <h1>
           Reliable Junk Removal and<br>
@@ -1989,7 +2012,10 @@
        ============================================================ -->
   <footer class="footer" role="contentinfo">
     <div class="container footer-inner">
-      <div class="footer-logo">Bridgeway <span>404</span> <em class="nav-logo-desc">Junk Removal</em></div>
+      <div class="footer-logo">
+        <img class="footer-logo-img" src="/assets/logo/bridgeway404-logo-reversed-320.png"
+             alt="Bridgeway 404 Junk Removal" width="320" height="289" loading="lazy" decoding="async">
+      </div>
       <p class="footer-copy">© 2026 Bridgeway 404. All rights reserved.</p>
       <nav class="footer-links" aria-label="Footer links">
         <!-- FOOTER LINKS — replace # with actual URLs when pages are ready -->
