@@ -796,6 +796,10 @@
       .scheduling-card { width: 100%; }
       .services-grid { grid-template-columns: 1fr; }
     }
+    /* Below 400px the emblem alone carries the nav — no room for the wordmark */
+    @media (max-width: 399.98px) {
+      .nav-logo-text { display: none; }
+    }
 
     /* ============================================================
        SKIP LINK (ACCESSIBILITY)
