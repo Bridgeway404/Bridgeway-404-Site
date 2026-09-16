@@ -6,6 +6,14 @@ leads, enriches ownership and management, scores each lead and writes
 everything to the `dpl_*` tables (migration `0006_distressed_leads.sql`).
 The Admin tab at `/admin/distressed/` reads those tables.
 
+## Status: paused
+
+Migration `0007_eviction_attorney_leads.sql` paused this pipeline: the pg_cron
+jobs are unscheduled and `dpl_request_run`, `dpl_submit_upload`,
+`dpl_scheduled_kick` and `dpl_tick` return early while `dpl_settings.paused`
+is `true`. Data and code are untouched. `select public.dpl_set_paused(false);`
+restores the schedule below.
+
 ## How it runs
 
 ```

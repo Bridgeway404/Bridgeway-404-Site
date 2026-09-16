@@ -154,7 +154,26 @@ Note only / Done), prospect type, and partnership vs. ordinary leads.
 
 ---
 
-## 3d. Distressed Property Leads (`/admin/distressed`)
+## 3d. Distressed Property Leads (`/admin/distressed`) — paused
+
+> **Status: paused (September 2026).** This lead source was not producing enough
+> useful opportunities, so its Tuesday/Thursday research schedule and the
+> five-minute watchdog are switched off, and the page refuses to start runs or
+> process uploads while paused. Nothing was deleted: every property, company,
+> contact and note collected so far is still in the database and can be browsed
+> on the page (which now sits behind a "Paused" card on the admin home page and
+> is no longer in the top navigation). The team works the **Eviction Attorney
+> Leads** list (section 3e) instead.
+>
+> To reactivate, run this once in the Supabase SQL editor — it restores the
+> schedule and re-enables runs in one step:
+>
+> ```sql
+> select public.dpl_set_paused(false);
+> ```
+>
+> `select public.dpl_set_paused(true);` pauses it again. The description below
+> is how the page works when it is active.
 
 Foreclosure notices and evictions in Fulton, DeKalb, Douglas and Henry, turned
 into B2B leads: each property is matched to the management company, owner
@@ -239,6 +258,94 @@ why, and which paid options exist are written up in
 
 ---
 
+## 3e. Eviction Attorney Leads (`/admin/attorneys`)
+
+Leslie's call list of plaintiff-side attorneys and law firms that represent
+landlords, apartment communities, property-management companies and rental
+owners in dispossessory (eviction) cases in metro Atlanta. Bridgeway is not
+selling legal services: when those clients regain possession of a unit it
+usually needs a cleanout before it can be turned, so an attorney with
+property-management clients is a recurring referral source. The pitch is
+printed at the top of the page under **The pitch**.
+
+**Nothing runs on a schedule.** The list grows only when someone presses
+**Find More Attorneys**.
+
+### The call list
+
+One row per attorney (a stacked card on a phone, a table on a desktop):
+
+| Column | What it shows |
+|---|---|
+| Attorney | Name, city/county, a gold **Court records** chip when the attorney was named as plaintiff's counsel on court calendars, **High referral potential** when the evidence points to a firm-wide landlord practice |
+| Firm | Law firm and website |
+| Phone | Tap-to-call button (opens the dialer on a phone), email; **Needs lookup** when no number is on file yet |
+| Why they are relevant | Court filing count and the landlord / property-management clients identified, or the web evidence |
+| Status | Selectable: New, Call Today, Called – No Answer, Left Voicemail, Spoke With Staff, Spoke With Attorney, Interested, Follow Up, Referral Partner, Not Interested, Bad Lead. **Mark contacted** under it stamps the last-contact time |
+| Last contact | When the lead was last marked contacted |
+| Follow up | A date; rows whose date has arrived get a gold edge and a **Due** chip, and the header shows how many are due |
+| Assigned | Leslie, Mike, Jonathan, any admin account, or **Someone else…** to type a name |
+
+Under each row: a **quick note** box (Enter or **Save note**; the latest note is
+shown on the row) and **Details, evidence & notes**, which opens the full
+evidence with source links, the clients identified, research notes, an
+**Edit details** form for every field (attorney, firm, phone, email, website,
+city, county, practice area, clients, evidence, source URL, standing notes),
+and the dated, attributed history of every status change, contact, follow-up,
+assignment and note.
+
+**Filters and sort:** search (attorney, firm, county, city, client, evidence,
+notes); status (**Active** by default, which hides Not Interested and Bad
+Lead; choose **All statuses** to see them); county; assignee; and a quick
+filter for follow-ups due, never contacted, has / needs a phone number, and
+source (court records, web research, added by hand). Sort by newest first
+(default), follow-up date, last contacted, most court filings, or name.
+
+**+ Add attorney** creates a lead by hand. **Export CSV** downloads the current
+filtered list.
+
+### Duplicates
+
+Before anything is added — by research or by hand — it is checked against the
+list by attorney name (ignoring punctuation, "Esq." and suffixes), email,
+phone number, website and firm. A match is merged into the existing lead:
+blank fields are filled in, new evidence and source links are appended, and
+Leslie's status, notes, follow-up and assignment are never touched. Two
+different attorneys who share a firm's main line are kept as two leads. Adding
+a duplicate by hand tells you what it matched on.
+
+### Find More Attorneys
+
+Opens a dialog to choose counties (Fulton, DeKalb, Gwinnett, Cobb, Clayton,
+Douglas and Henry by default), how many web research passes to run, whether to
+include court records, and an optional extra focus. **Start research** runs
+right away; the page updates by itself as leads arrive and shows the run's
+progress and result. A run has three parts:
+
+1. **Court records** — attorneys named as plaintiff's counsel on the
+   magistrate-court dispossessory calendars the distressed-leads system
+   already collected, with how many cases they filed and for which landlord /
+   management entities. Attorneys whose plaintiffs are only banks, servicers,
+   government agencies or individuals are skipped; an attorney qualifies with
+   two or more filings, or two or more business plaintiffs. No API key needed.
+2. **Contact lookup** — for court-record attorneys, a web search for the firm,
+   phone, email, website and how the firm markets its eviction practice.
+3. **Web research passes** — searches for firms marketing landlord-side
+   eviction / dispossessory work to property owners, apartment-association
+   legal resources, and bios naming property-management clients. Tenant-defense
+   attorneys, general real-estate attorneys and anything without a source URL
+   are discarded. Names already on the list are excluded up front.
+
+Parts 2 and 3 need an Anthropic API key, saved once under **Research settings
+& run history** at the bottom of the page (stored encrypted in Supabase Vault;
+it is the same key slot the distressed pipeline used). Without a key the run
+still adds court-record attorneys — they show **Needs lookup** for the phone —
+and the dialog says so. Each pass costs a few dollars of API usage; the run
+history shows the spend.
+
+If a run stalls (the worker stops checking in), a **Resume** button appears on
+the run card.
+
 ## 4. Adding and removing people
 
 On the admin home page:
@@ -297,7 +404,8 @@ Admin pages are marked `noindex`, so they never appear in search results.
 |---|---|
 | Admin pages | `admin/` in the `Bridgeway-404-Site` repo |
 | Database schema | `supabase/migrations/` in the same repo |
-| Distressed-leads research worker | `supabase/functions/distressed-leads/` (Supabase Edge Function, scheduled by pg_cron) |
+| Distressed-leads research worker (paused) | `supabase/functions/distressed-leads/` (Supabase Edge Function; its pg_cron schedule is removed while paused) |
+| Eviction-attorney research worker | `supabase/functions/eviction-attorney-leads/` (Supabase Edge Function, manual only, started from the Admin page) |
 | Prospect + outreach data | Supabase project **bridgeway-404** |
 | Deployment | Netlify, automatically on push to `main` |
 

@@ -420,3 +420,54 @@ table.mini th { border-top: none; color: var(--muted); font-size: .7rem; text-tr
 .hidden { display: none !important; }
 .center { text-align: center; }
 .loading { text-align: center; color: var(--muted); padding: 2.5rem 0; }
+
+/* ---------- Eviction Attorney Leads (call list) ---------- */
+.att-head { display: flex; align-items: center; gap: .5rem; margin: .2rem 0 .5rem; flex-wrap: wrap; }
+.att-head-actions { margin-left: auto; display: flex; gap: .4rem; flex-wrap: wrap; }
+.att-head-actions button { min-height: 40px; padding: .4rem .8rem; font-size: .85rem; }
+.att-counties { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .3rem .6rem; }
+.att-counties label { display: flex; align-items: center; gap: .4rem; min-height: 36px; font-size: .92rem; }
+.att-counties input { width: 20px; height: 20px; }
+/* Phone-first: each lead is a stacked card with labelled cells. */
+.att-header { display: none; }
+.att-row {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: .8rem .9rem; margin-bottom: .5rem; display: grid; gap: .5rem; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+.att-row.due { border-left: 5px solid var(--gold); }
+.att-row.hidden-lead { opacity: .7; }
+.att-cell { min-width: 0; overflow-wrap: anywhere; font-size: .9rem; }
+.att-k { display: block; font-size: .64rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: .1rem; }
+.att-name, .att-why, .att-note, .att-detail { grid-column: 1 / -1; }
+.att-name strong { font-size: 1rem; }
+.att-chips { display: flex; flex-wrap: wrap; gap: .25rem; margin-top: .25rem; }
+.att-call { display: inline-flex; align-items: center; min-height: 40px; padding: .3rem .7rem; border-radius: 10px; background: var(--purple); color: #fff; font-weight: 800; text-decoration: none; font-size: 1rem; }
+.att-call:hover { background: var(--purple-dark); }
+.att-phone a:not(.att-call) { font-weight: 600; text-decoration: none; }
+.att-why { font-size: .86rem; line-height: 1.4; }
+.att-row select, .att-row input[type="date"], .att-row input[type="text"] { min-height: 40px; padding: .35rem .5rem; font-size: .88rem; }
+.att-status select.chip-gold { background: var(--gold-light); }
+.att-status select.chip-done { background: #ececec; color: #666; }
+.att-status select.chip-status { background: var(--success-bg); }
+.mark-btn { display: block; min-height: 32px; padding: .2rem .4rem; font-size: .78rem; color: var(--purple); margin-top: .15rem; }
+.att-note { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .4rem; align-items: start; }
+.att-note .qn-save { min-height: 40px; padding: .35rem .7rem; font-size: .85rem; }
+.att-note .att-toggle { grid-column: 1 / -1; min-height: 34px; padding: .25rem; font-size: .8rem; color: var(--purple); text-align: left; justify-self: start; }
+.att-note .fu-note { grid-column: 1 / -1; margin-top: .1rem; }
+.att-detail { grid-column: 1 / -1; }
+/* Desktop: one true table row per attorney; details expand underneath. */
+@media (min-width: 1000px) {
+  .att-header, .att-row {
+    display: grid; align-items: start;
+    grid-template-columns: 1.3fr 1fr 1fr 1.6fr 1fr .8fr .95fr 1fr; gap: .6rem;
+  }
+  .att-header { padding: 0 .9rem .3rem; font-size: .66rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+  .att-header.hidden { display: none; }
+  .att-k { display: none; }
+  .att-name, .att-why { grid-column: auto; }
+  .att-note { grid-column: 1 / -1; grid-template-columns: minmax(0, 1fr) auto auto; }
+  .att-note .att-toggle { grid-column: auto; }
+  .att-note .fu-note { grid-column: 1 / -1; }
+  .att-call { font-size: .92rem; padding: .3rem .55rem; }
+  .att-counties { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
