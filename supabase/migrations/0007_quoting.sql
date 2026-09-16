@@ -47,7 +47,7 @@ insert into public.pricing_configuration (name, version, config) values ('defaul
   "load_size": { "minimum": 215, "quarter": 295, "half": 395, "three_quarter": 495, "full": 595, "multi_per_load": 595, "multi_default_loads": 2 },
   "stairs": { "ground": 0, "one": 30, "two": 60, "three_plus": 100 },
   "elevator_stair_multiplier": 0,
-  "heavy_items": { "none": 0, "one": 25, "two": 50, "three_four": 90, "five_plus": 150 },
+  "heavy_items": { "none": 0, "one": 35, "two": 70, "three_four": 120, "five_plus_starting": 120 },
   "readiness": { "curbside": -25, "inside": 0, "gathering": 60 },
   "access": { "easy": 0, "normal": 0, "long_carry": 40, "difficult": 90 },
   "handling": { "none": 0, "minor": 35, "significant": 85, "special": 125 },
@@ -84,6 +84,11 @@ create table if not exists public.quotes (
   final_price        numeric(10,2) not null default 0,
   adjustment_amount  numeric(10,2) not null default 0,
   adjustment_reason  text,
+  -- Employee chose to print the lowered price as a "Promotional discount"
+  -- line; otherwise the customer document shows only the final price.
+  show_discount      boolean not null default false,
+  -- Set when an employee confirmed a preliminary (manual-review) price.
+  price_confirmed_at timestamptz,
   needs_review       boolean not null default false,
   issued_at          timestamptz,
   sent_at            timestamptz,
