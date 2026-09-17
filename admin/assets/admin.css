@@ -471,3 +471,33 @@ table.mini th { border-top: none; color: var(--muted); font-size: .7rem; text-tr
   .att-call { font-size: .92rem; padding: .3rem .55rem; }
   .att-counties { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
+
+/* ===== Auction Buyer Leads (/admin/auction-buyers/) =====
+   Rows reuse the attorney card styling (.att-row / .att-cell / .att-k) and
+   only change the desktop column layout. */
+.ab-row .att-k { }
+.ab-buyer, .ab-property, .ab-note, .ab-detail { grid-column: 1 / -1; }
+.ab-buyer strong { font-size: 1rem; }
+.ab-property { font-size: .88rem; line-height: 1.4; }
+.ab-acq { font-weight: 700; }
+.ab-prio .chip { font-weight: 800; }
+.chip.prio-high { background: var(--purple); color: #fff; }
+.chip.prio-medium { background: var(--gold-light); }
+.chip.prio-low { background: #ececec; color: #666; }
+.ab-props { width: 100%; border-collapse: collapse; font-size: .82rem; margin: .3rem 0 .6rem; }
+.ab-props th, .ab-props td { text-align: left; padding: .3rem .4rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+.ab-props th { font-size: .66rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.ab-queue { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: .4rem; margin: .4rem 0; }
+.ab-queue div { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: .45rem .6rem; font-size: .82rem; }
+.ab-queue strong { display: block; font-size: 1.1rem; }
+.ab-src { font-size: .82rem; padding: .35rem 0; border-bottom: 1px solid var(--line); }
+.ab-src:last-child { border-bottom: 0; }
+@media (min-width: 1100px) {
+  .ab-header, .ab-row { grid-template-columns: 1.5fr 1.05fr 1.55fr .75fr .55fr .6fr 1.05fr .9fr .9fr; }
+  .ab-buyer, .ab-property { grid-column: auto; }
+  .ab-note { grid-column: 1 / -1; }
+}
+@media (min-width: 1000px) and (max-width: 1099.98px) {
+  .ab-header, .ab-row { grid-template-columns: 1.4fr 1fr 1.4fr .7fr .6fr .6fr 1fr .9fr .9fr; }
+  .ab-buyer, .ab-property { grid-column: auto; }
+}

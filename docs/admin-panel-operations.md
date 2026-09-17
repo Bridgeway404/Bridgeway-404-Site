@@ -346,6 +346,151 @@ history shows the spend.
 If a run stalls (the worker stops checking in), a **Resume** button appears on
 the run card.
 
+## 3f. Auction Buyer Leads (`/admin/auction-buyers`)
+
+Leslie's call list of people and companies that recently **bought** property
+at a tax sale, levy / sheriff's sale, foreclosure or other forced sale in
+Fulton, DeKalb, Cobb, Henry or Douglas. Whoever wins a parcel at auction
+usually has to clear out whatever the previous occupant left behind before
+they can renovate, rent or resell it, so a fresh purchaser — and above all a
+repeat purchaser who buys at every sale — is a natural customer. The pitch is
+printed at the top of the page under **The pitch**.
+
+This is a separate channel from Eviction Attorney Leads (section 3e): its own
+tables (`ab_*`), its own worker, its own schedule and its own page. Distressed
+Property Leads (section 3d) stays paused and is not touched by it.
+
+**It runs by itself every Wednesday at 8:00 am Eastern.** **Find Auction
+Buyers Now** runs exactly the same research immediately.
+
+### What qualifies as a lead
+
+A buyer appears on the call list only when all three are true:
+
+1. **The sale really happened.** An advertised sale is never enough. The proof
+   is either a county *result* list (an excess-funds / overage row exists only
+   once a parcel sold) or the county assessor roll showing a new owner of
+   record after the sale.
+2. **The purchaser is identified** — named by the county (Douglas prints the
+   purchaser) or taken from the assessor roll (DeKalb, Fulton, Cobb).
+3. **There is a realistic way to reach them** — a phone, email, website, or a
+   public business mailing address for a company. A person who bought a single
+   parcel needs a phone or email first; a person who has bought two or more is
+   plainly investing and a mailing address is enough.
+
+Banks, servicers, HUD and county bid-ins are recorded but stay off the list
+unless a direct phone or email exists. Vacant land, lots and redeemed sales
+are marked *Not useful*.
+
+**Priority:** High = repeat purchaser (2+ recent acquisitions) or a company
+with a direct phone/email; Medium = qualified with one acquisition; Low =
+qualified but weak. The default view shows High and Medium; Low and
+still-being-researched buyers are one filter away.
+
+### The call list
+
+One row per buyer, however many properties they bought:
+
+| Column | What it shows |
+|---|---|
+| Buyer / company | Company or person, the contact person when a company was bought through a principal, the mailing address when no phone is on file, **Repeat purchaser** and **Institutional** chips |
+| Phone | Tap-to-call button, email, website; **Needs lookup** when nothing is on file |
+| Property | The most recent property acquired, its county, property type and sale type |
+| Acquired | "N recent auction acquisitions" and the latest acquisition date |
+| Priority | High / Medium / Low |
+| Type | Investor company, landlord, flipper, builder, individual, bank / lender, servicer, nonprofit |
+| Status | New, Call Today, Called – No Answer, Left Voicemail, Spoke With Contact, Interested, Follow Up, Referral Partner, Not Interested, Bad Lead; **Mark contacted** stamps the last-contact time |
+| Follow up | A date; rows whose date has arrived get a gold edge and a **Due** chip |
+| Assigned | Leslie, Mike, Jonathan, any admin account, or **Someone else…** |
+
+Under each row: a **short note** box and **Properties, evidence & notes**,
+which opens the evidence, a table of every property the buyer acquired (parcel,
+sale date, price paid, verification status, links to the county list and the
+assessor record), the mailing address, research notes, an **Edit details**
+form (including the *On the call list* switch and priority), and the dated,
+attributed activity history.
+
+**Filters and sort:** search; status (**Active** by default hides Not
+Interested / Bad Lead); county; priority (call list, High, Medium, Low, *still
+being researched*, everything); assignee; quick filters for follow-ups due,
+never contacted, repeat purchasers, has / needs a phone, companies /
+individuals. Sort by newest first (default), most acquisitions, latest
+acquisition date, follow-up date, last contacted or name.
+
+**+ Add buyer** adds one by hand (it goes straight on the call list).
+**Export CSV** downloads the current filtered list.
+
+### Duplicates
+
+One buyer per purchaser: names are compared with LLC / Inc / punctuation
+ignored, then email, then website, then phone **together with** mailing
+address. A shared office phone on its own never merges two different
+companies. A purchaser who buys again is merged into the existing buyer and the
+acquisition count goes up; Leslie's status, notes, follow-up and assignment are
+never touched by research.
+
+### Where the research comes from (and what it cannot see)
+
+Everything is free public records; nothing is bought and no API is required.
+
+| County | Sale results (proof of sale) | Upcoming lists | Purchaser / assessor check |
+|---|---|---|---|
+| DeKalb | Tax Commissioner excess-funds list (text PDF) | Tax-sale listing on the public-access site (HTML; sometimes down for maintenance) | County GIS parcel layer: current owner + mailing address |
+| Douglas | Tax Commissioner overage file — the only county that **prints the purchaser** | Tax-sale legal notices (text PDF) | GIS land-records layer is a 2021 snapshot, so only the county file is used for purchasers |
+| Henry | Tax Commissioner excess-funds list (text PDF, with purchase amounts) | Property tax sale list (text PDF) | **No owner names published** in GIS and the assessor site blocks automated access: sold parcels wait in *Buyer research needed* for a manual look-up |
+| Fulton | Not published online (excess-funds list is by open-records request only) | Sheriff's levy sale lists are **scanned images** with no text; read only with the optional Claude OCR | Hosted assessor parcel layer works once parcels are known |
+| Cobb | Excess-funds PDF linked from the Tax Commissioner site | Tax sale list posted four weeks before each May / November sale | Daily assessor parcel layer works |
+
+When this was set up the Cobb PDFs linked from the county site returned
+"not found"; the adapter re-checks every run. Each source's last success and
+last problem is shown under **Research queue, sources & schedule**. One blocked
+or changed site never stops the run — it is logged and the other counties
+continue.
+
+### The research queue (behind the scenes)
+
+Every parcel seen on a list is tracked in the background with one of these
+statuses, visible as counts under **Research queue**: *Upcoming / waiting*,
+*Awaiting sale result*, *Buyer research needed*, *Buyer identified*, *Contact
+research needed*, *Qualified*, *Not useful*. Each weekly run re-reads the
+county results, re-checks unresolved parcels against the assessor roll (every
+7 days per parcel, for 450 days after the sale, giving up after 240 days
+without an ownership change), consolidates new purchasers into buyers, and
+promotes the ones that qualify. Tax deeds are often not re-titled on the
+assessor roll until the redemption period ends, which is why some confirmed
+sales sit in *Buyer research needed* for months.
+
+### Find Auction Buyers Now and the run result
+
+Press the button, confirm, and the run starts at once; the page refreshes on
+its own. When it finishes the card shows only the short result: counties
+checked, completed sales reviewed, buyers identified, qualified leads added,
+existing updated, repeat purchasers. Recent runs are listed under **Research
+queue, sources & schedule**. If a run stalls, a **Resume** button appears.
+
+### Pausing or resuming only the weekly schedule
+
+Under **Research queue, sources & schedule** press **Pause weekly research**
+(or **Resume weekly research**). This changes only the Auction Buyer jobs
+(`ab-weekly-1200utc`, `ab-weekly-1300utc`, `ab-tick`). The same thing from
+SQL:
+
+```sql
+select public.ab_set_paused(true);   -- pause the Wednesday run + watchdog
+select public.ab_set_paused(false);  -- resume
+```
+
+Neither touches the attorney research (manual only) nor the distressed
+pipeline (`dpl_*`, which stays paused).
+
+### Optional Anthropic key
+
+The weekly research is complete without an API key. Saving one under **Research
+queue, sources & schedule** (the same encrypted vault slot the other tabs use)
+adds two extras: OCR of Fulton's scanned levy lists, and a business-contact
+web search for purchasers who have no phone or website yet (up to 10 per run,
+repeat purchasers first).
+
 ## 4. Adding and removing people
 
 On the admin home page:
@@ -406,6 +551,7 @@ Admin pages are marked `noindex`, so they never appear in search results.
 | Database schema | `supabase/migrations/` in the same repo |
 | Distressed-leads research worker (paused) | `supabase/functions/distressed-leads/` (Supabase Edge Function; its pg_cron schedule is removed while paused) |
 | Eviction-attorney research worker | `supabase/functions/eviction-attorney-leads/` (Supabase Edge Function, manual only, started from the Admin page) |
+| Auction-buyer research worker | `supabase/functions/auction-buyer-leads/` (Supabase Edge Function; runs every Wednesday via pg_cron `ab-weekly-*`, or from the Admin page) |
 | Prospect + outreach data | Supabase project **bridgeway-404** |
 | Deployment | Netlify, automatically on push to `main` |
 

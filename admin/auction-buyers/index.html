@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Auction Buyer Leads — Bridgeway Admin</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap">
+<link rel="stylesheet" href="/admin/assets/admin.css">
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="/admin/">Bridgeway <span>Admin</span></a>
+  <nav>
+    <a href="/admin/blitz/">Blitz</a>
+    <a href="/admin/prospects/">Prospects</a>
+    <a href="/admin/follow-ups/">Follow-Ups</a>
+    <a href="/admin/attorneys/">Attorneys</a>
+    <a href="/admin/auction-buyers/" class="active">Auction Buyers</a>
+  </nav>
+</header>
+
+<main class="wrap wide">
+  <div class="att-head">
+    <h1 style="margin:0;font-size:1.15rem">Auction Buyer Leads</h1>
+    <span id="chip-today" class="chip gold hidden"></span>
+    <span id="chip-due" class="chip gold hidden"></span>
+    <span id="chip-count" class="chip hidden"></span>
+    <span class="att-head-actions">
+      <button class="btn-primary" id="find-btn">Find Auction Buyers Now</button>
+      <button class="btn-secondary" id="add-btn">+ Add buyer</button>
+      <button class="btn-quiet" id="export-btn" title="Download the current list as CSV">Export CSV</button>
+    </span>
+  </div>
+  <p class="muted small" style="margin:0 0 .6rem">People and companies that recently <strong>bought</strong> property at a tax sale, levy sale, sheriff&rsquo;s sale or foreclosure in Fulton, DeKalb, Cobb, Henry or Douglas. A buyer only appears here once the county shows the sale actually completed, we know who bought it, and there is a real way to reach them. Tap a number to dial, set the status, jot a note, pick a follow-up date. <em>Not Interested</em> and <em>Bad Lead</em> are hidden unless you choose to show them. Research runs automatically every Wednesday morning.</p>
+  <details class="small" style="margin:0 0 .8rem">
+    <summary style="cursor:pointer;font-weight:700;color:var(--purple)">The pitch (why we are calling)</summary>
+    <div class="why-box" style="margin:.5rem 0 0">&ldquo;Congratulations on the property at [address]. We are Bridgeway 404, a local cleanout crew &mdash; we clear out everything left behind after a tax sale or foreclosure so you can get straight to renovating, renting or listing it. Can we give you a quick quote?&rdquo;</div>
+    <p class="muted" style="margin:.4rem 0 0">Repeat purchasers are the best leads: an investor who buys at every sale needs a cleanout crew on call.</p>
+  </details>
+
+  <div id="run-msg"></div>
+  <div class="card small hidden" id="run-card">
+    <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
+      <span id="run-status" class="muted"></span>
+      <button class="btn-quiet hidden" id="resume-btn" style="min-height:0;padding:.2rem .5rem;font-size:.8rem;margin-left:auto">Resume</button>
+    </div>
+    <div id="run-result" style="margin-top:.4rem"></div>
+    <div id="run-log" class="muted" style="margin-top:.3rem"></div>
+  </div>
+
+  <div class="card">
+    <div class="filters">
+      <input class="full" id="f-search" type="search" placeholder="Search buyer, contact, property, county&hellip;" autocomplete="off">
+      <select id="f-status">
+        <option value="active">Active (hides Not Interested / Bad Lead)</option>
+        <option value="">All statuses</option>
+        <option>New</option><option>Call Today</option><option>Called – No Answer</option><option>Left Voicemail</option>
+        <option>Spoke With Contact</option><option>Interested</option><option>Follow Up</option>
+        <option>Referral Partner</option><option>Not Interested</option><option>Bad Lead</option>
+      </select>
+      <select id="f-county">
+        <option value="">All counties</option>
+        <option>Fulton</option><option>DeKalb</option><option>Cobb</option><option>Henry</option><option>Douglas</option>
+      </select>
+      <select id="f-priority">
+        <option value="call">Call list (High + Medium)</option>
+        <option value="High">High priority only</option>
+        <option value="Medium">Medium priority only</option>
+        <option value="Low">Low priority (qualified but weak)</option>
+        <option value="research">Still being researched (no contact yet)</option>
+        <option value="">Everything</option>
+      </select>
+      <select id="f-assigned"><option value="">Anyone / unassigned</option></select>
+      <select id="f-show">
+        <option value="">Everything</option>
+        <option value="due">Follow-up due</option>
+        <option value="never">Never contacted</option>
+        <option value="repeat">Repeat purchasers (2+)</option>
+        <option value="phone">Has a phone number</option>
+        <option value="nophone">Needs a phone number</option>
+        <option value="company">Companies / LLCs</option>
+        <option value="individual">Individuals</option>
+      </select>
+      <select id="f-sort">
+        <option value="new">Newest leads first</option>
+        <option value="acq">Most acquisitions</option>
+        <option value="date">Latest acquisition date</option>
+        <option value="follow">Follow-up date</option>
+        <option value="contact">Last contacted</option>
+        <option value="name">Buyer A–Z</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="loading" class="loading">Loading&hellip;</div>
+  <div id="error" class="alert-error hidden"></div>
+  <div id="empty" class="card center hidden">
+    <p class="muted" style="margin:0" id="empty-text">No buyers match these filters.</p>
+  </div>
+  <div class="att-header ab-header" id="ab-header">
+    <span>Buyer / company</span><span>Phone</span><span>Property</span><span>Acquired</span><span>Priority</span><span>Type</span><span>Status</span><span>Follow up</span><span>Assigned</span>
+  </div>
+  <div id="list"></div>
+  <div class="center" style="margin:1rem 0">
+    <button id="more-btn" class="btn-secondary hidden">Load more</button>
+  </div>
+
+  <div class="card">
+    <details>
+      <summary style="cursor:pointer;font-weight:700;color:var(--purple)">Research queue, sources &amp; schedule</summary>
+      <p class="muted small" style="margin:.5rem 0 0">Properties from county sale lists are tracked behind the scenes until the sale is confirmed, the buyer is identified and a contact is found. Only then does a buyer join the call list above.</p>
+      <div class="ab-queue" id="queue-box"></div>
+      <div id="county-box" class="small muted"></div>
+      <p class="label" style="margin-top:.8rem">Schedule</p>
+      <div id="schedule-box" class="small"></div>
+      <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.4rem">
+        <button class="btn-quiet hidden" id="pause-btn" style="min-height:36px;padding:.3rem .7rem;font-size:.82rem">Pause weekly research</button>
+        <button class="btn-secondary hidden" id="unpause-btn" style="min-height:36px;padding:.3rem .7rem;font-size:.82rem">Resume weekly research</button>
+      </div>
+      <p class="label" style="margin-top:.8rem">Public sources</p>
+      <div id="sources-box" class="small"></div>
+      <p class="label" style="margin-top:.8rem">Optional: Anthropic API key</p>
+      <div id="secret-status" class="small muted" style="margin:.3rem 0"></div>
+      <form id="secret-form">
+        <div class="field"><label class="label" for="s-key">Anthropic API key (stored encrypted in Supabase Vault; never shown again)</label><input id="s-key" type="password" autocomplete="off" placeholder="sk-ant-&hellip;"></div>
+        <div id="secret-msg"></div>
+        <button type="submit" class="btn-secondary">Save key</button>
+      </form>
+      <p class="muted small" style="margin:.7rem 0 0">The research works without a key: county sale results and assessor rolls are read directly. A key only adds two extras &mdash; reading Fulton&rsquo;s scanned levy lists (OCR) and looking up business phone numbers and websites for purchasers.</p>
+      <div id="runs-box" class="small" style="margin-top:.8rem"></div>
+    </details>
+  </div>
+</main>
+
+<!-- ===== Add buyer ===== -->
+<div class="modal-back hidden" id="add-back">
+  <div class="modal">
+    <div style="display:flex;align-items:center;margin-bottom:.6rem">
+      <h2 style="margin:0">Add buyer</h2>
+      <button class="btn-quiet" style="margin-left:auto" id="add-close">Close</button>
+    </div>
+    <form id="add-form">
+      <div class="grid2">
+        <div class="field"><label class="label" for="a-name">Buyer / company *</label><input id="a-name" type="text" required></div>
+        <div class="field"><label class="label" for="a-contact">Contact person</label><input id="a-contact" type="text"></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label class="label" for="a-phone">Phone</label><input id="a-phone" type="tel"></div>
+        <div class="field"><label class="label" for="a-email">Email</label><input id="a-email" type="email"></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label class="label" for="a-website">Website</label><input id="a-website" type="text" placeholder="company.com"></div>
+        <div class="field"><label class="label" for="a-mailing">Business mailing address</label><input id="a-mailing" type="text"></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label class="label" for="a-county">County</label>
+          <select id="a-county"><option value="">—</option><option>Fulton</option><option>DeKalb</option><option>Cobb</option><option>Henry</option><option>Douglas</option><option>Other</option></select></div>
+        <div class="field"><label class="label" for="a-type">Buyer type</label>
+          <select id="a-type"><option value="investor_company">Investor company / LLC</option><option value="investor_individual">Individual investor</option><option value="landlord">Landlord / rental operator</option><option value="flipper">Flipper / renovator</option><option value="builder">Builder / developer</option><option value="institutional_lender">Bank / lender</option><option value="servicer">Servicer</option><option value="nonprofit">Nonprofit</option><option value="individual">Individual (owner-occupant)</option><option value="unknown">Unknown</option></select></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label class="label" for="a-priority">Priority</label><select id="a-priority"><option>High</option><option selected>Medium</option><option>Low</option></select></div>
+        <div class="field"><label class="label" for="a-source">Source URL</label><input id="a-source" type="text"></div>
+      </div>
+      <div class="field"><label class="label" for="a-evidence">Evidence (what shows they bought at auction?)</label><textarea id="a-evidence" placeholder="e.g. Listed as purchaser of 123 Main St in the Douglas County overage file, sale 4/7/2026"></textarea></div>
+      <div class="field"><label class="label" for="a-notes">Notes</label><input id="a-notes" type="text"></div>
+      <div id="add-msg"></div>
+      <button type="submit" class="btn-primary">Add to list</button>
+    </form>
+  </div>
+</div>
+
+<script src="/admin/assets/supabase.js"></script>
+<script src="/admin/assets/config.js"></script>
+<script src="/admin/assets/admin.js"></script>
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var PAGE = 100;
+  var offset = 0;
+  var rows = [];
+  var expanded = {};
+  var summary = null;
+  var me = null;
+  var pollTimer = null;
+  var HIDDEN = ['Not Interested', 'Bad Lead'];
+  var STATUSES = ['New', 'Call Today', 'Called – No Answer', 'Left Voicemail', 'Spoke With Contact', 'Interested', 'Follow Up', 'Referral Partner', 'Not Interested', 'Bad Lead'];
+  var TEAM = ['Leslie', 'Mike', 'Jonathan'];
+  var assignees = TEAM.slice();
+  var TYPE_LABELS = { investor_company: 'Investor company', investor_individual: 'Individual investor', landlord: 'Landlord', flipper: 'Flipper', builder: 'Builder', institutional_lender: 'Bank / lender', servicer: 'Servicer', government: 'Government', nonprofit: 'Nonprofit', individual: 'Individual', unknown: 'Unknown' };
+  var PTYPE_LABELS = { single_family: 'Single-family', townhome: 'Townhome', condo: 'Condo', duplex: 'Duplex', multifamily: 'Multifamily', commercial: 'Commercial', land: 'Land', mobile_home: 'Mobile home', other: 'Other', unknown: '' };
+  var SALE_LABELS = { tax_sale: 'tax sale', levy_sale: 'levy sale', sheriff_sale: "sheriff's sale", foreclosure: 'foreclosure', judicial_sale: 'judicial sale', other: 'sale' };
+  var QUEUE_LABELS = { upcoming: 'Upcoming / waiting', awaiting_sale_result: 'Awaiting sale result', buyer_research_needed: 'Buyer research needed', buyer_identified: 'Buyer identified', contact_research_needed: 'Contact research needed', qualified: 'Qualified', not_useful: 'Not useful' };
+  var QUEUE_ORDER = ['upcoming', 'awaiting_sale_result', 'buyer_research_needed', 'buyer_identified', 'contact_research_needed', 'qualified', 'not_useful'];
+
+  function showError(msg) { $('error').textContent = msg; $('error').classList.remove('hidden'); }
+  function todayISO() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  function fmtD(d) { return d ? BW.fmtDate(d.length === 10 ? d + 'T12:00:00' : d) : ''; }
+  function link(url, text) {
+    if (!url) return '';
+    var href = /^[a-z]+:\/\//i.test(url) ? url : 'https://' + url;
+    return '<a href="' + BW.esc(href) + '" target="_blank" rel="noopener">' + BW.esc(text || BW.host(href)) + '</a>';
+  }
+  function truncate(s, n) { s = String(s || '').replace(/\s+/g, ' ').trim(); return s.length > n ? s.slice(0, n - 1) + '…' : s; }
+  function money(n) { return n == null ? '' : '$' + Number(n).toLocaleString('en-US', { maximumFractionDigits: 0 }); }
+  function statusClass(s) {
+    if (HIDDEN.indexOf(s) >= 0) return 'done';
+    if (s === 'Call Today') return 'gold';
+    if (s === 'Interested' || s === 'Referral Partner') return 'status';
+    return '';
+  }
+  function prioChip(p) { return '<span class="chip prio-' + (p || 'low').toLowerCase() + '">' + BW.esc(p || 'Low') + '</span>'; }
+  function assigneeOptions(current) {
+    var list = assignees.slice();
+    if (current && list.indexOf(current) < 0) list.push(current);
+    return '<option value="">Unassigned</option>' + list.map(function (a) { return '<option' + (a === current ? ' selected' : '') + '>' + BW.esc(a) + '</option>'; }).join('') + '<option value="__other">Someone else…</option>';
+  }
+  function statusOptions(current) { return STATUSES.map(function (s) { return '<option' + (s === current ? ' selected' : '') + '>' + BW.esc(s) + '</option>'; }).join(''); }
+
+  // ---------- Summary / run status ----------
+  async function loadSummary() {
+    var res = await BW.sb.rpc('ab_summary');
+    if (res.error) { showError('Could not load summary: ' + res.error.message); return; }
+    summary = res.data;
+    $('chip-today').textContent = summary.call_today + ' to call today';
+    $('chip-today').classList.toggle('hidden', !summary.call_today);
+    $('chip-due').textContent = summary.follow_ups_due + ' follow-up' + (summary.follow_ups_due === 1 ? '' : 's') + ' due';
+    $('chip-due').classList.toggle('hidden', !summary.follow_ups_due);
+    $('secret-status').innerHTML = summary.has_ai_key
+      ? '<span class="chip">Anthropic API key is set</span> Enter a new key below to replace it.'
+      : '<span class="chip">No Anthropic API key set</span> Not required; the weekly research runs without one.';
+    renderRun();
+    renderQueue();
+  }
+  function runActive() { var lr = summary && summary.last_run; return !!(lr && (lr.status === 'queued' || lr.status === 'running')); }
+  function resultLine(c) {
+    c = c || {};
+    return [
+      (c.counties_checked || 0) + ' counties checked',
+      (c.sales_reviewed || 0) + ' completed sales reviewed',
+      (c.buyers_identified || 0) + ' buyers identified',
+      (c.qualified_added || 0) + ' qualified leads added',
+      (c.existing_updated || 0) + ' existing updated',
+      (c.repeat_buyers || 0) + ' repeat purchasers'
+    ].join(' · ');
+  }
+  function renderRun() {
+    var lr = summary && summary.last_run;
+    var card = $('run-card');
+    if (!lr) { card.classList.add('hidden'); $('runs-box').innerHTML = '<p class="muted">No research run yet.</p>'; return; }
+    card.classList.remove('hidden');
+    var when = lr.finished_at || lr.started_at;
+    var stale = runActive() && lr.heartbeat_at && (Date.now() - new Date(lr.heartbeat_at).getTime()) > 3 * 60000;
+    var parts = [];
+    if (runActive()) parts.push('<span class="chip gold">Research in progress</span> ' + (stale ? '<span style="color:var(--error)">The worker has not checked in for a few minutes.</span>' : 'This page refreshes on its own.'));
+    else parts.push('<strong>Last run</strong> (' + BW.esc(lr.trigger === 'scheduled' ? 'Wednesday schedule' : 'manual') + '): ' + BW.esc(lr.status.replace(/_/g, ' ')) + (when ? ' &middot; ' + BW.esc(BW.fmtDateTime(when)) : ''));
+    if ((lr.errors || []).length) parts.push('<span style="color:var(--error)">' + lr.errors.length + ' error' + (lr.errors.length === 1 ? '' : 's') + '</span>');
+    $('run-status').innerHTML = parts.join(' <span class="muted">&middot;</span> ');
+    $('run-result').innerHTML = '<strong>' + BW.esc(resultLine(lr.counts)) + '</strong>';
+    $('resume-btn').classList.toggle('hidden', !(stale || (summary.queued_jobs > 0 && !runActive())));
+    var log = (lr.log || []).slice(-4);
+    $('run-log').innerHTML = log.map(function (l) { return '<div>' + BW.esc(l.line) + '</div>'; }).join('');
+    if (!runActive() && when && Date.now() - new Date(when).getTime() > 86400000) card.classList.add('hidden');
+    if (runActive()) { if (!pollTimer) pollTimer = setInterval(poll, 4000); }
+    else if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+  }
+  function renderQueue() {
+    var q = (summary && summary.queue) || {};
+    $('queue-box').innerHTML = QUEUE_ORDER.map(function (k) { return '<div><strong>' + (q[k] || 0) + '</strong>' + BW.esc(QUEUE_LABELS[k]) + '</div>'; }).join('');
+    var bc = (summary && summary.by_county) || {};
+    var keys = Object.keys(bc);
+    $('county-box').textContent = keys.length ? 'Call list by county: ' + keys.map(function (k) { return k + ' ' + bc[k]; }).join(', ') + '.' : 'No qualified buyers on the call list yet.';
+    var paused = summary && summary.paused;
+    $('schedule-box').innerHTML = paused
+      ? '<span class="chip done">Paused</span> Weekly research is switched off. Nothing runs until it is resumed.'
+      : '<span class="chip status">Every Wednesday, 8:00 am Eastern</span> Next run ' + BW.esc(summary && summary.next_scheduled_run ? BW.fmtDateTime(summary.next_scheduled_run) : '') + '. This schedule is separate from Distressed Property Leads, which stays paused.';
+    $('pause-btn').classList.toggle('hidden', !!paused);
+    $('unpause-btn').classList.toggle('hidden', !paused);
+    var srcs = (summary && summary.sources) || [];
+    $('sources-box').innerHTML = srcs.length ? srcs.map(function (s) {
+      var ok = s.last_success_at && (!s.last_error || s.last_error.indexOf('HTTP') < 0);
+      return '<div class="ab-src"><strong>' + BW.esc(s.county) + '</strong> &middot; ' + BW.esc(s.label) +
+        (s.last_success_at ? ' <span class="muted">&middot; last read ' + BW.esc(BW.fmtDateTime(s.last_success_at)) + '</span>' : ' <span class="muted">&middot; not read yet</span>') +
+        (s.last_error ? '<div class="muted">' + BW.esc(truncate(s.last_error, 260)) + '</div>' : '') +
+        (s.notes ? '<div class="muted">' + BW.esc(s.notes) + '</div>' : '') + '</div>';
+    }).join('') : '<p class="muted">Sources appear after the first run.</p>';
+  }
+  var lastRunStatus = null;
+  async function poll() {
+    var prev = summary && summary.last_run ? summary.last_run.status + ':' + JSON.stringify(summary.last_run.counts) : null;
+    await loadSummary();
+    var cur = summary && summary.last_run ? summary.last_run.status + ':' + JSON.stringify(summary.last_run.counts) : null;
+    if (cur !== prev) load(true);
+    if (!runActive() && lastRunStatus !== cur) { lastRunStatus = cur; loadRuns(); }
+  }
+  async function loadRuns() {
+    var res = await BW.sb.from('ab_runs').select('id,trigger,status,started_at,finished_at,counts,log,errors').order('created_at', { ascending: false }).limit(8);
+    if (res.error || !res.data.length) return;
+    $('runs-box').innerHTML = '<p class="label">Recent runs</p>' + res.data.map(function (r) {
+      var e = (r.errors || []).length;
+      var last = (r.log || []).slice(-1)[0];
+      return '<div class="history-item"><strong>' + BW.esc(BW.fmtDateTime(r.started_at || r.finished_at)) + '</strong> &middot; ' + BW.esc(r.trigger) + ' &middot; ' + BW.esc(r.status.replace(/_/g, ' ')) +
+        '<div>' + BW.esc(resultLine(r.counts)) + '</div>' +
+        (e ? '<div style="color:var(--error)">' + e + ' error' + (e === 1 ? '' : 's') + '</div>' : '') +
+        (last ? '<div class="muted">' + BW.esc(last.line) + '</div>' : '') + '</div>';
+    }).join('');
+  }
+
+  // ---------- Query ----------
+  function buildQuery() {
+    var q = BW.sb.from('ab_lead_list').select('*');
+    var s = $('f-search').value.trim().replace(/[,()]/g, ' ');
+    if (s) {
+      var like = '%' + s + '%';
+      q = q.or(['buyer_name', 'contact_name', 'county', 'city', 'latest_property', 'evidence', 'notes', 'mailing_address'].map(function (f) { return f + '.ilike.' + like; }).join(','));
+    }
+    var st = $('f-status').value;
+    if (st === 'active') q = q.not('contact_status', 'in', '("Not Interested","Bad Lead")');
+    else if (st) q = q.eq('contact_status', st);
+    var county = $('f-county').value;
+    if (county) q = q.or('county.eq.' + county + ',counties.cs.{' + county + '}');
+    var pr = $('f-priority').value;
+    if (pr === 'call') q = q.eq('qualified', true).in('priority', ['High', 'Medium']);
+    else if (pr === 'research') q = q.eq('qualified', false);
+    else if (pr) q = q.eq('qualified', true).eq('priority', pr);
+    var who = $('f-assigned').value;
+    if (who === '__none') q = q.is('assigned_to', null);
+    else if (who) q = q.eq('assigned_to', who);
+    var show = $('f-show').value;
+    if (show === 'due') q = q.lte('follow_up_date', todayISO());
+    if (show === 'never') q = q.is('last_contacted_at', null);
+    if (show === 'repeat') q = q.gte('recent_acquisitions', 2);
+    if (show === 'phone') q = q.not('phone', 'is', null);
+    if (show === 'nophone') q = q.is('phone', null);
+    if (show === 'company') q = q.in('buyer_type', ['investor_company', 'landlord', 'flipper', 'builder', 'institutional_lender', 'servicer', 'nonprofit']);
+    if (show === 'individual') q = q.in('buyer_type', ['individual', 'investor_individual']);
+    var sort = $('f-sort').value;
+    if (sort === 'acq') q = q.order('recent_acquisitions', { ascending: false }).order('created_at', { ascending: false });
+    else if (sort === 'date') q = q.order('latest_acquired_on', { ascending: false, nullsFirst: false }).order('created_at', { ascending: false });
+    else if (sort === 'follow') q = q.order('follow_up_date', { ascending: true, nullsFirst: false }).order('created_at', { ascending: false });
+    else if (sort === 'contact') q = q.order('last_contacted_at', { ascending: false, nullsFirst: false }).order('created_at', { ascending: false });
+    else if (sort === 'name') q = q.order('buyer_name', { ascending: true });
+    else q = q.order('created_at', { ascending: false });
+    return q.range(offset, offset + PAGE - 1);
+  }
+
+  // ---------- Rendering ----------
+  function rowHTML(p) {
+    var due = p.follow_up_date && p.follow_up_date <= todayISO() && HIDDEN.indexOf(p.contact_status) < 0;
+    var chips = [];
+    if (p.recent_acquisitions >= 2) chips.push('<span class="chip gold" title="Bought at more than one auction">Repeat purchaser</span>');
+    if (p.is_institutional) chips.push('<span class="chip">Institutional</span>');
+    if (!p.qualified) chips.push('<span class="chip done" title="Not on the call list yet">Research: needs contact</span>');
+    var phone = p.phone
+      ? '<a class="att-call" href="' + BW.esc(BW.telHref(p.phone)) + '">&#9742; ' + BW.esc(p.phone) + '</a>'
+      : '<span class="muted">Needs lookup</span>';
+    var email = p.email ? '<div><a href="mailto:' + BW.esc(p.email) + '">&#9993; ' + BW.esc(p.email) + '</a></div>' : '';
+    var web = p.website ? '<div class="small">' + link(p.website) + '</div>' : '';
+    var prop = p.latest_property ? BW.esc(p.latest_property) : '<span class="muted">(address not printed; see details)</span>';
+    var propMeta = [p.latest_property_county ? p.latest_property_county + ' County' : (p.county ? p.county + ' County' : ''), PTYPE_LABELS[p.latest_property_type] || '', p.latest_sale_type ? SALE_LABELS[p.latest_sale_type] : ''].filter(Boolean).join(' · ');
+    var acq = '<span class="ab-acq">' + p.recent_acquisitions + '</span> recent auction acquisition' + (p.recent_acquisitions === 1 ? '' : 's') + (p.latest_acquired_on ? '<div class="muted small">latest ' + BW.esc(fmtD(p.latest_acquired_on)) + '</div>' : '');
+    var last = p.last_contacted_at ? BW.esc(BW.fmtDateTime(p.last_contacted_at)) : '<span class="muted">never</span>';
+    var open = !!expanded[p.id];
+    return '<div class="att-row ab-row' + (due ? ' due' : '') + (HIDDEN.indexOf(p.contact_status) >= 0 ? ' hidden-lead' : '') + '" data-id="' + p.id + '">' +
+      '<div class="att-cell ab-buyer"><span class="att-k">Buyer / company</span><strong>' + BW.esc(p.buyer_name) + '</strong>' + (p.contact_name ? '<div class="small">Contact: ' + BW.esc(p.contact_name) + '</div>' : '') + (p.mailing_address && !p.phone ? '<div class="muted small">' + BW.esc(p.mailing_address) + '</div>' : '') + (chips.length ? '<div class="att-chips">' + chips.join('') + '</div>' : '') + '</div>' +
+      '<div class="att-cell att-phone"><span class="att-k">Phone</span>' + phone + email + web + '</div>' +
+      '<div class="att-cell ab-property"><span class="att-k">Property</span>' + prop + (propMeta ? '<div class="muted small">' + BW.esc(propMeta) + '</div>' : '') + '</div>' +
+      '<div class="att-cell"><span class="att-k">Acquired</span>' + acq + '</div>' +
+      '<div class="att-cell ab-prio"><span class="att-k">Priority</span>' + prioChip(p.priority) + '</div>' +
+      '<div class="att-cell"><span class="att-k">Type</span>' + BW.esc(TYPE_LABELS[p.buyer_type] || p.buyer_type) + '</div>' +
+      '<div class="att-cell att-status"><span class="att-k">Status</span><select class="st-sel chip-' + statusClass(p.contact_status) + '" data-id="' + p.id + '">' + statusOptions(p.contact_status) + '</select>' +
+        '<button class="btn-quiet mark-btn" data-id="' + p.id + '" title="Record that you reached out just now">Mark contacted</button><div class="muted small">Last: ' + last + '</div></div>' +
+      '<div class="att-cell att-follow"><span class="att-k">Follow up</span><input type="date" class="fu-date" data-id="' + p.id + '" value="' + BW.esc(p.follow_up_date || '') + '">' + (due ? '<div class="chip gold" style="margin-top:.2rem">Due</div>' : '') + '</div>' +
+      '<div class="att-cell att-assigned"><span class="att-k">Assigned</span><select class="as-sel" data-id="' + p.id + '">' + assigneeOptions(p.assigned_to) + '</select></div>' +
+      '<div class="att-cell att-note ab-note"><input type="text" class="qn-text" data-id="' + p.id + '" placeholder="Short note (e.g. spoke with owner, wants quote after closing)">' +
+        '<button class="btn-secondary qn-save" data-id="' + p.id + '">Save note</button>' +
+        '<button type="button" class="btn-quiet att-toggle" data-id="' + p.id + '" aria-expanded="' + open + '">' + (open ? 'Hide details' : 'Properties, evidence &amp; notes') + '</button>' +
+        (p.last_note ? '<div class="fu-note"><span class="fu-kind">Latest</span>' + BW.esc(truncate(p.last_note, 140)) + ' <span class="muted">&mdash; ' + BW.esc(p.last_note_by || '') + ', ' + BW.esc(BW.fmtDate(p.last_note_at)) + '</span></div>' : '') + '</div>' +
+      '<div class="att-detail ab-detail lead-detail' + (open ? '' : ' hidden') + '" id="detail-' + p.id + '"></div>' +
+      '</div>';
+  }
+  function rerenderRow(p) {
+    var old = document.querySelector('.ab-row[data-id="' + p.id + '"]');
+    if (!old) return;
+    var detail = old.querySelector('.ab-detail');
+    old.insertAdjacentHTML('afterend', rowHTML(p));
+    var fresh = old.nextElementSibling;
+    old.remove();
+    if (expanded[p.id] && detail) fresh.replaceChild(detail, fresh.querySelector('.ab-detail'));
+  }
+  async function refreshRow(id) {
+    var res = await BW.sb.from('ab_lead_list').select('*').eq('id', id).maybeSingle();
+    if (res.error || !res.data) return null;
+    var i = rows.findIndex(function (r) { return r.id === id; });
+    if (i >= 0) rows[i] = res.data; else rows.push(res.data);
+    rerenderRow(res.data);
+    if (expanded[id]) loadDetail(res.data, $('detail-' + id));
+    return res.data;
+  }
+  async function load(reset) {
+    if (reset) { offset = 0; rows = []; $('list').innerHTML = ''; }
+    $('error').classList.add('hidden'); $('empty').classList.add('hidden'); $('loading').classList.remove('hidden');
+    var res = await buildQuery();
+    $('loading').classList.add('hidden');
+    if (res.error) { showError('Could not load buyers: ' + res.error.message); return; }
+    res.data.forEach(function (p) { if (p.assigned_to && assignees.indexOf(p.assigned_to) < 0) assignees.push(p.assigned_to); });
+    rows = rows.concat(res.data);
+    $('list').insertAdjacentHTML('beforeend', res.data.map(rowHTML).join(''));
+    var pr = $('f-priority').value;
+    $('empty-text').textContent = rows.length ? '' : (pr === 'call' && summary && !summary.visible
+      ? 'No qualified buyers on the call list yet. The research queue below shows what is being tracked; the next Wednesday run (or "Find Auction Buyers Now") re-checks every county.'
+      : 'No buyers match these filters.');
+    $('empty').classList.toggle('hidden', rows.length > 0);
+    $('ab-header').classList.toggle('hidden', rows.length === 0);
+    $('chip-count').textContent = rows.length + (res.data.length === PAGE ? '+' : '') + ' shown';
+    $('chip-count').classList.remove('hidden');
+    $('more-btn').classList.toggle('hidden', res.data.length < PAGE);
+    offset += PAGE;
+    renderAssigneeFilter();
+  }
+  function renderAssigneeFilter() {
+    var sel = $('f-assigned'); var cur = sel.value;
+    sel.innerHTML = '<option value="">Anyone / unassigned</option><option value="__none">Unassigned only</option>' + assignees.map(function (a) { return '<option>' + BW.esc(a) + '</option>'; }).join('');
+    sel.value = cur;
+  }
+
+  // ---------- Detail panel ----------
+  var ED = ['buyer_name', 'contact_name', 'phone', 'email', 'website', 'mailing_address', 'city', 'county', 'buyer_type', 'priority', 'evidence', 'notes'];
+  async function loadDetail(p, box) {
+    box.innerHTML = '<div class="muted small">Loading&hellip;</div>';
+    var pr = await BW.sb.from('ab_buyer_property_list').select('*').eq('buyer_id', p.id).order('acquired_on', { ascending: false, nullsFirst: false });
+    var act = await BW.sb.from('ab_activity_view').select('*').eq('buyer_id', p.id).order('created_at', { ascending: false }).limit(50);
+    var props = pr.data || [];
+    var activity = act.data || [];
+    var h = [];
+    h.push('<p class="label">Why this is a lead</p><div class="small pre">' + BW.esc(p.evidence || 'No evidence recorded yet.') + '</div>');
+    if (props.length) {
+      h.push('<p class="label">Properties acquired at auction (' + props.length + ')</p><table class="ab-props"><thead><tr><th>Property</th><th>County</th><th>Sale</th><th>Paid</th><th>Verification</th><th>Records</th></tr></thead><tbody>' + props.map(function (x) {
+        var ver = x.sold_confirmed ? '<span class="chip status">Sale confirmed</span>' : '<span class="chip">' + BW.esc(QUEUE_LABELS[x.research_status] || x.research_status) + '</span>';
+        return '<tr><td>' + BW.esc(x.address || '(address not printed)') + (x.parcel_id ? '<div class="muted">Parcel ' + BW.esc(x.parcel_id) + '</div>' : '') + (PTYPE_LABELS[x.property_type] ? '<div class="muted">' + BW.esc(PTYPE_LABELS[x.property_type]) + '</div>' : '') + '</td>' +
+          '<td>' + BW.esc(x.county) + '</td><td>' + BW.esc(fmtD(x.acquired_on || x.sale_date)) + '<div class="muted">' + BW.esc(SALE_LABELS[x.sale_type] || '') + '</div></td>' +
+          '<td>' + BW.esc(money(x.purchase_price)) + '</td><td>' + ver + (x.status_reason ? '<div class="muted">' + BW.esc(x.status_reason) + '</div>' : '') + '</td>' +
+          '<td>' + [x.list_url ? link(x.list_url, 'County list') : '', x.assessor_source_url ? link(x.assessor_source_url, 'Assessor') : ''].filter(Boolean).join(' · ') + '</td></tr>';
+      }).join('') + '</tbody></table>');
+    }
+    if (p.mailing_address) h.push('<p class="label">Mailing address (assessor roll)</p><div class="small">' + BW.esc(p.mailing_address) + '</div>');
+    if (p.research_notes) h.push('<p class="label">Research notes</p><div class="small">' + BW.esc(p.research_notes) + '</div>');
+    if ((p.source_urls || []).length) h.push('<p class="label">Sources</p><div class="src-links small">' + p.source_urls.map(function (u) { return link(u); }).join(' ') + '</div>');
+    var facts = [];
+    facts.push((p.created_by_name ? 'Added by ' + p.created_by_name : 'Found by the weekly research') + ' ' + BW.fmtDate(p.created_at));
+    if ((p.counties || []).length) facts.push('Counties: ' + p.counties.join(', '));
+    facts.push('Type: ' + (TYPE_LABELS[p.buyer_type] || p.buyer_type));
+    facts.push(p.qualified ? 'Qualified for the call list' : 'Not yet qualified (needs a contact or sale confirmation)');
+    if (p.status_changed_at) facts.push('Status set ' + BW.fmtDateTime(p.status_changed_at));
+    h.push('<div class="small muted" style="margin-top:.4rem">' + facts.map(BW.esc).join(' &middot; ') + '</div>');
+
+    var typeOpts = Object.keys(TYPE_LABELS).map(function (k) { return '<option value="' + k + '"' + (k === p.buyer_type ? ' selected' : '') + '>' + BW.esc(TYPE_LABELS[k]) + '</option>'; }).join('');
+    h.push('<details style="margin-top:.6rem"><summary style="cursor:pointer;font-weight:700;color:var(--purple)">Edit details</summary><form class="ed-form" data-id="' + p.id + '" style="margin-top:.5rem">' +
+      '<div class="grid2"><div class="field"><label class="label">Buyer / company</label><input name="buyer_name" type="text" value="' + BW.esc(p.buyer_name || '') + '"></div>' +
+      '<div class="field"><label class="label">Contact person</label><input name="contact_name" type="text" value="' + BW.esc(p.contact_name || '') + '"></div></div>' +
+      '<div class="grid2"><div class="field"><label class="label">Phone</label><input name="phone" type="tel" value="' + BW.esc(p.phone || '') + '"></div>' +
+      '<div class="field"><label class="label">Email</label><input name="email" type="email" value="' + BW.esc(p.email || '') + '"></div></div>' +
+      '<div class="grid2"><div class="field"><label class="label">Website</label><input name="website" type="text" value="' + BW.esc(p.website || '') + '"></div>' +
+      '<div class="field"><label class="label">Business mailing address</label><input name="mailing_address" type="text" value="' + BW.esc(p.mailing_address || '') + '"></div></div>' +
+      '<div class="grid2"><div class="field"><label class="label">City</label><input name="city" type="text" value="' + BW.esc(p.city || '') + '"></div>' +
+      '<div class="field"><label class="label">County</label><input name="county" type="text" value="' + BW.esc(p.county || '') + '"></div></div>' +
+      '<div class="grid2"><div class="field"><label class="label">Buyer type</label><select name="buyer_type">' + typeOpts + '</select></div>' +
+      '<div class="field"><label class="label">Priority</label><select name="priority">' + ['High', 'Medium', 'Low'].map(function (x) { return '<option' + (x === p.priority ? ' selected' : '') + '>' + x + '</option>'; }).join('') + '</select></div></div>' +
+      '<div class="field"><label style="display:flex;align-items:center;gap:.4rem"><input type="checkbox" name="qualified"' + (p.qualified ? ' checked' : '') + ' style="width:20px;height:20px"> On the call list (qualified)</label></div>' +
+      '<div class="field"><label class="label">Evidence / why this is a lead</label><textarea name="evidence">' + BW.esc(p.evidence || '') + '</textarea></div>' +
+      '<div class="field"><label class="label">Notes (standing notes for this buyer)</label><textarea name="notes">' + BW.esc(p.notes || '') + '</textarea></div>' +
+      '<div class="ed-msg"></div><button type="submit" class="btn-primary">Save details</button></form></details>');
+
+    h.push('<p class="label">Notes &amp; activity</p>' + (activity.length ? activity.map(function (a) {
+      var kind = a.kind === 'status_change' ? (a.from_status || '') + ' → ' + (a.to_status || '') : a.kind === 'contact' ? 'Contacted' : a.kind === 'follow_up' ? 'Follow-up' : a.kind === 'assignment' ? 'Assigned' : a.kind === 'system' ? 'Research' : 'Note';
+      return '<div class="history-item"><span class="fu-kind">' + BW.esc(kind) + '</span>' + BW.esc(a.note || '') + ' <span class="muted">&mdash; ' + BW.esc(a.display_name || 'system') + ', ' + BW.esc(BW.fmtDateTime(a.created_at)) + '</span></div>';
+    }).join('') : '<div class="muted small">No activity yet.</div>'));
+    box.innerHTML = h.join('');
+  }
+  function toggle(id) {
+    var box = $('detail-' + id);
+    var row = document.querySelector('.ab-row[data-id="' + id + '"]');
+    var btn = row && row.querySelector('.att-toggle');
+    var p = rows.find(function (r) { return r.id === id; });
+    if (!p || !box) return;
+    if (expanded[id]) {
+      box.classList.add('hidden'); expanded[id] = false;
+      if (btn) { btn.innerHTML = 'Properties, evidence &amp; notes'; btn.setAttribute('aria-expanded', 'false'); }
+      return;
+    }
+    expanded[id] = true; box.classList.remove('hidden');
+    if (btn) { btn.textContent = 'Hide details'; btn.setAttribute('aria-expanded', 'true'); }
+    loadDetail(p, box);
+  }
+
+  // ---------- Updates ----------
+  async function patch(id, p, el) {
+    if (el) el.disabled = true;
+    var res = await BW.sb.rpc('ab_update_lead', { p_id: id, p_patch: p });
+    if (el) el.disabled = false;
+    if (res.error) { alert('Could not save: ' + res.error.message); return false; }
+    await refreshRow(id);
+    loadSummary();
+    return true;
+  }
+  $('list').addEventListener('click', async function (e) {
+    var t = e.target;
+    if (t.closest('a')) return;
+    var btn = t.closest('button');
+    if (!btn) return;
+    if (btn.classList.contains('att-toggle')) { toggle(btn.dataset.id); return; }
+    if (btn.classList.contains('mark-btn')) {
+      var row = btn.closest('.ab-row');
+      var qn = row.querySelector('.qn-text');
+      await patch(btn.dataset.id, { mark_contacted: true, note: qn && qn.value.trim() ? qn.value.trim() : null }, btn);
+      return;
+    }
+    if (btn.classList.contains('qn-save')) {
+      var ta = btn.closest('.ab-row').querySelector('.qn-text');
+      if (!ta.value.trim()) { ta.focus(); return; }
+      var r1 = await BW.sb.rpc('ab_add_note', { p_id: btn.dataset.id, p_note: ta.value.trim() });
+      if (r1.error) { alert('Could not save note: ' + r1.error.message); return; }
+      await refreshRow(btn.dataset.id);
+    }
+  });
+  $('list').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && e.target.classList.contains('qn-text')) { e.preventDefault(); var b = e.target.parentNode.querySelector('.qn-save'); if (b) b.click(); }
+  });
+  $('list').addEventListener('change', async function (e) {
+    var el = e.target;
+    if (el.classList.contains('st-sel')) {
+      var p = rows.find(function (x) { return x.id === el.dataset.id; });
+      var qn = el.closest('.ab-row').querySelector('.qn-text');
+      var ok = await patch(el.dataset.id, { contact_status: el.value, note: qn && qn.value.trim() ? qn.value.trim() : null }, el);
+      if (!ok && p) el.value = p.contact_status;
+      return;
+    }
+    if (el.classList.contains('fu-date')) { await patch(el.dataset.id, { follow_up_date: el.value || null }, el); return; }
+    if (el.classList.contains('as-sel')) {
+      var v = el.value;
+      if (v === '__other') {
+        v = (prompt('Assign to (name):') || '').trim();
+        if (!v) { var p2 = rows.find(function (x) { return x.id === el.dataset.id; }); el.value = (p2 && p2.assigned_to) || ''; return; }
+        if (assignees.indexOf(v) < 0) assignees.push(v);
+      }
+      await patch(el.dataset.id, { assigned_to: v || null }, el);
+    }
+  });
+  $('list').addEventListener('submit', async function (e) {
+    var form = e.target;
+    if (!form.classList.contains('ed-form')) return;
+    e.preventDefault();
+    var vals = {};
+    ED.forEach(function (f) { var i = form.querySelector('[name="' + f + '"]'); if (i) vals[f] = i.value.trim(); });
+    vals.qualified = form.querySelector('[name="qualified"]').checked;
+    if (!vals.buyer_name) { form.querySelector('.ed-msg').innerHTML = '<div class="alert-error">Enter a buyer or company name.</div>'; return; }
+    var btnS = form.querySelector('button[type="submit"]');
+    btnS.disabled = true;
+    var res = await BW.sb.rpc('ab_update_lead', { p_id: form.dataset.id, p_patch: vals });
+    btnS.disabled = false;
+    if (res.error) { form.querySelector('.ed-msg').innerHTML = '<div class="alert-error">' + BW.esc(res.error.message) + '</div>'; return; }
+    await refreshRow(form.dataset.id);
+    loadSummary();
+  });
+
+  // ---------- Filters ----------
+  var timer = null;
+  $('f-search').addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(function () { load(true); }, 300); });
+  ['f-status', 'f-county', 'f-priority', 'f-assigned', 'f-show', 'f-sort'].forEach(function (id) { $(id).addEventListener('change', function () { load(true); }); });
+  $('more-btn').addEventListener('click', function () { load(false); });
+
+  // ---------- Find Auction Buyers Now ----------
+  $('find-btn').addEventListener('click', async function () {
+    $('run-msg').innerHTML = '';
+    if (runActive()) { $('run-msg').innerHTML = '<div class="alert-error">A research run is already in progress. Wait for it to finish, or use Resume if it stalled.</div>'; return; }
+    if (summary && summary.paused) { $('run-msg').innerHTML = '<div class="alert-error">Weekly research is paused. Resume it below before running.</div>'; return; }
+    if (!confirm('Run the auction buyer research now? It reads the five counties\' public sale results and assessor rolls (a few minutes).')) return;
+    var btn = $('find-btn'); btn.disabled = true;
+    var res = await BW.sb.rpc('ab_request_run', { p_options: {}, p_trigger: 'manual' });
+    btn.disabled = false;
+    if (res.error) { $('run-msg').innerHTML = '<div class="alert-error">' + BW.esc(res.error.message) + '</div>'; return; }
+    $('run-msg').innerHTML = '<div class="alert-ok">Research started. This page updates as results arrive; the short run result appears above the list when it finishes.</div>';
+    setTimeout(function () { $('run-msg').innerHTML = ''; }, 12000);
+    await loadSummary();
+    if (!pollTimer) pollTimer = setInterval(poll, 4000);
+  });
+  $('resume-btn').addEventListener('click', async function () {
+    var res = await BW.sb.rpc('ab_resume_run');
+    if (res.error) { alert(res.error.message); return; }
+    $('run-msg').innerHTML = '<div class="alert-ok">Worker re-invoked (' + BW.esc(res.data) + ').</div>';
+    setTimeout(loadSummary, 3000);
+  });
+  $('pause-btn').addEventListener('click', async function () {
+    if (!confirm('Pause the weekly auction buyer research? Nothing else (Attorneys, Distressed) is affected.')) return;
+    var res = await BW.sb.rpc('ab_set_paused', { p_paused: true });
+    if (res.error) { alert(res.error.message); return; }
+    loadSummary();
+  });
+  $('unpause-btn').addEventListener('click', async function () {
+    var res = await BW.sb.rpc('ab_set_paused', { p_paused: false });
+    if (res.error) { alert(res.error.message); return; }
+    loadSummary();
+  });
+
+  // ---------- Add buyer ----------
+  $('add-btn').addEventListener('click', function () { $('add-msg').innerHTML = ''; $('add-back').classList.remove('hidden'); $('a-name').focus(); });
+  $('add-close').addEventListener('click', function () { $('add-back').classList.add('hidden'); });
+  $('add-back').addEventListener('click', function (e) { if (e.target === this) this.classList.add('hidden'); });
+  $('add-form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var msg = $('add-msg'); msg.innerHTML = '';
+    var p = {
+      buyer_name: $('a-name').value.trim(), contact_name: $('a-contact').value.trim() || null,
+      phone: $('a-phone').value.trim() || null, email: $('a-email').value.trim() || null, website: $('a-website').value.trim() || null,
+      mailing_address: $('a-mailing').value.trim() || null, county: $('a-county').value || null, buyer_type: $('a-type').value,
+      evidence: $('a-evidence').value.trim() || null, source_urls: $('a-source').value.trim() ? [$('a-source').value.trim()] : [],
+      priority: $('a-priority').value, qualified: true
+    };
+    if (!p.buyer_name) { msg.innerHTML = '<div class="alert-error">Enter a buyer or company name.</div>'; return; }
+    var res = await BW.sb.rpc('ab_upsert_buyer', { p: p });
+    if (res.error) { msg.innerHTML = '<div class="alert-error">' + BW.esc(res.error.message) + '</div>'; return; }
+    var extra = { qualified: true, priority: p.priority };
+    if ($('a-notes').value.trim()) extra.notes = $('a-notes').value.trim();
+    await BW.sb.rpc('ab_update_lead', { p_id: res.data.id, p_patch: extra });
+    e.target.reset();
+    $('add-back').classList.add('hidden');
+    $('run-msg').innerHTML = res.data.action === 'merged'
+      ? '<div class="alert-ok">Already on the list (matched on ' + BW.esc(res.data.matched_on) + '). New details were merged into the existing buyer.</div>'
+      : '<div class="alert-ok">Added to the list.</div>';
+    setTimeout(function () { $('run-msg').innerHTML = ''; }, 8000);
+    $('f-status').value = 'active'; $('f-priority').value = ''; $('f-show').value = ''; $('f-county').value = ''; $('f-assigned').value = ''; $('f-search').value = '';
+    await load(true);
+    if (!rows.some(function (r) { return r.id === res.data.id; })) await refreshRow(res.data.id);
+    loadSummary();
+  });
+
+  // ---------- Export ----------
+  $('export-btn').addEventListener('click', async function () {
+    offset = 0; var all = []; var page;
+    do { page = await buildQuery(); if (page.error) { alert(page.error.message); return; } all = all.concat(page.data); offset += PAGE; } while (page.data.length === PAGE && all.length < 5000);
+    offset = rows.length;
+    var cols = ['buyer_name', 'contact_name', 'phone', 'email', 'website', 'mailing_address', 'city', 'county', 'counties', 'buyer_type', 'recent_acquisitions', 'latest_property', 'latest_acquired_on', 'priority', 'qualified', 'evidence', 'source_urls', 'contact_status', 'last_contacted_at', 'follow_up_date', 'notes', 'assigned_to', 'last_note', 'created_at'];
+    var csv = [cols.join(',')].concat(all.map(function (r) {
+      return cols.map(function (c) { var v = r[c]; if (Array.isArray(v)) v = v.join(' | '); v = v == null ? '' : String(v); return '"' + v.replace(/"/g, '""') + '"'; }).join(',');
+    })).join('\r\n');
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv' }));
+    a.download = 'auction-buyer-leads-' + todayISO() + '.csv';
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+
+  // ---------- Secrets ----------
+  $('secret-form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var msg = $('secret-msg'); msg.innerHTML = '';
+    var v = $('s-key').value.trim();
+    if (!v) return;
+    var res = await BW.sb.rpc('dpl_set_secret', { p_name: 'anthropic_api_key', p_value: v });
+    if (res.error) { msg.innerHTML = '<div class="alert-error">' + BW.esc(res.error.message) + '</div>'; return; }
+    msg.innerHTML = '<div class="alert-ok">Key saved to the vault.</div>';
+    $('s-key').value = '';
+    loadSummary();
+  });
+
+  (async function boot() {
+    var auth = await BW.requireAdmin();
+    if (!auth) return;
+    me = auth.me;
+    var team = await BW.sb.from('admin_users').select('display_name').order('created_at');
+    (team.data || []).forEach(function (u) { if (u.display_name && assignees.indexOf(u.display_name) < 0) assignees.push(u.display_name); });
+    await loadSummary();
+    load(true);
+    loadRuns();
+  })();
+})();
+</script>
+</body>
+</html>
