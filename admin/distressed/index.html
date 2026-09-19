@@ -19,7 +19,8 @@
     <a href="/admin/blitz/">Blitz</a>
     <a href="/admin/prospects/">Prospects</a>
     <a href="/admin/follow-ups/">Follow-Ups</a>
-    <a href="/admin/distressed/" class="active">Leads</a>
+    <a href="/admin/attorneys/">Attorneys</a>
+    <a href="/admin/auction-buyers/">Auction Buyers</a>
   </nav>
 </header>
 
@@ -29,7 +30,8 @@
     <span id="count-chip" class="chip hidden"></span>
     <button id="run-btn" class="btn-secondary" style="margin-left:auto;min-height:40px;padding:.4rem .9rem;font-size:.85rem">Run research now</button>
   </div>
-  <p class="muted small" style="margin:0 0 .8rem">Foreclosure notices and late-stage evictions in Fulton, DeKalb, Douglas and Henry, matched to the property-management company, owner or investor most likely to buy cleanout and turnover work. Research runs automatically every Tuesday and Thursday at 8:00 AM Eastern.</p>
+  <div id="paused-banner" class="alert-error hidden"><strong>Paused.</strong> This lead source is not part of the current workflow: the Tuesday/Thursday research schedule is off and no enrichment or scoring jobs are created. Everything collected so far is kept and can be browsed below. The team is working the <a href="/admin/attorneys/">Eviction Attorney Leads</a> list instead. To reactivate, run <code>select public.dpl_set_paused(false);</code> in the Supabase SQL editor.</div>
+  <p class="muted small" style="margin:0 0 .8rem">Foreclosure notices and late-stage evictions in Fulton, DeKalb, Douglas and Henry, matched to the property-management company, owner or investor most likely to buy cleanout and turnover work.<span id="schedule-note"> Research runs automatically every Tuesday and Thursday at 8:00 AM Eastern.</span></p>
 
   <div id="run-msg"></div>
 
@@ -323,6 +325,12 @@
     }
     if (summary.next_scheduled_run) parts.push('<strong>Next scheduled:</strong> ' + BW.esc(BW.fmtDateTime(summary.next_scheduled_run)) + ' (Tue/Thu 8:00 AM Eastern)');
     if (summary.run_enabled === 'false') parts.push('<span style="color:var(--error)">Scheduled runs are paused (dpl_settings.run_enabled).</span>');
+    var ps = await BW.sb.from('dpl_settings').select('value').eq('key', 'paused').maybeSingle();
+    var paused = !!(ps.data && ps.data.value === 'true');
+    $('paused-banner').classList.toggle('hidden', !paused);
+    $('schedule-note').classList.toggle('hidden', paused);
+    $('run-btn').disabled = paused;
+    $('run-btn').title = paused ? 'Distressed Leads research is paused' : '';
     var errs = (summary.source_errors || []).filter(function (s) { return s.enabled && s.last_error; });
     if (errs.length) parts.push('<span class="muted">' + errs.length + ' source' + (errs.length === 1 ? '' : 's') + ' reporting errors &mdash; see Sources below.</span>');
     $('run-status').innerHTML = parts.join(' <span class="muted">&middot;</span> ');

@@ -1,0 +1,9 @@
+{
+  "name": "eviction-attorney-leads-worker",
+  "private": true,
+  "type": "module",
+  "description": "Bridgeway Admin — eviction attorney lead research worker (Supabase Edge Function). Tests run with Node 22's built-in runner; no dependencies.",
+  "scripts": {
+    "test": "node --test"
+  }
+}

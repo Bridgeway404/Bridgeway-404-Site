@@ -154,7 +154,26 @@ Note only / Done), prospect type, and partnership vs. ordinary leads.
 
 ---
 
-## 3d. Distressed Property Leads (`/admin/distressed`)
+## 3d. Distressed Property Leads (`/admin/distressed`) — paused
+
+> **Status: paused (September 2026).** This lead source was not producing enough
+> useful opportunities, so its Tuesday/Thursday research schedule and the
+> five-minute watchdog are switched off, and the page refuses to start runs or
+> process uploads while paused. Nothing was deleted: every property, company,
+> contact and note collected so far is still in the database and can be browsed
+> on the page (which now sits behind a "Paused" card on the admin home page and
+> is no longer in the top navigation). The team works the **Eviction Attorney
+> Leads** list (section 3e) instead.
+>
+> To reactivate, run this once in the Supabase SQL editor — it restores the
+> schedule and re-enables runs in one step:
+>
+> ```sql
+> select public.dpl_set_paused(false);
+> ```
+>
+> `select public.dpl_set_paused(true);` pauses it again. The description below
+> is how the page works when it is active.
 
 Foreclosure notices and evictions in Fulton, DeKalb, Douglas and Henry, turned
 into B2B leads: each property is matched to the management company, owner
@@ -239,6 +258,275 @@ why, and which paid options exist are written up in
 
 ---
 
+## 3e. Eviction Attorney Leads (`/admin/attorneys`)
+
+Leslie's call list of plaintiff-side attorneys and law firms that represent
+landlords, apartment communities, property-management companies and rental
+owners in dispossessory (eviction) cases in metro Atlanta. Bridgeway is not
+selling legal services: when those clients regain possession of a unit it
+usually needs a cleanout before it can be turned, so an attorney with
+property-management clients is a recurring referral source. The pitch is
+printed at the top of the page under **The pitch**.
+
+**Nothing runs on a schedule.** The list grows only when someone presses
+**Find More Attorneys**.
+
+### The call list
+
+One row per attorney (a stacked card on a phone, a table on a desktop):
+
+| Column | What it shows |
+|---|---|
+| Attorney | Name, city/county, a gold **Court records** chip when the attorney was named as plaintiff's counsel on court calendars, **High referral potential** when the evidence points to a firm-wide landlord practice |
+| Firm | Law firm and website |
+| Phone | Tap-to-call button (opens the dialer on a phone), email; **Needs lookup** when no number is on file yet |
+| Why they are relevant | Court filing count and the landlord / property-management clients identified, or the web evidence |
+| Status | Selectable: New, Call Today, Called – No Answer, Left Voicemail, Spoke With Staff, Spoke With Attorney, Interested, Follow Up, Referral Partner, Not Interested, Bad Lead. **Mark contacted** under it stamps the last-contact time |
+| Last contact | When the lead was last marked contacted |
+| Follow up | A date; rows whose date has arrived get a gold edge and a **Due** chip, and the header shows how many are due |
+| Assigned | Leslie, Mike, Jonathan, any admin account, or **Someone else…** to type a name |
+
+Under each row: a **quick note** box (Enter or **Save note**; the latest note is
+shown on the row) and **Details, evidence & notes**, which opens the full
+evidence with source links, the clients identified, research notes, an
+**Edit details** form for every field (attorney, firm, phone, email, website,
+city, county, practice area, clients, evidence, source URL, standing notes),
+and the dated, attributed history of every status change, contact, follow-up,
+assignment and note.
+
+**Filters and sort:** search (attorney, firm, county, city, client, evidence,
+notes); status (**Active** by default, which hides Not Interested and Bad
+Lead; choose **All statuses** to see them); county; assignee; and a quick
+filter for follow-ups due, never contacted, has / needs a phone number, and
+source (court records, web research, added by hand). Sort by newest first
+(default), follow-up date, last contacted, most court filings, or name.
+
+**+ Add attorney** creates a lead by hand. **Export CSV** downloads the current
+filtered list.
+
+### Duplicates
+
+Before anything is added — by research or by hand — it is checked against the
+list by attorney name (ignoring punctuation, "Esq." and suffixes), email,
+phone number, website and firm. A match is merged into the existing lead:
+blank fields are filled in, new evidence and source links are appended, and
+Leslie's status, notes, follow-up and assignment are never touched. Two
+different attorneys who share a firm's main line are kept as two leads. Adding
+a duplicate by hand tells you what it matched on.
+
+### Find More Attorneys
+
+Opens a dialog to choose counties (Fulton, DeKalb, Gwinnett, Cobb, Clayton,
+Douglas and Henry by default), how many web research passes to run, whether to
+include court records, and an optional extra focus. **Start research** runs
+right away; the page updates by itself as leads arrive and shows the run's
+progress and result. A run has three parts:
+
+1. **Court records** — attorneys named as plaintiff's counsel on the
+   magistrate-court dispossessory calendars the distressed-leads system
+   already collected, with how many cases they filed and for which landlord /
+   management entities. Attorneys whose plaintiffs are only banks, servicers,
+   government agencies or individuals are skipped; an attorney qualifies with
+   two or more filings, or two or more business plaintiffs. No API key needed.
+2. **Contact lookup** — for court-record attorneys, a web search for the firm,
+   phone, email, website and how the firm markets its eviction practice.
+3. **Web research passes** — searches for firms marketing landlord-side
+   eviction / dispossessory work to property owners, apartment-association
+   legal resources, and bios naming property-management clients. Tenant-defense
+   attorneys, general real-estate attorneys and anything without a source URL
+   are discarded. Names already on the list are excluded up front.
+
+Parts 2 and 3 need an Anthropic API key, saved once under **Research settings
+& run history** at the bottom of the page (stored encrypted in Supabase Vault;
+it is the same key slot the distressed pipeline used). Without a key the run
+still adds court-record attorneys — they show **Needs lookup** for the phone —
+and the dialog says so. Each pass costs a few dollars of API usage; the run
+history shows the spend.
+
+If a run stalls (the worker stops checking in), a **Resume** button appears on
+the run card.
+
+## 3f. Auction Buyer Leads (`/admin/auction-buyers`)
+
+Leslie's call list of people and companies that recently **bought** property
+at a tax sale, levy / sheriff's sale, foreclosure or other forced sale in
+Fulton, DeKalb, Cobb, Henry or Douglas. Whoever wins a parcel at auction
+usually has to clear out whatever the previous occupant left behind before
+they can renovate, rent or resell it, so a fresh purchaser — and above all a
+repeat purchaser who buys at every sale — is a natural customer. The pitch is
+printed at the top of the page under **The pitch**.
+
+This is a separate channel from Eviction Attorney Leads (section 3e): its own
+tables (`ab_*`), its own worker, its own schedule and its own page. Distressed
+Property Leads (section 3d) stays paused and is not touched by it.
+
+**It runs by itself every Wednesday at 8:00 am Eastern.** **Find Auction
+Buyers Now** runs exactly the same research immediately.
+
+### What qualifies as a lead
+
+A buyer appears on the call list only when all three are true:
+
+1. **The sale really happened.** An advertised sale is never enough. The proof
+   is either a county *result* list (an excess-funds / overage row exists only
+   once a parcel sold) or the county assessor roll showing a new owner of
+   record after the sale.
+2. **The purchaser is identified** — named by the county (Douglas prints the
+   purchaser) or taken from the assessor roll (DeKalb, Fulton, Cobb).
+3. **There is a realistic way to reach them** — a phone, email, website, or a
+   public business mailing address for a company. A person who bought a single
+   parcel needs a phone or email first; a person who has bought two or more is
+   plainly investing and a mailing address is enough.
+
+Banks, servicers, HUD and county bid-ins are recorded but stay off the list
+unless a direct phone or email exists. Vacant land, lots and redeemed sales
+are marked *Not useful*.
+
+**Priority:** High = repeat purchaser (2+ recent acquisitions) or a company
+with a direct phone/email; Medium = qualified with one acquisition; Low =
+qualified but weak.
+
+### Contact route and the call queue
+
+Qualification says a buyer is real. The **contact route** says how good the
+number is, and only that decides what Leslie sees by default:
+
+| Route | Means | Queue label |
+|---|---|---|
+| **Direct** | The phone/email belongs to the buyer, the buyer's company, a verified principal, the buyer's property-management company, or an acquisitions/operations contact clearly tied to the buyer | **Call First** (repeat buyer or clear recurring acquirer) or **Call** |
+| **Indirect** | A registered agent, law firm, broker, neighbouring/related company or other intermediary that may connect us to the buyer but is not the buyer | **Indirect Introduction** |
+| **Research only** | No practical phone/email, or the relationship is too speculative to call | **Research More** (off the default view) |
+
+The default view is the **call queue**: every lead labelled Call First, Call
+or Indirect Introduction, in call order (label first, then acquisitions, then
+overall recorded purchases). A lead can be *qualified* (real sale, real buyer,
+mailing address) and still sit under Research More until someone finds a
+usable number; the weekly run never lowers a label a person has set.
+
+Every indirect lead spells out, in the row itself, **who the number reaches**
+("Reaches: InVesta / GPS Property Management"), the **relationship** to the
+buyer ("possible related property-management contact; shared registered-agent
+location") and the **call goal** ("confirm whether they manage Deed Co
+properties and who handles cleanouts"), so nobody has to open the research
+notes to understand the call.
+
+**Relationship clusters.** When several buyers route through the same law
+firm, property manager or registered agent, they are linked in a cluster
+(never merged). The first cluster member in the list is the one to call; the
+others show *"One call covers this lead, handled by the call to X above."*
+Any lead that shares a phone number with another shows a gold warning
+*"This contact also relates to: …"*. When a status, note, contact stamp or
+follow-up date is saved on such a lead, the **Also log on N linked leads**
+box (ticked by default) writes the same outcome to every linked lead, with the
+note prefixed "(via X)". Clusters are created from **Edit details → Relationship
+cluster → New cluster…** or by SQL into `ab_clusters`.
+
+### The call list
+
+One row per buyer, however many properties they bought:
+
+| Column | What it shows |
+|---|---|
+| Buyer / relationship | Company or person, the contact person, the one-line relationship (who the number really reaches and how they relate to the buyer), **Repeat purchaser**, **Institutional** and cluster chips |
+| Phone | Tap-to-call button, "Reaches: …", email, website, and the shared-contact warning when other leads use the same number |
+| Contact route | **Direct** / **Indirect** / **Research only** |
+| Acquisitions | Auction acquisitions we confirmed, overall recorded purchases when known, the latest property and its date |
+| Priority | The queue label (Call First / Call / Indirect Introduction / Research More) and High / Medium / Low |
+| Call goal | One sentence: what the call is trying to accomplish |
+| Status | New, Call Today, Called – No Answer, Left Voicemail, Spoke With Contact, Interested, Follow Up, Referral Partner, Not Interested, Bad Lead; **Mark contacted** stamps the last-contact time |
+| Follow up | A date; rows whose date has arrived get a gold edge and a **Due** chip |
+| Assigned | Leslie, Mike, Jonathan, any admin account, or **Someone else…** |
+
+Under each row: a **short note** box (with the *Also log on linked leads*
+box when the contact is shared) and **Properties, evidence & notes**, which
+opens the evidence, the cluster (if any), a table of every property the buyer
+acquired (parcel, sale date, price paid, verification status, links to the
+county list and the assessor record), the mailing address, research notes,
+an **Edit details** form (contact route, queue label, who the number reaches,
+relationship, call goal, cluster, plus the buyer fields and priority), and the
+dated, attributed activity history.
+
+**Filters and sort:** search; status (**Active** by default hides Not
+Interested / Bad Lead); county; queue (call queue, Call First only, direct
+only, indirect only, Research More, everything); assignee; quick filters for
+follow-ups due, never contacted, repeat purchasers, has / needs a phone,
+companies / individuals. Sort by call order (default), newest first, most
+acquisitions, latest acquisition date, follow-up date, last contacted or name.
+
+**+ Add buyer** adds one by hand (it goes straight on the call list).
+**Export CSV** downloads the current filtered list.
+
+### Duplicates
+
+One buyer per purchaser: names are compared with LLC / Inc / punctuation
+ignored, then email, then website, then phone **together with** mailing
+address. A shared office phone on its own never merges two different
+companies. A purchaser who buys again is merged into the existing buyer and the
+acquisition count goes up; Leslie's status, notes, follow-up and assignment are
+never touched by research.
+
+### Where the research comes from (and what it cannot see)
+
+Everything is free public records; nothing is bought and no API is required.
+
+| County | Sale results (proof of sale) | Upcoming lists | Purchaser / assessor check |
+|---|---|---|---|
+| DeKalb | Tax Commissioner excess-funds list (text PDF) | Tax-sale listing on the public-access site (HTML; sometimes down for maintenance) | County GIS parcel layer: current owner + mailing address |
+| Douglas | Tax Commissioner overage file — the only county that **prints the purchaser** | Tax-sale legal notices (text PDF) | GIS land-records layer is a 2021 snapshot, so only the county file is used for purchasers |
+| Henry | Tax Commissioner excess-funds list (text PDF, with purchase amounts) | Property tax sale list (text PDF) | **No owner names published** in GIS and the assessor site blocks automated access: sold parcels wait in *Buyer research needed* for a manual look-up |
+| Fulton | Not published online (excess-funds list is by open-records request only) | Sheriff's levy sale lists are **scanned images** with no text; read only with the optional Claude OCR | Hosted assessor parcel layer works once parcels are known |
+| Cobb | Excess-funds PDF linked from the Tax Commissioner site | Tax sale list posted four weeks before each May / November sale | Daily assessor parcel layer works |
+
+When this was set up the Cobb PDFs linked from the county site returned
+"not found"; the adapter re-checks every run. Each source's last success and
+last problem is shown under **Research queue, sources & schedule**. One blocked
+or changed site never stops the run — it is logged and the other counties
+continue.
+
+### The research queue (behind the scenes)
+
+Every parcel seen on a list is tracked in the background with one of these
+statuses, visible as counts under **Research queue**: *Upcoming / waiting*,
+*Awaiting sale result*, *Buyer research needed*, *Buyer identified*, *Contact
+research needed*, *Qualified*, *Not useful*. Each weekly run re-reads the
+county results, re-checks unresolved parcels against the assessor roll (every
+7 days per parcel, for 450 days after the sale, giving up after 240 days
+without an ownership change), consolidates new purchasers into buyers, and
+promotes the ones that qualify. Tax deeds are often not re-titled on the
+assessor roll until the redemption period ends, which is why some confirmed
+sales sit in *Buyer research needed* for months.
+
+### Find Auction Buyers Now and the run result
+
+Press the button, confirm, and the run starts at once; the page refreshes on
+its own. When it finishes the card shows only the short result: counties
+checked, completed sales reviewed, buyers identified, qualified leads added,
+existing updated, repeat purchasers. Recent runs are listed under **Research
+queue, sources & schedule**. If a run stalls, a **Resume** button appears.
+
+### Pausing or resuming only the weekly schedule
+
+Under **Research queue, sources & schedule** press **Pause weekly research**
+(or **Resume weekly research**). This changes only the Auction Buyer jobs
+(`ab-weekly-1200utc`, `ab-weekly-1300utc`, `ab-tick`). The same thing from
+SQL:
+
+```sql
+select public.ab_set_paused(true);   -- pause the Wednesday run + watchdog
+select public.ab_set_paused(false);  -- resume
+```
+
+Neither touches the attorney research (manual only) nor the distressed
+pipeline (`dpl_*`, which stays paused).
+
+### Optional Anthropic key
+
+The weekly research is complete without an API key. Saving one under **Research
+queue, sources & schedule** (the same encrypted vault slot the other tabs use)
+adds two extras: OCR of Fulton's scanned levy lists, and a business-contact
+web search for purchasers who have no phone or website yet (up to 10 per run,
+repeat purchasers first).
+
 ## 4. Adding and removing people
 
 On the admin home page:
@@ -297,7 +585,9 @@ Admin pages are marked `noindex`, so they never appear in search results.
 |---|---|
 | Admin pages | `admin/` in the `Bridgeway-404-Site` repo |
 | Database schema | `supabase/migrations/` in the same repo |
-| Distressed-leads research worker | `supabase/functions/distressed-leads/` (Supabase Edge Function, scheduled by pg_cron) |
+| Distressed-leads research worker (paused) | `supabase/functions/distressed-leads/` (Supabase Edge Function; its pg_cron schedule is removed while paused) |
+| Eviction-attorney research worker | `supabase/functions/eviction-attorney-leads/` (Supabase Edge Function, manual only, started from the Admin page) |
+| Auction-buyer research worker | `supabase/functions/auction-buyer-leads/` (Supabase Edge Function; runs every Wednesday via pg_cron `ab-weekly-*`, or from the Admin page) |
 | Prospect + outreach data | Supabase project **bridgeway-404** |
 | Deployment | Netlify, automatically on push to `main` |
 
