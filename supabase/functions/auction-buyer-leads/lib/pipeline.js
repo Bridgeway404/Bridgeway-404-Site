@@ -394,6 +394,12 @@ async function enrichBuyer(env, runId, buyerId) {
     await env.db.upsertBuyer({ buyer_name: buyer.buyer_name, contact_name: out.contact_name || null, phone: formatPhone(out.phone), email: out.email || null, website: out.website || null,
       mailing_address: out.mailing_address || null, evidence: out.evidence ? `Web: ${out.evidence}` : null, source_urls: out.source_urls || [],
       buyer_type: out.buyer_type || null, portfolio_count: out.portfolio_count || null, research_notes: out.notes || null });
+    // The lookup only returns the buyer's own business contact, so a phone or
+    // email found this way is a direct route. A person's label is never lowered.
+    if ((out.phone || out.email) && (buyer.contact_route || 'research') === 'research') {
+      await env.db.updateBuyer(buyerId, { contact_route: 'direct', contact_via: `${buyer.buyer_name} (business contact found by the weekly lookup)`,
+        call_goal: buyer.call_goal || "Introduce Bridgeway's post-acquisition cleanout service and ask whether they use a preferred vendor for newly acquired properties." });
+    }
   } else {
     await env.db.updateBuyer(buyerId, { research_notes: (out && out.notes) || 'Contact lookup found no business phone, email or website for this purchaser.' });
   }

@@ -30,13 +30,14 @@
     <span id="chip-today" class="chip gold hidden"></span>
     <span id="chip-due" class="chip gold hidden"></span>
     <span id="chip-count" class="chip hidden"></span>
+    <span id="chip-routes" class="chip hidden" title="Direct = the buyer, their company or a verified principal; Indirect = a law firm, agent or related company that may connect us"></span>
     <span class="att-head-actions">
       <button class="btn-primary" id="find-btn">Find Auction Buyers Now</button>
       <button class="btn-secondary" id="add-btn">+ Add buyer</button>
       <button class="btn-quiet" id="export-btn" title="Download the current list as CSV">Export CSV</button>
     </span>
   </div>
-  <p class="muted small" style="margin:0 0 .6rem">People and companies that recently <strong>bought</strong> property at a tax sale, levy sale, sheriff&rsquo;s sale or foreclosure in Fulton, DeKalb, Cobb, Henry or Douglas. A buyer only appears here once the county shows the sale actually completed, we know who bought it, and there is a real way to reach them. Tap a number to dial, set the status, jot a note, pick a follow-up date. <em>Not Interested</em> and <em>Bad Lead</em> are hidden unless you choose to show them. Research runs automatically every Wednesday morning.</p>
+  <p class="muted small" style="margin:0 0 .6rem">People and companies that recently <strong>bought</strong> property at a tax sale, levy sale, sheriff&rsquo;s sale or foreclosure in Fulton, DeKalb, Cobb, Henry or Douglas. The default view is the <strong>call queue</strong>: who to call next, why, and which number to use. <strong>Direct</strong> means the number belongs to the buyer, their company or a verified principal. <strong>Indirect</strong> means it reaches a law firm, agent or related company that may connect us to the buyer &mdash; the row says exactly who answers. Leads with no usable number stay under <em>Research More</em>. Tap a number to dial, set the status, jot a note, pick a follow-up date. <em>Not Interested</em> and <em>Bad Lead</em> are hidden unless you choose to show them. Research runs automatically every Wednesday morning.</p>
   <details class="small" style="margin:0 0 .8rem">
     <summary style="cursor:pointer;font-weight:700;color:var(--purple)">The pitch (why we are calling)</summary>
     <div class="why-box" style="margin:.5rem 0 0">&ldquo;Congratulations on the property at [address]. We are Bridgeway 404, a local cleanout crew &mdash; we clear out everything left behind after a tax sale or foreclosure so you can get straight to renovating, renting or listing it. Can we give you a quick quote?&rdquo;</div>
@@ -68,11 +69,11 @@
         <option>Fulton</option><option>DeKalb</option><option>Cobb</option><option>Henry</option><option>Douglas</option>
       </select>
       <select id="f-priority">
-        <option value="call">Call list (High + Medium)</option>
-        <option value="High">High priority only</option>
-        <option value="Medium">Medium priority only</option>
-        <option value="Low">Low priority (qualified but weak)</option>
-        <option value="research">Still being researched (no contact yet)</option>
+        <option value="queue">Call queue (Call First, Call, Indirect Introduction)</option>
+        <option value="first">Call First only</option>
+        <option value="direct">Direct contacts only</option>
+        <option value="indirect">Indirect introductions only</option>
+        <option value="research">Research More (no usable contact yet)</option>
         <option value="">Everything</option>
       </select>
       <select id="f-assigned"><option value="">Anyone / unassigned</option></select>
@@ -87,6 +88,7 @@
         <option value="individual">Individuals</option>
       </select>
       <select id="f-sort">
+        <option value="queue">Call order (who to call next)</option>
         <option value="new">Newest leads first</option>
         <option value="acq">Most acquisitions</option>
         <option value="date">Latest acquisition date</option>
@@ -103,7 +105,7 @@
     <p class="muted" style="margin:0" id="empty-text">No buyers match these filters.</p>
   </div>
   <div class="att-header ab-header" id="ab-header">
-    <span>Buyer / company</span><span>Phone</span><span>Property</span><span>Acquired</span><span>Priority</span><span>Type</span><span>Status</span><span>Follow up</span><span>Assigned</span>
+    <span>Buyer / relationship</span><span>Phone</span><span>Contact route</span><span>Acquisitions</span><span>Priority</span><span>Call goal</span><span>Status</span><span>Follow up</span><span>Assigned</span>
   </div>
   <div id="list"></div>
   <div class="center" style="margin:1rem 0">
@@ -197,6 +199,9 @@
   var PTYPE_LABELS = { single_family: 'Single-family', townhome: 'Townhome', condo: 'Condo', duplex: 'Duplex', multifamily: 'Multifamily', commercial: 'Commercial', land: 'Land', mobile_home: 'Mobile home', other: 'Other', unknown: '' };
   var SALE_LABELS = { tax_sale: 'tax sale', levy_sale: 'levy sale', sheriff_sale: "sheriff's sale", foreclosure: 'foreclosure', judicial_sale: 'judicial sale', other: 'sale' };
   var QUEUE_LABELS = { upcoming: 'Upcoming / waiting', awaiting_sale_result: 'Awaiting sale result', buyer_research_needed: 'Buyer research needed', buyer_identified: 'Buyer identified', contact_research_needed: 'Contact research needed', qualified: 'Qualified', not_useful: 'Not useful' };
+  var ROUTE_LABELS = { direct: 'Direct', indirect: 'Indirect', research: 'Research only' };
+  var QUEUE_LABELS_CALL = ['Call First', 'Call', 'Indirect Introduction'];
+  var clusters = [];
   var QUEUE_ORDER = ['upcoming', 'awaiting_sale_result', 'buyer_research_needed', 'buyer_identified', 'contact_research_needed', 'qualified', 'not_useful'];
 
   function showError(msg) { $('error').textContent = msg; $('error').classList.remove('hidden'); }
@@ -230,6 +235,8 @@
     summary = res.data;
     $('chip-today').textContent = summary.call_today + ' to call today';
     $('chip-today').classList.toggle('hidden', !summary.call_today);
+    $('chip-routes').textContent = (summary.direct || 0) + ' direct · ' + (summary.indirect || 0) + ' indirect · ' + (summary.research_only || 0) + ' research';
+    $('chip-routes').classList.remove('hidden');
     $('chip-due').textContent = summary.follow_ups_due + ' follow-up' + (summary.follow_ups_due === 1 ? '' : 's') + ' due';
     $('chip-due').classList.toggle('hidden', !summary.follow_ups_due);
     $('secret-status').innerHTML = summary.has_ai_key
@@ -326,9 +333,11 @@
     var county = $('f-county').value;
     if (county) q = q.or('county.eq.' + county + ',counties.cs.{' + county + '}');
     var pr = $('f-priority').value;
-    if (pr === 'call') q = q.eq('qualified', true).in('priority', ['High', 'Medium']);
-    else if (pr === 'research') q = q.eq('qualified', false);
-    else if (pr) q = q.eq('qualified', true).eq('priority', pr);
+    if (pr === 'queue') q = q.in('call_label', QUEUE_LABELS_CALL);
+    else if (pr === 'first') q = q.eq('call_label', 'Call First');
+    else if (pr === 'direct') q = q.eq('contact_route', 'direct').in('call_label', QUEUE_LABELS_CALL);
+    else if (pr === 'indirect') q = q.eq('contact_route', 'indirect').in('call_label', QUEUE_LABELS_CALL);
+    else if (pr === 'research') q = q.eq('call_label', 'Research More');
     var who = $('f-assigned').value;
     if (who === '__none') q = q.is('assigned_to', null);
     else if (who) q = q.eq('assigned_to', who);
@@ -346,44 +355,76 @@
     else if (sort === 'follow') q = q.order('follow_up_date', { ascending: true, nullsFirst: false }).order('created_at', { ascending: false });
     else if (sort === 'contact') q = q.order('last_contacted_at', { ascending: false, nullsFirst: false }).order('created_at', { ascending: false });
     else if (sort === 'name') q = q.order('buyer_name', { ascending: true });
-    else q = q.order('created_at', { ascending: false });
+    else if (sort === 'new') q = q.order('created_at', { ascending: false });
+    else q = q.order('call_rank', { ascending: true }).order('recent_acquisitions', { ascending: false }).order('portfolio_count', { ascending: false, nullsFirst: false }).order('buyer_name', { ascending: true });
     return q.range(offset, offset + PAGE - 1);
   }
 
   // ---------- Rendering ----------
+  function labelChip(l) {
+    var cls = l === 'Call First' ? 'gold' : l === 'Call' ? 'status' : l === 'Indirect Introduction' ? 'indirect' : 'done';
+    return '<span class="chip lbl-' + cls + '">' + BW.esc(l || 'Research More') + '</span>';
+  }
+  function routeChip(r) { return '<span class="chip route-' + (r || 'research') + '">' + BW.esc(ROUTE_LABELS[r] || 'Research only') + '</span>'; }
+  function coveredBy(p) {
+    // An earlier row in this list that shares the cluster: one call covers both.
+    if (!p.cluster_id) return null;
+    for (var i = 0; i < rows.length; i++) {
+      if (rows[i].id === p.id) return null;
+      if (rows[i].cluster_id === p.cluster_id) return rows[i];
+    }
+    return null;
+  }
   function rowHTML(p) {
     var due = p.follow_up_date && p.follow_up_date <= todayISO() && HIDDEN.indexOf(p.contact_status) < 0;
     var chips = [];
     if (p.recent_acquisitions >= 2) chips.push('<span class="chip gold" title="Bought at more than one auction">Repeat purchaser</span>');
     if (p.is_institutional) chips.push('<span class="chip">Institutional</span>');
-    if (!p.qualified) chips.push('<span class="chip done" title="Not on the call list yet">Research: needs contact</span>');
+    if (p.cluster_name) chips.push('<span class="chip cluster" title="Relationship cluster: one conversation covers every lead in it">&#128279; ' + BW.esc(p.cluster_name) + '</span>');
+    var linked = p.linked_names || [];
+    var cov = coveredBy(p);
     var phone = p.phone
       ? '<a class="att-call" href="' + BW.esc(BW.telHref(p.phone)) + '">&#9742; ' + BW.esc(p.phone) + '</a>'
-      : '<span class="muted">Needs lookup</span>';
+      : '<span class="muted">No usable number yet</span>';
     var email = p.email ? '<div><a href="mailto:' + BW.esc(p.email) + '">&#9993; ' + BW.esc(p.email) + '</a></div>' : '';
     var web = p.website ? '<div class="small">' + link(p.website) + '</div>' : '';
-    var prop = p.latest_property ? BW.esc(p.latest_property) : '<span class="muted">(address not printed; see details)</span>';
-    var propMeta = [p.latest_property_county ? p.latest_property_county + ' County' : (p.county ? p.county + ' County' : ''), PTYPE_LABELS[p.latest_property_type] || '', p.latest_sale_type ? SALE_LABELS[p.latest_sale_type] : ''].filter(Boolean).join(' · ');
-    var acq = '<span class="ab-acq">' + p.recent_acquisitions + '</span> recent auction acquisition' + (p.recent_acquisitions === 1 ? '' : 's') + (p.latest_acquired_on ? '<div class="muted small">latest ' + BW.esc(fmtD(p.latest_acquired_on)) + '</div>' : '');
+    var via = p.contact_via ? '<div class="small ab-via">Reaches: <strong>' + BW.esc(p.contact_via) + '</strong></div>' : '';
+    var shared = linked.length ? '<div class="ab-shared">&#9888; This contact also relates to: <strong>' + linked.map(BW.esc).join(', ') + '</strong>. One call can cover them; log the result on every linked lead.</div>' : '';
+    var prop = p.latest_property ? BW.esc(p.latest_property) + (p.latest_property_county ? ' <span class="muted">(' + BW.esc(p.latest_property_county) + ')</span>' : '') : '<span class="muted">address in details</span>';
+    var acq = '<span class="ab-acq">' + p.recent_acquisitions + '</span> at auction' + (p.portfolio_count > p.recent_acquisitions ? '<div class="muted small">' + p.portfolio_count + ' recorded purchases overall</div>' : '') + '<div class="small">' + prop + '</div>' + (p.latest_acquired_on ? '<div class="muted small">latest ' + BW.esc(fmtD(p.latest_acquired_on)) + '</div>' : '');
     var last = p.last_contacted_at ? BW.esc(BW.fmtDateTime(p.last_contacted_at)) : '<span class="muted">never</span>';
+    var goal = p.call_goal ? BW.esc(p.call_goal) : '<span class="muted">Set a call goal in Edit details.</span>';
     var open = !!expanded[p.id];
-    return '<div class="att-row ab-row' + (due ? ' due' : '') + (HIDDEN.indexOf(p.contact_status) >= 0 ? ' hidden-lead' : '') + '" data-id="' + p.id + '">' +
-      '<div class="att-cell ab-buyer"><span class="att-k">Buyer / company</span><strong>' + BW.esc(p.buyer_name) + '</strong>' + (p.contact_name ? '<div class="small">Contact: ' + BW.esc(p.contact_name) + '</div>' : '') + (p.mailing_address && !p.phone ? '<div class="muted small">' + BW.esc(p.mailing_address) + '</div>' : '') + (chips.length ? '<div class="att-chips">' + chips.join('') + '</div>' : '') + '</div>' +
-      '<div class="att-cell att-phone"><span class="att-k">Phone</span>' + phone + email + web + '</div>' +
-      '<div class="att-cell ab-property"><span class="att-k">Property</span>' + prop + (propMeta ? '<div class="muted small">' + BW.esc(propMeta) + '</div>' : '') + '</div>' +
-      '<div class="att-cell"><span class="att-k">Acquired</span>' + acq + '</div>' +
-      '<div class="att-cell ab-prio"><span class="att-k">Priority</span>' + prioChip(p.priority) + '</div>' +
-      '<div class="att-cell"><span class="att-k">Type</span>' + BW.esc(TYPE_LABELS[p.buyer_type] || p.buyer_type) + '</div>' +
+    return '<div class="att-row ab-row' + (due ? ' due' : '') + (HIDDEN.indexOf(p.contact_status) >= 0 ? ' hidden-lead' : '') + (cov ? ' covered' : '') + ' route-' + (p.contact_route || 'research') + '" data-id="' + p.id + '">' +
+      (cov ? '<div class="ab-covered">&#128279; One call covers this lead &mdash; it is handled by the call to <strong>' + BW.esc(cov.buyer_name) + '</strong> above. Log that outcome here too.</div>' : '') +
+      '<div class="att-cell ab-buyer"><span class="att-k">Buyer / relationship</span><strong>' + BW.esc(p.buyer_name) + '</strong>' +
+        (p.contact_name ? '<div class="small">Contact: ' + BW.esc(p.contact_name) + '</div>' : '') +
+        (p.relationship ? '<div class="small ab-rel">' + BW.esc(p.relationship) + '</div>' : '') +
+        (p.mailing_address && !p.phone ? '<div class="muted small">' + BW.esc(p.mailing_address) + '</div>' : '') +
+        (chips.length ? '<div class="att-chips">' + chips.join('') + '</div>' : '') + '</div>' +
+      '<div class="att-cell att-phone"><span class="att-k">Phone</span>' + phone + via + email + web + shared + '</div>' +
+      '<div class="att-cell ab-route"><span class="att-k">Contact route</span>' + routeChip(p.contact_route) + (p.contact_route === 'indirect' ? '<div class="muted small">Not the buyer &mdash; an introduction</div>' : p.contact_route === 'direct' ? '<div class="muted small">Buyer, company or verified principal</div>' : '<div class="muted small">No practical contact yet</div>') + '</div>' +
+      '<div class="att-cell"><span class="att-k">Acquisitions</span>' + acq + '</div>' +
+      '<div class="att-cell ab-prio"><span class="att-k">Priority</span>' + labelChip(p.call_label) + '<div style="margin-top:.2rem">' + prioChip(p.priority) + '</div></div>' +
+      '<div class="att-cell ab-goal"><span class="att-k">Call goal</span><div class="small">' + goal + '</div></div>' +
       '<div class="att-cell att-status"><span class="att-k">Status</span><select class="st-sel chip-' + statusClass(p.contact_status) + '" data-id="' + p.id + '">' + statusOptions(p.contact_status) + '</select>' +
         '<button class="btn-quiet mark-btn" data-id="' + p.id + '" title="Record that you reached out just now">Mark contacted</button><div class="muted small">Last: ' + last + '</div></div>' +
       '<div class="att-cell att-follow"><span class="att-k">Follow up</span><input type="date" class="fu-date" data-id="' + p.id + '" value="' + BW.esc(p.follow_up_date || '') + '">' + (due ? '<div class="chip gold" style="margin-top:.2rem">Due</div>' : '') + '</div>' +
       '<div class="att-cell att-assigned"><span class="att-k">Assigned</span><select class="as-sel" data-id="' + p.id + '">' + assigneeOptions(p.assigned_to) + '</select></div>' +
       '<div class="att-cell att-note ab-note"><input type="text" class="qn-text" data-id="' + p.id + '" placeholder="Short note (e.g. spoke with owner, wants quote after closing)">' +
         '<button class="btn-secondary qn-save" data-id="' + p.id + '">Save note</button>' +
+        (linked.length ? '<label class="ab-linked-opt"><input type="checkbox" class="apply-linked" data-id="' + p.id + '" checked> Also log on ' + linked.length + ' linked lead' + (linked.length === 1 ? '' : 's') + '</label>' : '') +
         '<button type="button" class="btn-quiet att-toggle" data-id="' + p.id + '" aria-expanded="' + open + '">' + (open ? 'Hide details' : 'Properties, evidence &amp; notes') + '</button>' +
         (p.last_note ? '<div class="fu-note"><span class="fu-kind">Latest</span>' + BW.esc(truncate(p.last_note, 140)) + ' <span class="muted">&mdash; ' + BW.esc(p.last_note_by || '') + ', ' + BW.esc(BW.fmtDate(p.last_note_at)) + '</span></div>' : '') + '</div>' +
       '<div class="att-detail ab-detail lead-detail' + (open ? '' : ' hidden') + '" id="detail-' + p.id + '"></div>' +
       '</div>';
+  }
+  function linkedPatch(id, p) {
+    // When a lead shares its contact with others, carry the outcome to them unless the box is unticked.
+    var row = document.querySelector('.ab-row[data-id="' + id + '"]');
+    var cb = row && row.querySelector('.apply-linked');
+    if (cb && cb.checked) p.apply_to_linked = true;
+    return p;
   }
   function rerenderRow(p) {
     var old = document.querySelector('.ab-row[data-id="' + p.id + '"]');
@@ -413,8 +454,8 @@
     rows = rows.concat(res.data);
     $('list').insertAdjacentHTML('beforeend', res.data.map(rowHTML).join(''));
     var pr = $('f-priority').value;
-    $('empty-text').textContent = rows.length ? '' : (pr === 'call' && summary && !summary.visible
-      ? 'No qualified buyers on the call list yet. The research queue below shows what is being tracked; the next Wednesday run (or "Find Auction Buyers Now") re-checks every county.'
+    $('empty-text').textContent = rows.length ? '' : (pr === 'queue' && summary && !summary.visible
+      ? 'Nothing in the call queue yet. Leads under "Research More" need a usable phone or email before they show here; the next Wednesday run (or "Find Auction Buyers Now") re-checks every county.'
       : 'No buyers match these filters.');
     $('empty').classList.toggle('hidden', rows.length > 0);
     $('ab-header').classList.toggle('hidden', rows.length === 0);
@@ -431,7 +472,7 @@
   }
 
   // ---------- Detail panel ----------
-  var ED = ['buyer_name', 'contact_name', 'phone', 'email', 'website', 'mailing_address', 'city', 'county', 'buyer_type', 'priority', 'evidence', 'notes'];
+  var ED = ['buyer_name', 'contact_name', 'phone', 'email', 'website', 'mailing_address', 'city', 'county', 'buyer_type', 'priority', 'evidence', 'notes', 'contact_route', 'contact_via', 'relationship', 'call_goal', 'call_label', 'cluster_id'];
   async function loadDetail(p, box) {
     box.innerHTML = '<div class="muted small">Loading&hellip;</div>';
     var pr = await BW.sb.from('ab_buyer_property_list').select('*').eq('buyer_id', p.id).order('acquired_on', { ascending: false, nullsFirst: false });
@@ -449,6 +490,7 @@
           '<td>' + [x.list_url ? link(x.list_url, 'County list') : '', x.assessor_source_url ? link(x.assessor_source_url, 'Assessor') : ''].filter(Boolean).join(' · ') + '</td></tr>';
       }).join('') + '</tbody></table>');
     }
+    if (p.cluster_name) h.push('<p class="label">Relationship cluster: ' + BW.esc(p.cluster_name) + '</p><div class="small">' + (p.cluster_relationship ? BW.esc(p.cluster_relationship) + ' ' : '') + (p.cluster_phone ? 'Cluster number ' + BW.esc(p.cluster_phone) + '. ' : '') + (p.cluster_call_goal ? '<em>Goal:</em> ' + BW.esc(p.cluster_call_goal) : '') + ((p.linked_names || []).length ? '<div class="muted">Linked leads: ' + p.linked_names.map(BW.esc).join(', ') + '</div>' : '') + '</div>');
     if (p.mailing_address) h.push('<p class="label">Mailing address (assessor roll)</p><div class="small">' + BW.esc(p.mailing_address) + '</div>');
     if (p.research_notes) h.push('<p class="label">Research notes</p><div class="small">' + BW.esc(p.research_notes) + '</div>');
     if ((p.source_urls || []).length) h.push('<p class="label">Sources</p><div class="src-links small">' + p.source_urls.map(function (u) { return link(u); }).join(' ') + '</div>');
@@ -456,7 +498,8 @@
     facts.push((p.created_by_name ? 'Added by ' + p.created_by_name : 'Found by the weekly research') + ' ' + BW.fmtDate(p.created_at));
     if ((p.counties || []).length) facts.push('Counties: ' + p.counties.join(', '));
     facts.push('Type: ' + (TYPE_LABELS[p.buyer_type] || p.buyer_type));
-    facts.push(p.qualified ? 'Qualified for the call list' : 'Not yet qualified (needs a contact or sale confirmation)');
+    facts.push('Contact route: ' + (ROUTE_LABELS[p.contact_route] || 'Research only') + ' · queue label: ' + (p.call_label || 'Research More'));
+    facts.push(p.qualified ? 'Qualified (sale confirmed, buyer identified)' : 'Not yet qualified (needs a contact or sale confirmation)');
     if (p.status_changed_at) facts.push('Status set ' + BW.fmtDateTime(p.status_changed_at));
     h.push('<div class="small muted" style="margin-top:.4rem">' + facts.map(BW.esc).join(' &middot; ') + '</div>');
 
@@ -472,7 +515,14 @@
       '<div class="field"><label class="label">County</label><input name="county" type="text" value="' + BW.esc(p.county || '') + '"></div></div>' +
       '<div class="grid2"><div class="field"><label class="label">Buyer type</label><select name="buyer_type">' + typeOpts + '</select></div>' +
       '<div class="field"><label class="label">Priority</label><select name="priority">' + ['High', 'Medium', 'Low'].map(function (x) { return '<option' + (x === p.priority ? ' selected' : '') + '>' + x + '</option>'; }).join('') + '</select></div></div>' +
-      '<div class="field"><label style="display:flex;align-items:center;gap:.4rem"><input type="checkbox" name="qualified"' + (p.qualified ? ' checked' : '') + ' style="width:20px;height:20px"> On the call list (qualified)</label></div>' +
+      '<div class="field"><label style="display:flex;align-items:center;gap:.4rem"><input type="checkbox" name="qualified"' + (p.qualified ? ' checked' : '') + ' style="width:20px;height:20px"> Qualified (sale confirmed, buyer identified, some way to reach them)</label></div>' +
+      '<p class="label" style="margin-top:.6rem">Call routing (what Leslie sees)</p>' +
+      '<div class="grid2"><div class="field"><label class="label">Contact route</label><select name="contact_route">' + ['direct', 'indirect', 'research'].map(function (x) { return '<option value="' + x + '"' + (x === (p.contact_route || 'research') ? ' selected' : '') + '>' + ROUTE_LABELS[x] + (x === 'direct' ? ' — buyer / company / verified principal' : x === 'indirect' ? ' — law firm, agent, related company' : ' — no practical contact') + '</option>'; }).join('') + '</select></div>' +
+      '<div class="field"><label class="label">Queue label</label><select name="call_label"><option value="">Automatic (from route)</option>' + ['Call First', 'Call', 'Indirect Introduction', 'Research More'].map(function (x) { return '<option' + (x === p.call_label ? ' selected' : '') + '>' + x + '</option>'; }).join('') + '</select></div></div>' +
+      '<div class="field"><label class="label">Who the number reaches</label><input name="contact_via" type="text" value="' + BW.esc(p.contact_via || '') + '" placeholder="e.g. GPS Property Management (InVesta)"></div>' +
+      '<div class="field"><label class="label">Relationship to the buyer (one line)</label><input name="relationship" type="text" value="' + BW.esc(p.relationship || '') + '" placeholder="e.g. Law firm that receives the LLC&#39;s mail; not the buyer"></div>' +
+      '<div class="field"><label class="label">Call goal (one sentence)</label><input name="call_goal" type="text" value="' + BW.esc(p.call_goal || '') + '"></div>' +
+      '<div class="field"><label class="label">Relationship cluster (one conversation covers every lead in it)</label><select name="cluster_id"><option value="">None</option>' + clusters.map(function (c) { return '<option value="' + c.id + '"' + (c.id === p.cluster_id ? ' selected' : '') + '>' + BW.esc(c.name) + (c.member_count ? ' (' + c.member_count + ')' : '') + '</option>'; }).join('') + '<option value="__new">New cluster…</option></select></div>' +
       '<div class="field"><label class="label">Evidence / why this is a lead</label><textarea name="evidence">' + BW.esc(p.evidence || '') + '</textarea></div>' +
       '<div class="field"><label class="label">Notes (standing notes for this buyer)</label><textarea name="notes">' + BW.esc(p.notes || '') + '</textarea></div>' +
       '<div class="ed-msg"></div><button type="submit" class="btn-primary">Save details</button></form></details>');
@@ -506,6 +556,11 @@
     if (el) el.disabled = false;
     if (res.error) { alert('Could not save: ' + res.error.message); return false; }
     await refreshRow(id);
+    if (p.apply_to_linked) {
+      var me0 = rows.find(function (r) { return r.id === id; });
+      var names = (me0 && me0.linked_names) || [];
+      for (var i = 0; i < rows.length; i++) if (rows[i].id !== id && names.indexOf(rows[i].buyer_name) >= 0) await refreshRow(rows[i].id);
+    }
     loadSummary();
     return true;
   }
@@ -518,13 +573,14 @@
     if (btn.classList.contains('mark-btn')) {
       var row = btn.closest('.ab-row');
       var qn = row.querySelector('.qn-text');
-      await patch(btn.dataset.id, { mark_contacted: true, note: qn && qn.value.trim() ? qn.value.trim() : null }, btn);
+      await patch(btn.dataset.id, linkedPatch(btn.dataset.id, { mark_contacted: true, note: qn && qn.value.trim() ? qn.value.trim() : null }), btn);
       return;
     }
     if (btn.classList.contains('qn-save')) {
       var ta = btn.closest('.ab-row').querySelector('.qn-text');
       if (!ta.value.trim()) { ta.focus(); return; }
-      var r1 = await BW.sb.rpc('ab_add_note', { p_id: btn.dataset.id, p_note: ta.value.trim() });
+      var lp = linkedPatch(btn.dataset.id, { note: ta.value.trim() });
+      var r1 = lp.apply_to_linked ? await BW.sb.rpc('ab_update_lead', { p_id: btn.dataset.id, p_patch: lp }) : await BW.sb.rpc('ab_add_note', { p_id: btn.dataset.id, p_note: ta.value.trim() });
       if (r1.error) { alert('Could not save note: ' + r1.error.message); return; }
       await refreshRow(btn.dataset.id);
     }
@@ -537,11 +593,11 @@
     if (el.classList.contains('st-sel')) {
       var p = rows.find(function (x) { return x.id === el.dataset.id; });
       var qn = el.closest('.ab-row').querySelector('.qn-text');
-      var ok = await patch(el.dataset.id, { contact_status: el.value, note: qn && qn.value.trim() ? qn.value.trim() : null }, el);
+      var ok = await patch(el.dataset.id, linkedPatch(el.dataset.id, { contact_status: el.value, note: qn && qn.value.trim() ? qn.value.trim() : null }), el);
       if (!ok && p) el.value = p.contact_status;
       return;
     }
-    if (el.classList.contains('fu-date')) { await patch(el.dataset.id, { follow_up_date: el.value || null }, el); return; }
+    if (el.classList.contains('fu-date')) { await patch(el.dataset.id, linkedPatch(el.dataset.id, { follow_up_date: el.value || null }), el); return; }
     if (el.classList.contains('as-sel')) {
       var v = el.value;
       if (v === '__other') {
@@ -559,6 +615,15 @@
     var vals = {};
     ED.forEach(function (f) { var i = form.querySelector('[name="' + f + '"]'); if (i) vals[f] = i.value.trim(); });
     vals.qualified = form.querySelector('[name="qualified"]').checked;
+    if (vals.cluster_id === '__new') {
+      var cname = (prompt('Name the relationship cluster (e.g. the law firm or property manager everyone routes through):') || '').trim();
+      if (!cname) { form.querySelector('[name="cluster_id"]').value = ''; delete vals.cluster_id; }
+      else {
+        var cr = await BW.sb.rpc('ab_save_cluster', { p: { name: cname, contact_org: vals.contact_via || null, phone: vals.phone || null, relationship: vals.relationship || null, call_goal: vals.call_goal || null } });
+        if (cr.error) { form.querySelector('.ed-msg').innerHTML = '<div class="alert-error">' + BW.esc(cr.error.message) + '</div>'; return; }
+        vals.cluster_id = cr.data; await loadClusters();
+      }
+    }
     if (!vals.buyer_name) { form.querySelector('.ed-msg').innerHTML = '<div class="alert-error">Enter a buyer or company name.</div>'; return; }
     var btnS = form.querySelector('button[type="submit"]');
     btnS.disabled = true;
@@ -625,7 +690,7 @@
     if (!p.buyer_name) { msg.innerHTML = '<div class="alert-error">Enter a buyer or company name.</div>'; return; }
     var res = await BW.sb.rpc('ab_upsert_buyer', { p: p });
     if (res.error) { msg.innerHTML = '<div class="alert-error">' + BW.esc(res.error.message) + '</div>'; return; }
-    var extra = { qualified: true, priority: p.priority };
+    var extra = { qualified: true, priority: p.priority, contact_route: (p.phone || p.email) ? 'direct' : 'research', contact_via: (p.phone || p.email) ? (p.buyer_name + ' (entered by hand)') : null, call_goal: "Introduce Bridgeway's post-acquisition cleanout service and ask whether they use a preferred vendor for newly acquired properties." };
     if ($('a-notes').value.trim()) extra.notes = $('a-notes').value.trim();
     await BW.sb.rpc('ab_update_lead', { p_id: res.data.id, p_patch: extra });
     e.target.reset();
@@ -634,7 +699,7 @@
       ? '<div class="alert-ok">Already on the list (matched on ' + BW.esc(res.data.matched_on) + '). New details were merged into the existing buyer.</div>'
       : '<div class="alert-ok">Added to the list.</div>';
     setTimeout(function () { $('run-msg').innerHTML = ''; }, 8000);
-    $('f-status').value = 'active'; $('f-priority').value = ''; $('f-show').value = ''; $('f-county').value = ''; $('f-assigned').value = ''; $('f-search').value = '';
+    $('f-status').value = 'active'; $('f-priority').value = ''; $('f-show').value = ''; $('f-sort').value = 'new'; $('f-county').value = ''; $('f-assigned').value = ''; $('f-search').value = '';
     await load(true);
     if (!rows.some(function (r) { return r.id === res.data.id; })) await refreshRow(res.data.id);
     loadSummary();
@@ -645,7 +710,7 @@
     offset = 0; var all = []; var page;
     do { page = await buildQuery(); if (page.error) { alert(page.error.message); return; } all = all.concat(page.data); offset += PAGE; } while (page.data.length === PAGE && all.length < 5000);
     offset = rows.length;
-    var cols = ['buyer_name', 'contact_name', 'phone', 'email', 'website', 'mailing_address', 'city', 'county', 'counties', 'buyer_type', 'recent_acquisitions', 'latest_property', 'latest_acquired_on', 'priority', 'qualified', 'evidence', 'source_urls', 'contact_status', 'last_contacted_at', 'follow_up_date', 'notes', 'assigned_to', 'last_note', 'created_at'];
+    var cols = ['buyer_name', 'call_label', 'contact_route', 'contact_via', 'relationship', 'call_goal', 'cluster_name', 'linked_names', 'contact_name', 'phone', 'email', 'website', 'mailing_address', 'city', 'county', 'counties', 'buyer_type', 'recent_acquisitions', 'portfolio_count', 'latest_property', 'latest_acquired_on', 'priority', 'qualified', 'evidence', 'source_urls', 'contact_status', 'last_contacted_at', 'follow_up_date', 'notes', 'assigned_to', 'last_note', 'created_at'];
     var csv = [cols.join(',')].concat(all.map(function (r) {
       return cols.map(function (c) { var v = r[c]; if (Array.isArray(v)) v = v.join(' | '); v = v == null ? '' : String(v); return '"' + v.replace(/"/g, '""') + '"'; }).join(',');
     })).join('\r\n');
@@ -668,10 +733,15 @@
     loadSummary();
   });
 
+  async function loadClusters() {
+    var res = await BW.sb.from('ab_cluster_list').select('id,name,member_count,phone,contact_org').order('name');
+    if (!res.error) clusters = res.data || [];
+  }
   (async function boot() {
     var auth = await BW.requireAdmin();
     if (!auth) return;
     me = auth.me;
+    await loadClusters();
     var team = await BW.sb.from('admin_users').select('display_name').order('created_at');
     (team.data || []).forEach(function (u) { if (u.display_name && assignees.indexOf(u.display_name) < 0) assignees.push(u.display_name); });
     await loadSummary();

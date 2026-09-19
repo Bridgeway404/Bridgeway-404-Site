@@ -384,8 +384,42 @@ are marked *Not useful*.
 
 **Priority:** High = repeat purchaser (2+ recent acquisitions) or a company
 with a direct phone/email; Medium = qualified with one acquisition; Low =
-qualified but weak. The default view shows High and Medium; Low and
-still-being-researched buyers are one filter away.
+qualified but weak.
+
+### Contact route and the call queue
+
+Qualification says a buyer is real. The **contact route** says how good the
+number is, and only that decides what Leslie sees by default:
+
+| Route | Means | Queue label |
+|---|---|---|
+| **Direct** | The phone/email belongs to the buyer, the buyer's company, a verified principal, the buyer's property-management company, or an acquisitions/operations contact clearly tied to the buyer | **Call First** (repeat buyer or clear recurring acquirer) or **Call** |
+| **Indirect** | A registered agent, law firm, broker, neighbouring/related company or other intermediary that may connect us to the buyer but is not the buyer | **Indirect Introduction** |
+| **Research only** | No practical phone/email, or the relationship is too speculative to call | **Research More** (off the default view) |
+
+The default view is the **call queue**: every lead labelled Call First, Call
+or Indirect Introduction, in call order (label first, then acquisitions, then
+overall recorded purchases). A lead can be *qualified* (real sale, real buyer,
+mailing address) and still sit under Research More until someone finds a
+usable number; the weekly run never lowers a label a person has set.
+
+Every indirect lead spells out, in the row itself, **who the number reaches**
+("Reaches: InVesta / GPS Property Management"), the **relationship** to the
+buyer ("possible related property-management contact; shared registered-agent
+location") and the **call goal** ("confirm whether they manage Deed Co
+properties and who handles cleanouts"), so nobody has to open the research
+notes to understand the call.
+
+**Relationship clusters.** When several buyers route through the same law
+firm, property manager or registered agent, they are linked in a cluster
+(never merged). The first cluster member in the list is the one to call; the
+others show *"One call covers this lead, handled by the call to X above."*
+Any lead that shares a phone number with another shows a gold warning
+*"This contact also relates to: …"*. When a status, note, contact stamp or
+follow-up date is saved on such a lead, the **Also log on N linked leads**
+box (ticked by default) writes the same outcome to every linked lead, with the
+note prefixed "(via X)". Clusters are created from **Edit details → Relationship
+cluster → New cluster…** or by SQL into `ab_clusters`.
 
 ### The call list
 
@@ -393,29 +427,31 @@ One row per buyer, however many properties they bought:
 
 | Column | What it shows |
 |---|---|
-| Buyer / company | Company or person, the contact person when a company was bought through a principal, the mailing address when no phone is on file, **Repeat purchaser** and **Institutional** chips |
-| Phone | Tap-to-call button, email, website; **Needs lookup** when nothing is on file |
-| Property | The most recent property acquired, its county, property type and sale type |
-| Acquired | "N recent auction acquisitions" and the latest acquisition date |
-| Priority | High / Medium / Low |
-| Type | Investor company, landlord, flipper, builder, individual, bank / lender, servicer, nonprofit |
+| Buyer / relationship | Company or person, the contact person, the one-line relationship (who the number really reaches and how they relate to the buyer), **Repeat purchaser**, **Institutional** and cluster chips |
+| Phone | Tap-to-call button, "Reaches: …", email, website, and the shared-contact warning when other leads use the same number |
+| Contact route | **Direct** / **Indirect** / **Research only** |
+| Acquisitions | Auction acquisitions we confirmed, overall recorded purchases when known, the latest property and its date |
+| Priority | The queue label (Call First / Call / Indirect Introduction / Research More) and High / Medium / Low |
+| Call goal | One sentence: what the call is trying to accomplish |
 | Status | New, Call Today, Called – No Answer, Left Voicemail, Spoke With Contact, Interested, Follow Up, Referral Partner, Not Interested, Bad Lead; **Mark contacted** stamps the last-contact time |
 | Follow up | A date; rows whose date has arrived get a gold edge and a **Due** chip |
 | Assigned | Leslie, Mike, Jonathan, any admin account, or **Someone else…** |
 
-Under each row: a **short note** box and **Properties, evidence & notes**,
-which opens the evidence, a table of every property the buyer acquired (parcel,
-sale date, price paid, verification status, links to the county list and the
-assessor record), the mailing address, research notes, an **Edit details**
-form (including the *On the call list* switch and priority), and the dated,
-attributed activity history.
+Under each row: a **short note** box (with the *Also log on linked leads*
+box when the contact is shared) and **Properties, evidence & notes**, which
+opens the evidence, the cluster (if any), a table of every property the buyer
+acquired (parcel, sale date, price paid, verification status, links to the
+county list and the assessor record), the mailing address, research notes,
+an **Edit details** form (contact route, queue label, who the number reaches,
+relationship, call goal, cluster, plus the buyer fields and priority), and the
+dated, attributed activity history.
 
 **Filters and sort:** search; status (**Active** by default hides Not
-Interested / Bad Lead); county; priority (call list, High, Medium, Low, *still
-being researched*, everything); assignee; quick filters for follow-ups due,
-never contacted, repeat purchasers, has / needs a phone, companies /
-individuals. Sort by newest first (default), most acquisitions, latest
-acquisition date, follow-up date, last contacted or name.
+Interested / Bad Lead); county; queue (call queue, Call First only, direct
+only, indirect only, Research More, everything); assignee; quick filters for
+follow-ups due, never contacted, repeat purchasers, has / needs a phone,
+companies / individuals. Sort by call order (default), newest first, most
+acquisitions, latest acquisition date, follow-up date, last contacted or name.
 
 **+ Add buyer** adds one by hand (it goes straight on the call list).
 **Export CSV** downloads the current filtered list.

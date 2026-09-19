@@ -476,7 +476,8 @@ table.mini th { border-top: none; color: var(--muted); font-size: .7rem; text-tr
    Rows reuse the attorney card styling (.att-row / .att-cell / .att-k) and
    only change the desktop column layout. */
 .ab-row .att-k { }
-.ab-buyer, .ab-property, .ab-note, .ab-detail { grid-column: 1 / -1; }
+.ab-buyer, .ab-goal, .ab-note, .ab-detail { grid-column: 1 / -1; }
+@media (min-width: 1000px) { .ab-goal { grid-column: auto; } }
 .ab-buyer strong { font-size: 1rem; }
 .ab-property { font-size: .88rem; line-height: 1.4; }
 .ab-acq { font-weight: 700; }
@@ -492,12 +493,30 @@ table.mini th { border-top: none; color: var(--muted); font-size: .7rem; text-tr
 .ab-queue strong { display: block; font-size: 1.1rem; }
 .ab-src { font-size: .82rem; padding: .35rem 0; border-bottom: 1px solid var(--line); }
 .ab-src:last-child { border-bottom: 0; }
+/* Call routing (0009): route / label chips, relationship line, shared-contact warning */
+.ab-rel { color: var(--text); margin-top: .15rem; }
+.ab-via { margin-top: .2rem; }
+.ab-goal { font-size: .88rem; line-height: 1.4; }
+.ab-shared { margin-top: .3rem; padding: .35rem .5rem; border-radius: 8px; background: var(--gold-light); font-size: .8rem; line-height: 1.35; }
+.ab-covered { grid-column: 1 / -1; padding: .35rem .55rem; border-radius: 8px; background: #f1ecfa; color: var(--purple); font-size: .82rem; }
+.ab-row.covered { opacity: .82; }
+.ab-linked-opt { display: inline-flex; align-items: center; gap: .3rem; font-size: .8rem; color: var(--muted); }
+.ab-linked-opt input { width: 18px; height: 18px; }
+.chip.lbl-gold { background: var(--gold); color: #1d1d1d; font-weight: 800; }
+.chip.lbl-status { background: var(--purple); color: #fff; font-weight: 800; }
+.chip.lbl-indirect { background: #e8f0fb; color: #1f3f74; font-weight: 800; }
+.chip.lbl-done { background: #ececec; color: #666; }
+.chip.route-direct { background: #dff3e4; color: #135c2b; font-weight: 800; }
+.chip.route-indirect { background: #e8f0fb; color: #1f3f74; font-weight: 800; }
+.chip.route-research { background: #ececec; color: #666; }
+.chip.cluster { background: #f1ecfa; color: var(--purple); }
 @media (min-width: 1100px) {
-  .ab-header, .ab-row { grid-template-columns: 1.5fr 1.05fr 1.55fr .75fr .55fr .6fr 1.05fr .9fr .9fr; }
-  .ab-buyer, .ab-property { grid-column: auto; }
+  .ab-header, .ab-row { grid-template-columns: 1.55fr 1.15fr .8fr 1.05fr .7fr 1.5fr 1.05fr .85fr .8fr; }
+  .ab-buyer { grid-column: auto; }
   .ab-note { grid-column: 1 / -1; }
 }
 @media (min-width: 1000px) and (max-width: 1099.98px) {
-  .ab-header, .ab-row { grid-template-columns: 1.4fr 1fr 1.4fr .7fr .6fr .6fr 1fr .9fr .9fr; }
-  .ab-buyer, .ab-property { grid-column: auto; }
+  .ab-header, .ab-row { grid-template-columns: 1.4fr 1.05fr .75fr 1fr .65fr 1.3fr 1fr .8fr .8fr; }
+  .ab-buyer { grid-column: auto; }
 }
+.ab-row .att-phone a[href^="mailto:"] { word-break: break-all; }
