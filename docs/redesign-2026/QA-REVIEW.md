@@ -1,5 +1,7 @@
 # Redesign QA Review — November 2026
 
+> **Update (Nov 5):** texting is **ON** again. 404-565-4216 was confirmed as a Google Voice number that receives texts and MMS photos. "Email photos" remains as the alternative. The texting and test-plan notes below are kept for history; the current owner steps are in `LAUNCH-CHECKLIST.md`.
+
 PR: Bridgeway404/Bridgeway-404-Site#8 (draft — not merged)
 Deploy Preview: https://deploy-preview-8--storied-trifle-152147.netlify.app
 (Netlify builds a fresh preview for every push to the PR branch; production is untouched.)
@@ -65,7 +67,7 @@ counts as modifying production lead records, so it was deliberately not done.
    `service-saturdays-community`.
 2. Optionally pause the Zapier zap first.
 3. On the Deploy Preview, submit one entry per form with the name **"TEST — QA (delete me)"** and
-   the email `test@example.com`.
+   a real email address you control (spam filtering can hold back example.com addresses).
 4. Confirm each appears in Netlify → Forms and that the notification email arrives.
 5. Delete the five test entries in Netlify and any test row in the Google Sheet, then re-enable the zap.
 

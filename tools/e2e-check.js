@@ -163,12 +163,17 @@ async function fillForm(page, formSel, values) {
   ok(await m.isVisible('.action-bar'), 'sticky Call / Text / Quote bar visible on phones');
   ok(await m.getAttribute('.action-bar a:first-child', 'href') === 'tel:+14045654216', 'action bar dials 404-565-4216');
   const visibleBar = await m.$$eval('.action-bar a', as => as.filter(a => a.offsetParent).map(a => a.getAttribute('href')));
-  ok(visibleBar.length === 3 && visibleBar[1].startsWith('mailto:info@bridgeway404.com'), 'action bar shows Call / Email photos / Quote while texting is unconfirmed');
-  for (const p of ['/', '/services/', '/quote/', '/thank-you.html', '/commercial/', '/service-saturdays/', '/about/']) {
+  ok(visibleBar.length === 3 && visibleBar[1].startsWith('sms:+14045654216'), 'action bar shows Call / Text / Quote (texting on)');
+  // Texting is on, and email photos stays visible as the alternative wherever photos are requested
+  const visibleLinks = (sel) => m.$$eval(sel, as => as.filter(a => a.offsetParent).length);
+  for (const p of ['/', '/services/', '/quote/', '/thank-you.html']) {
     await m.goto(BASE + p);
-    const visibleSms = await m.$$eval('a[href^="sms:"]', as => as.filter(a => a.offsetParent).length);
-    ok(visibleSms === 0, `${p}: no visible text-message links (SMS switch off)`);
+    ok(await visibleLinks('a[href^="sms:+14045654216"]') > 0, `${p}: text-photos link visible`);
+    ok(await visibleLinks('a[href^="mailto:info@bridgeway404.com?subject=Photos"]') > 0, `${p}: email-photos alternative visible`);
   }
+  await m.goto(BASE + '/thank-you.html');
+  const thanks = await m.$$eval('.thanks .btn-block', as => as.filter(a => a.offsetParent).map(a => a.getAttribute('href').split(':')[0]));
+  ok(thanks.join(',') === 'sms,mailto', 'thank-you page offers Text Photos Now, then Email Photos Now');
   await m.goto(BASE + '/');
   await m.click('.menu-toggle');
   const menuOpen = await m.locator('#mobile-panel a[href="/service-saturdays/"]').waitFor({ state: 'visible', timeout: 2000 }).then(() => true, () => false);

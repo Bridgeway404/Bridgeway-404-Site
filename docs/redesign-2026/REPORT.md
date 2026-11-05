@@ -4,8 +4,8 @@ Branch: `claude/nice-clarke-kqkdl4` · Not merged, not deployed to the live doma
 
 > **Launch readiness:** see `LAUNCH-CHECKLIST.md` (blockers, form tests, notifications, approvals).
 >
-> **QA update:** see `QA-REVIEW.md`. Texting is switched **off** until 404-565-4216 is confirmed to
-> receive texts; "Email photos" replaces "Text photos" everywhere. The header logo is larger, the
+> **QA update:** see `QA-REVIEW.md`. Texting is **on**: 404-565-4216 (Google Voice) receives texts
+> and photos, and "Email photos" stays available as the alternative. The header logo is larger, the
 > Commercial Partners page was reworked for its four priority audiences, and a draft PR with a live
 > Netlify Deploy Preview is open.
 Screenshots: `docs/redesign-2026/screenshots/` (desktop at 2×, iPhone 13, and full-page captures).

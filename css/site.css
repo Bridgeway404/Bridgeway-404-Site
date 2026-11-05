@@ -78,11 +78,14 @@ button, input, select, textarea { font: inherit; color: inherit; }
 :focus-visible { outline: 3px solid var(--gold-500); outline-offset: 3px; border-radius: 4px; }
 [id] { scroll-margin-top: calc(var(--header-h) + 16px); }
 /* ===== SMS SWITCH =====================================================
-   Texting 404-565-4216 is NOT yet confirmed, so every "Text" control
-   (class .sms-on) is hidden and an email alternative (class .sms-off) shows.
-   To turn texting on once confirmed: change the rule below to
-   `.sms-off { display: none !important; }` — nothing else needs editing. */
-.sms-on { display: none !important; }
+   Texting is ON: 404-565-4216 is a Google Voice number that receives texts
+   and MMS photos (they are also forwarded to info@bridgeway404.com).
+     .sms-on   text-message controls (shown)
+     .sms-off  email stand-ins used only where space is tight (hidden while texting is on)
+     no class  email alternatives that always show
+   To switch texting OFF: replace the rule below with
+   `.sms-on { display: none !important; }` — nothing else needs editing. */
+.sms-off { display: none !important; }
 /* ==================================================================== */
 .sr-only { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 .icon { width: 1.25em; height: 1.25em; flex-shrink: 0; }
@@ -181,6 +184,7 @@ h4 { font-size: 1.02rem; font-weight: 700; line-height: 1.35; }
 .btn-lg { min-height: 58px; padding: 14px 30px; font-size: 1.06rem; }
 .btn-sm { min-height: 42px; padding: 8px 18px; font-size: .92rem; }
 .btn-block { width: 100%; }
+.btn-block + .btn-block { margin-top: 10px; }
 .btn-row { display: flex; flex-wrap: wrap; gap: 12px; }
 .text-link { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; text-decoration: none; }
 .text-link .icon { width: 18px; height: 18px; transition: transform .15s; }
@@ -703,3 +707,8 @@ input:user-invalid, select:user-invalid, textarea:user-invalid { border-color: v
 
 /* ---------- Print ---------- */
 @media print { .site-header, .topbar, .action-bar, .site-footer, .hero::before, .hero::after { display: none !important; } }
+
+/* Homepage hero: quiet email alternative under the main buttons */
+.hero-email { margin-top: 14px; font-size: .95rem; color: rgba(255,255,255,.8); }
+.hero-email a { color: var(--white); font-weight: 700; }
+.hero-email a:hover { color: var(--gold-400); }

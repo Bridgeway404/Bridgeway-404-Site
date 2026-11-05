@@ -80,8 +80,10 @@ only support `%{formName}`, `%{siteName}` and `%{submissionId}` — field values
 name cannot be inserted. Netlify sets Reply-To from the field named `email`.
 
 After the first deploy of the redesign, Netlify registers the three new forms automatically.
-Add email notifications for them in **Netlify → Forms → (form) → Form notifications**, the same
-way as for `quote-request`. `privacy_consent_granted` now really records `Yes` when the box is
+Add email notifications for them in **Netlify → Forms → Submission notifications**. Since Netlify's
+November 3, 2026 change, new email recipients must be **active members of the Netlify team**: send all
+five to info@bridgeway404.com (a team member) and let Gmail filters in info@ forward copies to
+individual people. See `docs/redesign-2026/LEAD-HANDLING.md`. `privacy_consent_granted` now really records `Yes` when the box is
 ticked (the old site always sent `No`).
 
 **Photos:** the site deliberately has no upload field. Netlify Forms caps a whole submission at
@@ -89,11 +91,12 @@ ticked (the old site always sent `No`).
 the lead. Customers instead tap a photo button on the form, the thank-you page and the sticky
 mobile bar.
 
-**SMS switch (texting is currently OFF):** it is not yet confirmed that 404-565-4216 can receive
-texts, so every "Text" control carries the class `sms-on` and is hidden by one rule near the top of
-`css/site.css`; an **Email photos** button (`sms-off`, a pre-filled email to info@bridgeway404.com)
-shows in its place. Once texting is confirmed, change that rule to
-`.sms-off { display: none !important; }` and every Text button returns site-wide.
+**Photos by text or email (texting is ON):** 404-565-4216 is a Google Voice number that receives
+texts and MMS photos and forwards them to info@bridgeway404.com. Every "Text photos" control carries
+the class `sms-on`. An **Email photos** alternative (a pre-filled email to info@bridgeway404.com) stays
+visible next to it. In the two tight spots (the sticky phone bar and the homepage hero button row), an
+email stand-in with class `sms-off` appears only if texting is switched off. To switch texting off,
+change the single SMS SWITCH rule near the top of `css/site.css` to `.sms-on { display: none !important; }`.
 `tools/check-site.py` fails if any `sms:` link is added without the switch class.
 
 ### Link preview (share card)
