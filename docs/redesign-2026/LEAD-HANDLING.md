@@ -5,6 +5,12 @@ Customer-level findings are reported to the owner separately and are not stored 
 
 ---
 
+> **Status after the Nov 5 owner-token verification** (supersedes the "not yet verified" notes below):
+> - Production notifications are: email to info@ for the two quote forms; email to **michael@bridgeway404.com for all forms** (team owner, which satisfies the Nov 3 rule); and a Zapier webhook, now limited to the two quote forms.
+> - All five forms were tested (verified, not spam), and both info@ notifications were confirmed.
+> - The 30 spam-flagged submissions from August to November were all bot spam, so **no real website inquiry was missed**.
+> - See `LAUNCH-CHECKLIST.md`.
+
 ## 1. Netlify projects
 
 | Item | Finding | Status |
