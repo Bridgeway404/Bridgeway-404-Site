@@ -70,7 +70,7 @@ owner's brand reference pack — white background removed, nothing redrawn.
 |---|---|---|---|
 | `quote-request` | `/quote/` | `/thank-you.html` | Junk removal & cleanouts. **Field names unchanged** from the old site so existing Zapier/Make → Sheets mappings keep working. `email`, `volume_estimate` and `item_location` are now optional. New `service_type` values: `garage-cleanout`, `basement-attic-cleanout`, `property-cleanout`, `labor-help`, `other`. |
 | `furniture-assembly-request` | `/quote/#assembly` | `/thank-you.html` | Field names unchanged; `email` now optional unless Email is the chosen contact method. |
-| `commercial-partner-inquiry` | `/commercial/#partner-form` | `/commercial/thank-you.html` | `company_name`, `business_type`, `contact_name`, `job_title`, `phone`, `email`, `service_needs[]`, `service_locations`, `property_count`, `anticipated_volume`, `timeline`, `preferred_contact`, `vendor_requirements`, `message`, `privacy_consent`, `privacy_consent_granted` |
+| `commercial-partner-inquiry` | `/commercial/#partner-form` | `/commercial/thank-you.html` | `company_name`, `business_type`, `contact_name`, `job_title`, `phone`, `email`, `service_needs[]`, `service_locations`, `property_count`, `anticipated_volume`, `timeline`, `preferred_contact`, `referral_source`, `vendor_requirements`, `message`, `privacy_consent`, `privacy_consent_granted` |
 | `service-saturdays-nomination` | `/service-saturdays/#nominate` | `/service-saturdays/thank-you.html` | `nominator_name`, `nominator_phone`, `nominator_email`, `relationship`, `senior_name`, `senior_area`, `senior_aware`, `help_needed[]`, `situation`, `nomination_acknowledgement`, `privacy_consent`, `privacy_consent_granted`. A nomination is **not** a booking. |
 | `service-saturdays-community` | `/service-saturdays/#get-involved` | `/service-saturdays/thank-you.html` | `organization_name`, `contact_name`, `email`, `phone`, `involvement[]`, `message`, `privacy_consent`, `privacy_consent_granted` |
 
@@ -81,8 +81,15 @@ ticked (the old site always sent `No`).
 
 **Photos:** the site deliberately has no upload field. Netlify Forms caps a whole submission at
 8 MB and one file per input, and a single modern phone photo can exceed that and silently lose
-the lead. Customers instead tap **Text photos** (opens their messaging app addressed to
-404-565-4216 with a pre-filled message) on the form, the thank-you page and the sticky mobile bar.
+the lead. Customers instead tap a photo button on the form, the thank-you page and the sticky
+mobile bar.
+
+**SMS switch (texting is currently OFF):** it is not yet confirmed that 404-565-4216 can receive
+texts, so every "Text" control carries the class `sms-on` and is hidden by one rule near the top of
+`css/site.css`; an **Email photos** button (`sms-off`, a pre-filled email to info@bridgeway404.com)
+shows in its place. Once texting is confirmed, change that rule to
+`.sms-off { display: none !important; }` and every Text button returns site-wide.
+`tools/check-site.py` fails if any `sms:` link is added without the switch class.
 
 ### Link preview (share card)
 

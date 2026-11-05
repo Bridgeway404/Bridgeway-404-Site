@@ -124,6 +124,13 @@ async function fillForm(page, formSel, values) {
   ok(post && post.body.get('form-name') === 'commercial-partner-inquiry', 'commercial-partner-inquiry posts');
   ok(post && post.body.getAll('service_needs[]').length === 2, 'multiple service needs submitted');
 
+  await page.goto(BASE + '/commercial/');
+  await page.click('#attorneys a[data-type]');
+  ok(await page.inputValue('#cp-type') === 'eviction-attorney', 'attorney panel CTA preselects business type');
+  await page.goto(BASE + '/commercial/?type=storage-facility');
+  ok(await page.inputValue('#cp-type') === 'storage-facility', '?type= preselects business type');
+  ok(await page.$('form[name="commercial-partner-inquiry"] [name="referral_source"]') !== null, 'commercial form asks how they heard about us');
+
   console.log('\n[service saturdays forms]');
   await page.goto(BASE + '/service-saturdays/');
   await fillForm(page, 'form[name="service-saturdays-nomination"]', {
@@ -133,6 +140,8 @@ async function fillForm(page, formSel, values) {
   await page.check('form[name="service-saturdays-nomination"] [name="privacy_consent"]');
   await page.click('form[name="service-saturdays-nomination"] button[type=submit]');
   ok(page.posts.length === 0, 'nomination requires the "not an appointment" acknowledgement');
+  ok(await page.isVisible('text=How we protect nominee privacy'), 'nominee privacy notice shown beside the form');
+  ok(await page.$('form[name="service-saturdays-nomination"] [name*="address" i], form[name="service-saturdays-nomination"] [name*="dob" i], form[name="service-saturdays-nomination"] [name*="age" i]') === null, 'nomination form collects no street address, birth date or age');
   await page.check('form[name="service-saturdays-nomination"] [name="nomination_acknowledgement"]');
   await Promise.all([page.waitForURL(/service-saturdays\/thank-you/), page.click('form[name="service-saturdays-nomination"] button[type=submit]')]);
   post = page.posts.pop();
@@ -151,12 +160,21 @@ async function fillForm(page, formSel, values) {
   await m.goto(BASE + '/');
   ok(await m.isVisible('.action-bar'), 'sticky Call / Text / Quote bar visible on phones');
   ok(await m.getAttribute('.action-bar a:first-child', 'href') === 'tel:+14045654216', 'action bar dials 404-565-4216');
-  ok((await m.getAttribute('.action-bar a:nth-child(2)', 'href')).startsWith('sms:+14045654216'), 'action bar opens a text to 404-565-4216');
+  const visibleBar = await m.$$eval('.action-bar a', as => as.filter(a => a.offsetParent).map(a => a.getAttribute('href')));
+  ok(visibleBar.length === 3 && visibleBar[1].startsWith('mailto:info@bridgeway404.com'), 'action bar shows Call / Email photos / Quote while texting is unconfirmed');
+  for (const p of ['/', '/services/', '/quote/', '/thank-you.html', '/commercial/', '/service-saturdays/', '/about/']) {
+    await m.goto(BASE + p);
+    const visibleSms = await m.$$eval('a[href^="sms:"]', as => as.filter(a => a.offsetParent).length);
+    ok(visibleSms === 0, `${p}: no visible text-message links (SMS switch off)`);
+  }
+  await m.goto(BASE + '/');
   await m.click('.menu-toggle');
   const menuOpen = await m.locator('#mobile-panel a[href="/service-saturdays/"]').waitFor({ state: 'visible', timeout: 2000 }).then(() => true, () => false);
   ok(menuOpen, 'mobile menu opens');
   ok(await m.evaluate(() => document.getElementById('mobile-panel').offsetHeight > 400), 'mobile menu fills the screen (not clipped by the header)');
   ok(await m.getAttribute('.menu-toggle', 'aria-expanded') === 'true', 'menu button reports aria-expanded');
+  await m.goto(BASE + '/commercial/');
+  ok(await m.getAttribute('.action-bar a.primary', 'href') === '#partner-form', 'commercial page: sticky bar CTA goes to the partner form');
   await m.goto(BASE + '/quote/');
   const small = await m.$$eval('input:not([type=hidden]):not([type=checkbox]), select, textarea',
     els => els.filter(e => e.offsetParent && parseFloat(getComputedStyle(e).fontSize) < 16).length);

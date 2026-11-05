@@ -1,6 +1,11 @@
 # Bridgeway404.com Redesign — November 2026
 
 Branch: `claude/nice-clarke-kqkdl4` · Not merged, not deployed to the live domain.
+
+> **QA update:** see `QA-REVIEW.md`. Texting is switched **off** until 404-565-4216 is confirmed to
+> receive texts; "Email photos" replaces "Text photos" everywhere. The header logo is larger, the
+> Commercial Partners page was reworked for its four priority audiences, and a draft PR with a live
+> Netlify Deploy Preview is open.
 Screenshots: `docs/redesign-2026/screenshots/` (desktop at 2×, iPhone 13, and full-page captures).
 
 ---

@@ -122,6 +122,16 @@ def main():
                 if f'id="{symbol}"' not in target.read_text():
                     fail(rel, f"missing icon symbol #{symbol}")
 
+        # --- texting is unconfirmed: every sms: link must sit behind the .sms-on switch ---
+        for m in re.finditer(r'href="sms:', html):
+            tag_start = max(html.rfind("<a ", 0, m.start()), html.rfind("<a\n", 0, m.start()))
+            tag = html[tag_start:m.start()]
+            li_start = html.rfind("<li", 0, tag_start)
+            inside_li = li_start != -1 and "</li>" not in html[li_start:tag_start]
+            parent_li = html[li_start:html.find(">", li_start) + 1] if inside_li else ""
+            if "sms-on" not in tag and "sms-on" not in parent_li:
+                fail(rel, "sms: link not behind the .sms-on switch (texting is unconfirmed)")
+
         # --- SEO / a11y basics ---
         if p.h1 != 1:
             fail(rel, f"expected exactly one <h1>, found {p.h1}")

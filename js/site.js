@@ -121,6 +121,19 @@
     if (Array.prototype.some.call(sel.options, function (o) { return o.value === svc; })) sel.value = svc;
   })();
 
+  /* ---------- Commercial form: preselect business type from ?type= or [data-type] links ---------- */
+  (function () {
+    var sel = document.getElementById('cp-type');
+    if (!sel) return;
+    function set(v) {
+      if (v && Array.prototype.some.call(sel.options, function (o) { return o.value === v; })) sel.value = v;
+    }
+    set(new URLSearchParams(location.search).get('type'));
+    document.querySelectorAll('[data-type]').forEach(function (a) {
+      a.addEventListener('click', function () { set(a.getAttribute('data-type')); });
+    });
+  })();
+
   /* ---------- Consent mirror: hidden Yes/No field for clean CRM import ---------- */
   document.querySelectorAll('[data-consent-mirror]').forEach(function (box) {
     var hidden = document.getElementById(box.getAttribute('data-consent-mirror'));
@@ -146,6 +159,15 @@
   if (document.body.dataset.page === 'home') {
     var legacy = { '#quote': '/quote/', '#assembly-form': '/quote/#assembly', '#contact': '/quote/#contact' };
     if (legacy[location.hash]) location.replace(legacy[location.hash]);
+  }
+
+  /* ---------- Commercial page: point the sticky mobile CTA at the partner form ---------- */
+  if (document.body.dataset.page === 'commercial') {
+    var primary = document.querySelector('.action-bar a.primary');
+    if (primary) {
+      primary.setAttribute('href', '#partner-form');
+      primary.lastChild.textContent = 'Partner Inquiry';
+    }
   }
 
   /* ---------- Footer year ---------- */
