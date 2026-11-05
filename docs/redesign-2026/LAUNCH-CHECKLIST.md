@@ -3,6 +3,8 @@
 **Preview:** https://deploy-preview-8--storied-trifle-152147.netlify.app
 **PR:** Bridgeway404/Bridgeway-404-Site#8 (draft — do not merge until every **Blocker** box is ticked)
 
+> **Lead-handling audit (Nov 5):** see `LEAD-HANDLING.md`. Production project confirmed as `storied-trifle-152147` (team `michael-glzfwwe`); form capture verified live; notifications and past submissions still need the owner's Netlify access. 404-565-4216 is Google Voice and does receive texts and photos.
+
 Legend: 🔴 **Blocker**: must be done before merging. 🟡 Strongly recommended before or at launch. ⚪ Can follow launch.
 
 ---
