@@ -91,6 +91,7 @@ async function fillForm(page, formSel, values) {
   ok(post && post.body.get('form-name') === 'quote-request', 'quote-request posts with form-name');
   ok(post && post.body.get('privacy_consent_granted') === 'Yes', 'privacy_consent_granted mirrors the checkbox (Yes)');
   ok(post && post.body.get('items_detail') === 'TEST — couch and 6 boxes', 'items_detail submitted');
+  ok(post && /^NEW QUOTE REQUEST/.test(post.body.get('subject') || ''), 'quote-request carries its notification subject');
   ok(post && post.url.endsWith('/thank-you.html'), 'quote form posts to /thank-you.html');
 
   await page.goto(BASE + '/quote/');
@@ -123,6 +124,7 @@ async function fillForm(page, formSel, values) {
   post = page.posts.pop();
   ok(post && post.body.get('form-name') === 'commercial-partner-inquiry', 'commercial-partner-inquiry posts');
   ok(post && post.body.getAll('service_needs[]').length === 2, 'multiple service needs submitted');
+  ok(post && /^NEW COMMERCIAL PARTNER INQUIRY/.test(post.body.get('subject') || ''), 'commercial inquiry email subject is labeled');
 
   await page.goto(BASE + '/commercial/');
   await page.click('#attorneys a[data-type]');

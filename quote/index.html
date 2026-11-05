@@ -50,7 +50,7 @@
 <header class="site-header">
   <div class="container header-inner">
     <a class="brand" href="/" aria-label="Bridgeway 404 home">
-      <img src="/assets/brand/logo-mark-light-v1.png" width="631" height="407" alt="Bridgeway 404 logo — Atlanta skyline over a purple and gold arch">
+      <img src="/assets/brand/logo-mark-light-v1.webp" width="631" height="407" alt="Bridgeway 404 logo — Atlanta skyline over a purple and gold arch">
     </a>
     <nav class="site-nav" aria-label="Main">
       <ul class="nav-list">
@@ -92,7 +92,7 @@
 
 <main id="main">
   <section class="hero page-hero" aria-labelledby="page-title" style="padding-bottom:clamp(90px,10vw,130px)">
-    <img class="hero-skyline" src="/assets/brand/icon-skyline-dark-v1.png" alt="" aria-hidden="true" width="542" height="237">
+    <img class="hero-skyline" src="/assets/brand/icon-skyline-dark-v1.webp" alt="" aria-hidden="true" width="542" height="237">
     <div class="container">
       <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="/">Home</a> / Get a quote</nav>
       <p class="eyebrow">Free quote</p>
@@ -116,6 +116,8 @@
         <div class="tab-panel" id="panel-removal" role="tabpanel" aria-labelledby="tab-removal">
           <form name="quote-request" method="POST" action="/thank-you.html" data-netlify="true" data-netlify-honeypot="bot-field" aria-label="Junk removal and cleanout quote request">
             <input type="hidden" name="form-name" value="quote-request">
+            <!-- Email notification subject (overrides the Netlify UI). Only %{formName}, %{siteName}, %{submissionId} are supported. -->
+            <input type="hidden" name="subject" data-remove-prefix value="NEW QUOTE REQUEST — junk removal / cleanout (#%{submissionId})">
             <input type="hidden" name="privacy_consent_granted" id="qr-privacy-granted" value="No">
             <p class="honeypot" aria-hidden="true"><label>Leave this empty: <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
 
@@ -250,6 +252,8 @@
         <div class="tab-panel" id="panel-assembly" role="tabpanel" aria-labelledby="tab-assembly" hidden>
           <form name="furniture-assembly-request" method="POST" action="/thank-you.html" data-netlify="true" data-netlify-honeypot="bot-field-assembly" aria-label="Furniture assembly quote request">
             <input type="hidden" name="form-name" value="furniture-assembly-request">
+            <!-- Email notification subject (overrides the Netlify UI). Only %{formName}, %{siteName}, %{submissionId} are supported. -->
+            <input type="hidden" name="subject" data-remove-prefix value="NEW ASSEMBLY REQUEST (#%{submissionId})">
             <input type="hidden" name="privacy_consent_granted" id="asm-privacy-granted" value="No">
             <p class="honeypot" aria-hidden="true"><label>Leave this empty: <input name="bot-field-assembly" tabindex="-1" autocomplete="off"></label></p>
 
@@ -390,7 +394,7 @@
   <div class="container">
     <div class="footer-grid">
       <div class="footer-brand">
-        <img src="/assets/brand/logo-full-dark-v1.png" width="631" height="491" alt="Bridgeway 404 — Junk Removal &amp; Property Cleanouts. A Cleaner Tomorrow." loading="lazy">
+        <img src="/assets/brand/logo-full-dark-v1.webp" width="631" height="491" alt="Bridgeway 404 — Junk Removal &amp; Property Cleanouts. A Cleaner Tomorrow." loading="lazy">
         <p>Locally owned junk removal, property cleanouts and furniture help for homeowners, renters and property professionals across Metro Atlanta.</p>
       </div>
       <div>

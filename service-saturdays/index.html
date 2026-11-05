@@ -50,7 +50,7 @@
 <header class="site-header">
   <div class="container header-inner">
     <a class="brand" href="/" aria-label="Bridgeway 404 home">
-      <img src="/assets/brand/logo-mark-light-v1.png" width="631" height="407" alt="Bridgeway 404 logo — Atlanta skyline over a purple and gold arch">
+      <img src="/assets/brand/logo-mark-light-v1.webp" width="631" height="407" alt="Bridgeway 404 logo — Atlanta skyline over a purple and gold arch">
     </a>
     <nav class="site-nav" aria-label="Main">
       <ul class="nav-list">
@@ -96,7 +96,7 @@
        * Any sharing of nomination data with Sistamatic must be agreed with the partner (see privacy-policy.html §5).
        * Do NOT add specific Service Saturday dates until capacity and dates are confirmed. -->
   <section class="hero page-hero" aria-labelledby="page-title">
-    <img class="hero-skyline" src="/assets/brand/icon-skyline-dark-v1.png" alt="" aria-hidden="true" width="542" height="237">
+    <img class="hero-skyline" src="/assets/brand/icon-skyline-dark-v1.webp" alt="" aria-hidden="true" width="542" height="237">
     <div class="container hero-grid">
       <div>
         <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="/">Home</a> / Service Saturdays</nav>
@@ -111,9 +111,9 @@
       </div>
       <div class="hero-logo-card" style="max-width:440px">
         <div class="partner-lockup">
-          <img class="bw" src="/assets/brand/logo-full-light-v1.png" width="631" height="491" alt="Bridgeway 404">
+          <img class="bw" src="/assets/brand/logo-full-light-v1.webp" width="631" height="491" alt="Bridgeway 404">
           <span class="divider" aria-hidden="true"></span>
-          <img class="sista" src="/assets/brand/partner-sistamatic-organizing-v1.png" width="452" height="452" alt="Sistamatic Organizing">
+          <img class="sista" src="/assets/brand/partner-sistamatic-organizing-v1.webp" width="452" height="452" alt="Sistamatic Organizing">
         </div>
         <p class="tagline center" style="margin-top:14px;letter-spacing:.24em">Bridgeway 404 × Sistamatic Organizing</p>
       </div>
@@ -150,11 +150,11 @@
       </div>
       <div class="grid grid-2">
         <article class="card" style="flex-direction:row;gap:20px;align-items:flex-start">
-          <img src="/assets/brand/logo-mark-light-v1.png" width="631" height="407" alt="" style="width:96px;flex-shrink:0" loading="lazy">
+          <img src="/assets/brand/logo-mark-light-v1.webp" width="631" height="407" alt="" style="width:96px;flex-shrink:0" loading="lazy">
           <div><h3>Bridgeway 404</h3><p style="margin-top:8px">Brings the crew, the truck and the heavy lifting — carrying out and hauling away the furniture and items the senior has decided to let go.</p></div>
         </article>
         <article class="card" style="flex-direction:row;gap:20px;align-items:flex-start">
-          <img src="/assets/brand/partner-sistamatic-organizing-v1.png" width="452" height="452" alt="" style="width:84px;flex-shrink:0" loading="lazy">
+          <img src="/assets/brand/partner-sistamatic-organizing-v1.webp" width="452" height="452" alt="" style="width:84px;flex-shrink:0" loading="lazy">
           <div><h3>Sistamatic Organizing</h3><p style="margin-top:8px">Brings professional organizing expertise — helping sort, decide what stays, and set up the space so it's easier to live in and keep tidy.</p></div>
         </article>
       </div>
@@ -205,6 +205,8 @@
         <!-- Netlify form "service-saturdays-nomination". A submission is a nomination for review, never a booking. -->
         <form name="service-saturdays-nomination" method="POST" action="/service-saturdays/thank-you.html" data-netlify="true" data-netlify-honeypot="bot-field-ss" aria-label="Service Saturdays senior nomination">
           <input type="hidden" name="form-name" value="service-saturdays-nomination">
+            <!-- Email notification subject (overrides the Netlify UI). Only %{formName}, %{siteName}, %{submissionId} are supported. -->
+            <input type="hidden" name="subject" data-remove-prefix value="Service Saturdays nomination (#%{submissionId})">
           <input type="hidden" name="privacy_consent_granted" id="ss-privacy-granted" value="No">
           <p class="honeypot" aria-hidden="true"><label>Leave this empty: <input name="bot-field-ss" tabindex="-1" autocomplete="off"></label></p>
 
@@ -213,7 +215,7 @@
             <div class="fields two">
               <div class="field"><label for="ss-nom-name">Your name <span class="req" aria-hidden="true">*</span></label><input id="ss-nom-name" name="nominator_name" type="text" required autocomplete="name"></div>
               <div class="field"><label for="ss-nom-phone">Your phone <span class="req" aria-hidden="true">*</span></label><input id="ss-nom-phone" name="nominator_phone" type="tel" required autocomplete="tel" inputmode="tel"></div>
-              <div class="field"><label for="ss-nom-email">Your email <span class="opt">(optional)</span></label><input id="ss-nom-email" name="nominator_email" type="email" autocomplete="email"></div>
+              <div class="field"><label for="ss-nom-email">Your email <span class="opt">(optional)</span></label><input id="ss-nom-email" name="email" type="email" autocomplete="email"></div>
               <div class="field">
                 <label for="ss-rel">Your relationship to the senior <span class="req" aria-hidden="true">*</span></label>
                 <select id="ss-rel" name="relationship" required>
@@ -272,7 +274,7 @@
 
   <!-- COMMUNITY -->
   <section class="section band" id="get-involved" aria-labelledby="involve-title">
-    <img class="band-skyline" src="/assets/brand/icon-skyline-dark-v1.png" alt="" aria-hidden="true" width="542" height="237" loading="lazy">
+    <img class="band-skyline" src="/assets/brand/icon-skyline-dark-v1.webp" alt="" aria-hidden="true" width="542" height="237" loading="lazy">
     <div class="container split split-top">
       <div>
         <p class="eyebrow">Community organizations</p>
@@ -291,6 +293,8 @@
         <!-- Netlify form "service-saturdays-community" -->
         <form name="service-saturdays-community" method="POST" action="/service-saturdays/thank-you.html" data-netlify="true" data-netlify-honeypot="bot-field-community" aria-label="Service Saturdays community involvement">
           <input type="hidden" name="form-name" value="service-saturdays-community">
+            <!-- Email notification subject (overrides the Netlify UI). Only %{formName}, %{siteName}, %{submissionId} are supported. -->
+            <input type="hidden" name="subject" data-remove-prefix value="Service Saturdays community inquiry (#%{submissionId})">
           <input type="hidden" name="privacy_consent_granted" id="sc-privacy-granted" value="No">
           <p class="honeypot" aria-hidden="true"><label>Leave this empty: <input name="bot-field-community" tabindex="-1" autocomplete="off"></label></p>
           <div class="fields two">
@@ -343,7 +347,7 @@
   <div class="container">
     <div class="footer-grid">
       <div class="footer-brand">
-        <img src="/assets/brand/logo-full-dark-v1.png" width="631" height="491" alt="Bridgeway 404 — Junk Removal &amp; Property Cleanouts. A Cleaner Tomorrow." loading="lazy">
+        <img src="/assets/brand/logo-full-dark-v1.webp" width="631" height="491" alt="Bridgeway 404 — Junk Removal &amp; Property Cleanouts. A Cleaner Tomorrow." loading="lazy">
         <p>Locally owned junk removal, property cleanouts and furniture help for homeowners, renters and property professionals across Metro Atlanta.</p>
       </div>
       <div>

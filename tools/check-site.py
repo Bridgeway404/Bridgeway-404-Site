@@ -168,6 +168,8 @@ def main():
                 fail(rel, f"form {name!r}: success page {action!r} does not exist")
             if (a.get("method") or "").upper() != "POST":
                 fail(rel, f"form {name!r}: method must be POST")
+            if fields.get("subject", {}).get("type") != "hidden":
+                fail(rel, f"form {name!r}: missing hidden notification subject field")
             if "privacy_consent" not in fields:
                 fail(rel, f"form {name!r}: missing privacy_consent checkbox")
             mirror = fields.get("privacy_consent", {}).get("data-consent-mirror")

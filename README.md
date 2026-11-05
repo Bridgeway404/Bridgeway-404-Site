@@ -71,8 +71,13 @@ owner's brand reference pack — white background removed, nothing redrawn.
 | `quote-request` | `/quote/` | `/thank-you.html` | Junk removal & cleanouts. **Field names unchanged** from the old site so existing Zapier/Make → Sheets mappings keep working. `email`, `volume_estimate` and `item_location` are now optional. New `service_type` values: `garage-cleanout`, `basement-attic-cleanout`, `property-cleanout`, `labor-help`, `other`. |
 | `furniture-assembly-request` | `/quote/#assembly` | `/thank-you.html` | Field names unchanged; `email` now optional unless Email is the chosen contact method. |
 | `commercial-partner-inquiry` | `/commercial/#partner-form` | `/commercial/thank-you.html` | `company_name`, `business_type`, `contact_name`, `job_title`, `phone`, `email`, `service_needs[]`, `service_locations`, `property_count`, `anticipated_volume`, `timeline`, `preferred_contact`, `referral_source`, `vendor_requirements`, `message`, `privacy_consent`, `privacy_consent_granted` |
-| `service-saturdays-nomination` | `/service-saturdays/#nominate` | `/service-saturdays/thank-you.html` | `nominator_name`, `nominator_phone`, `nominator_email`, `relationship`, `senior_name`, `senior_area`, `senior_aware`, `help_needed[]`, `situation`, `nomination_acknowledgement`, `privacy_consent`, `privacy_consent_granted`. A nomination is **not** a booking. |
+| `service-saturdays-nomination` | `/service-saturdays/#nominate` | `/service-saturdays/thank-you.html` | `nominator_name`, `nominator_phone`, `email` (nominator's; used as Reply-To), `relationship`, `senior_name`, `senior_area`, `senior_aware`, `help_needed[]`, `situation`, `nomination_acknowledgement`, `privacy_consent`, `privacy_consent_granted`. A nomination is **not** a booking. |
 | `service-saturdays-community` | `/service-saturdays/#get-involved` | `/service-saturdays/thank-you.html` | `organization_name`, `contact_name`, `email`, `phone`, `involvement[]`, `message`, `privacy_consent`, `privacy_consent_granted` |
+
+Every form carries a hidden `subject` field (with `data-remove-prefix`) so notification emails
+arrive with a clear subject such as **NEW COMMERCIAL PARTNER INQUIRY (#…)**. Netlify subjects
+only support `%{formName}`, `%{siteName}` and `%{submissionId}` — field values such as a customer
+name cannot be inserted. Netlify sets Reply-To from the field named `email`.
 
 After the first deploy of the redesign, Netlify registers the three new forms automatically.
 Add email notifications for them in **Netlify → Forms → (form) → Form notifications**, the same
