@@ -1,41 +1,105 @@
 # Bridgeway 404 — Website
 
-One-page marketing and quote-request site for Bridgeway 404 (Metro Atlanta junk removal and furniture services).
+Marketing, quote-request and business-development site for Bridgeway 404
+(Metro Atlanta junk removal, property cleanouts and furniture assembly), plus the
+internal admin panel and its Supabase workers.
+
+The public site is plain static HTML/CSS/JS on Netlify — no framework and no build
+step. Shared header/footer markup lives once in `partials/` and is stamped into each
+page by a small script (see "Updating the Website").
 
 ---
 
 ## Files
 
-| File | Purpose |
+### Public site
+
+| Path | Purpose |
 |---|---|
-| `index.html` | The entire website — all sections, styles, and scripts in one file |
-| `netlify.toml` | Netlify configuration (headers, redirects, build settings) |
-| `assets/bridgeway404-social-preview-v2.png` | 1200 × 630 branded link-preview image (iMessage, SMS, Facebook, LinkedIn, X, Slack, WhatsApp) |
-| `favicon.png` | Bridgeway 404 logo, used as the browser/tab icon |
-| `assets/bridgeway404-moving-special-325.png` | 1080 × 1080 social graphic for the $325 / 2-hour moving special (truck, 2 movers, straps & blankets) |
-| `assets/bridgeway404-moving-special-325.html` | Self-contained source for the moving-special graphic — edit the text, open in Chrome at 1080 × 1080, and screenshot to regenerate the PNG |
+| `index.html` | Homepage |
+| `services/index.html` | Residential services + items we can't accept |
+| `commercial/index.html` | Commercial / property-professional landing page + **commercial partner** form |
+| `service-saturdays/index.html` | Service Saturdays program page + **senior nomination** and **community** forms |
+| `about/index.html` | Company story, values, real job photos (`#our-work`), reviews link |
+| `quote/index.html` | Quote page: **junk removal / cleanout** and **furniture assembly** forms (tabs) |
+| `thank-you.html`, `commercial/thank-you.html`, `service-saturdays/thank-you.html` | Form success pages (noindex) |
+| `privacy-policy.html` | Privacy policy |
+| `css/site.css` | Design system — brand color tokens, type, components. Edit colors here once. |
+| `js/site.js` | Progressive enhancement: mobile menu, call modal, quote tabs, consent mirror |
+| `partials/head.html`, `partials/header.html`, `partials/footer.html` | Shared markup (blocked from public by `netlify.toml`) |
+| `assets/brand/` | Logo files cut from the official brand pack (see below) |
+| `assets/icons-v1.svg` | Line-icon sprite used across pages |
+| `assets/bridgeway404-social-preview-v3.png` | 1200 × 630 link-preview card (source: `tools/social-card-v3.html`) |
+| `images/` | Real Bridgeway 404 job photos |
+| `robots.txt`, `sitemap.xml` | Search engine files (`/admin/` disallowed) |
+| `tools/` | Maintenance and test scripts (blocked from public by `netlify.toml`) |
+| `favicon.png` | Old favicon — still used by the `/admin` panel, so it is kept as-is |
+
+### Logo files (`assets/brand/`)
+
+All logo variants are pixel-exact derivatives of `bridgeway404-primary-logo-crop.png` from the
+owner's brand reference pack — white background removed, nothing redrawn.
+
+| File | Use |
+|---|---|
+| `logo-full-light-v1.png` | Full logo (skyline, arch, BRIDGEWAY 404, JUNK REMOVAL & PROPERTY CLEANOUTS, A CLEANER TOMORROW.) on light backgrounds |
+| `logo-full-dark-v1.png` | Same, for dark backgrounds (black → white, purple brightened as on the brand's dark flyers) |
+| `logo-mark-light-v1.png` / `logo-mark-dark-v1.png` | Compact mark without taglines — header / mobile nav |
+| `icon-skyline-light-v1.png` / `icon-skyline-dark-v1.png` | Skyline + arch only — background motifs |
+| `favicon-v1.ico`, `favicon-16/32/48-v1.png` | Browser icon ("404" from the logo) |
+| `apple-touch-icon-v1.png`, `icon-192-v1.png`, `icon-512-v1.png` | Phone home-screen icons |
+| `partner-sistamatic-organizing-v1.png` | Sistamatic Organizing logo (cropped from the Service Saturdays graphic) — **confirm partner approval before launch** |
+
+### Internal (unchanged by the redesign)
+
+| Path | Purpose |
+|---|---|
 | `admin/` | Internal admin panel (Blitz, Prospects, Follow-Ups, Eviction Attorney Leads, Auction Buyer Leads; Distressed Property Leads is paused) — see `docs/admin-panel-operations.md` |
 | `supabase/migrations/` | Database schema for the admin panel (Supabase project `bridgeway-404`) |
 | `supabase/functions/distressed-leads/` | Research worker behind the Distressed Property Leads tab (Supabase Edge Function; tests with `node --test`). Paused: `select public.dpl_set_paused(false)` reactivates it |
 | `supabase/functions/eviction-attorney-leads/` | Manual research worker behind the Eviction Attorney Leads tab (Supabase Edge Function; tests with `node --test`) |
-| `supabase/functions/auction-buyer-leads/` | Weekly (Wednesday) research worker behind the Auction Buyer Leads tab: county tax-sale results + assessor rolls → buyer call list (Supabase Edge Function; tests with `node --test`) |
+| `supabase/functions/auction-buyer-leads/` | Weekly (Wednesday) research worker behind the Auction Buyer Leads tab (Supabase Edge Function; tests with `node --test`) |
 | `docs/distressed-leads-sources.md` | Per-county source matrix, what is and is not automated, paid options |
-| `README.md` | This file — deployment guide |
+| `assets/bridgeway404-moving-special-325.*` | Archived $325 moving-special graphic — not linked from the public site |
+
+---
+
+## Netlify Forms
+
+| Form name | Page | Success page | Notes |
+|---|---|---|---|
+| `quote-request` | `/quote/` | `/thank-you.html` | Junk removal & cleanouts. **Field names unchanged** from the old site so existing Zapier/Make → Sheets mappings keep working. `email`, `volume_estimate` and `item_location` are now optional. New `service_type` values: `garage-cleanout`, `basement-attic-cleanout`, `property-cleanout`, `labor-help`, `other`. |
+| `furniture-assembly-request` | `/quote/#assembly` | `/thank-you.html` | Field names unchanged; `email` now optional unless Email is the chosen contact method. |
+| `commercial-partner-inquiry` | `/commercial/#partner-form` | `/commercial/thank-you.html` | `company_name`, `business_type`, `contact_name`, `job_title`, `phone`, `email`, `service_needs[]`, `service_locations`, `property_count`, `anticipated_volume`, `timeline`, `preferred_contact`, `vendor_requirements`, `message`, `privacy_consent`, `privacy_consent_granted` |
+| `service-saturdays-nomination` | `/service-saturdays/#nominate` | `/service-saturdays/thank-you.html` | `nominator_name`, `nominator_phone`, `nominator_email`, `relationship`, `senior_name`, `senior_area`, `senior_aware`, `help_needed[]`, `situation`, `nomination_acknowledgement`, `privacy_consent`, `privacy_consent_granted`. A nomination is **not** a booking. |
+| `service-saturdays-community` | `/service-saturdays/#get-involved` | `/service-saturdays/thank-you.html` | `organization_name`, `contact_name`, `email`, `phone`, `involvement[]`, `message`, `privacy_consent`, `privacy_consent_granted` |
+
+After the first deploy of the redesign, Netlify registers the three new forms automatically.
+Add email notifications for them in **Netlify → Forms → (form) → Form notifications**, the same
+way as for `quote-request`. `privacy_consent_granted` now really records `Yes` when the box is
+ticked (the old site always sent `No`).
+
+**Photos:** the site deliberately has no upload field. Netlify Forms caps a whole submission at
+8 MB and one file per input, and a single modern phone photo can exceed that and silently lose
+the lead. Customers instead tap **Text photos** (opens their messaging app addressed to
+404-565-4216 with a pre-filled message) on the form, the thank-you page and the sticky mobile bar.
 
 ### Link preview (share card)
 
 The image people see when bridgeway404.com is texted or posted comes from the
-Open Graph / Twitter tags in the `<head>` of `index.html` — **not** from the photos
-in the page. Those tags point at `assets/bridgeway404-social-preview-v2.png`.
+Open Graph / Twitter tags in the `<head>` of every public page — **not** from the photos
+in the page. Those tags point at `assets/bridgeway404-social-preview-v3.png`
+(source: `tools/social-card-v3.html`; the older `-v2` file is kept for cached links).
 
 To change the preview image:
 
 1. Export a new 1200 × 630 PNG.
 2. Save it under `assets/` with a **new** filename — bump the version, so
-   `...-v3.png`. Files in `assets/` are cached for a year by the CDN and by
+   `...-v4.png`. Files in `assets/` are cached for a year by the CDN and by
    Apple/Facebook/LinkedIn, so reusing a filename can keep serving the old image.
 3. Update every `og:image`, `og:image:secure_url`, and `twitter:image` URL in
-   `index.html`, `thank-you.html`, and `privacy-policy.html`.
+   every public page (search the repo for `social-preview-v3`), and `CARD` in
+   `tools/verify-social-metadata.py`.
 4. Run `python3 tools/verify-social-metadata.py` to confirm nothing was missed.
 5. Re-scrape at https://developers.facebook.com/tools/debug/ and
    https://www.linkedin.com/post-inspector/ so those platforms drop their cached copy.
@@ -436,36 +500,32 @@ Repeat for `furniture-assembly-request` with a separate scenario.
 
 ## Updating the Website
 
-All content is in `index.html`. Search for these comment markers to find the right spot:
-
-| What to change | Search for |
+| What to change | Where |
 |---|---|
-| Phone number | `<!-- PHONE -->`, `404-565-4216`, or `tel:+14045654216` |
-| Email address | `info@bridgeway404.com` |
-| Call Now button / call modal | `data-call-now` or `id="call-modal"` |
-| Service area cities | `CITIES —` comment |
-| Hero headline/subheadline | `<h1>` in the hero section |
-| Service cards | `SERVICE CARDS —` comment |
-| Images | `IMAGES —` comment (Unsplash URLs to replace with your photos) |
-| Footer links | `FOOTER LINKS —` comment |
-| Map placeholder | `MAP —` comment |
+| Brand colors, fonts, spacing | `:root` tokens at the top of `css/site.css` |
+| Header, navigation, footer, phone in header/footer | `partials/header.html`, `partials/footer.html` — then run `python3 tools/sync-partials.py` |
+| Favicon / fonts / stylesheet links | `partials/head.html` — then run the sync script |
+| Phone number elsewhere | search the repo for `404-565-4216` and `+14045654216` (also `PHONE_DISPLAY` in `js/site.js`) |
+| Service area cities | homepage "Where we work" chips and `areaServed` in the homepage JSON-LD |
+| Services | `services/index.html` cards and the `service_type` options in `quote/index.html` |
+| Job photos | add to `images/`, then the `#our-work` photo sets on the homepage and About page |
+| Team members | commented `TEAM CARDS` block in `about/index.html` |
+| Reviews | Thumbtack link on the homepage and About page; add real, verbatim reviews only |
 
-After editing `index.html`, save the file. If using GitHub + Netlify, commit and push — the site redeploys in about 30 seconds.
+Every page keeps a copy of the shared markup between `<!-- partial:NAME -->` comments.
+Never edit inside those markers directly — edit `partials/` and re-run the sync script.
 
----
+### Checks to run before pushing
 
-## Replacing Placeholder Images
+```bash
+python3 tools/sync-partials.py --check     # partials stamped into every page
+python3 tools/check-site.py                # links, assets, icons, forms, CRM field names, SEO basics
+python3 tools/verify-social-metadata.py    # link-preview tags on every public page
+```
 
-The site uses free Unsplash images as placeholders. To replace them with your own photos:
-
-1. Upload your photos to a hosting service (Netlify itself, Cloudinary, Google Drive with direct link, etc.).
-2. In `index.html`, find each `<img src="https://images.unsplash.com/...">` tag.
-3. Replace the `src` value with your photo URL.
-4. Update the `alt` text to accurately describe your photo.
-
-Best image dimensions:
-- Wide feature images: **900 × 380px** minimum
-- Standard grid images: **600 × 440px** minimum
+Optional browser test (needs Node + Playwright): serve the folder with
+`python3 -m http.server 8080`, then run `node tools/e2e-check.js http://127.0.0.1:8080`.
+It submits every form with test data — the submissions are intercepted locally and never reach Netlify.
 
 ---
 
@@ -480,9 +540,8 @@ If you later add a backend (contact API, booking system, etc.), add variables in
 
 ## Local Preview
 
-Open `index.html` directly in any browser — no server needed.
-
-For a local server (optional, fixes some browser security restrictions on file uploads):
+The site uses root-relative paths (`/css/site.css`, `/quote/`), so preview it through a local
+server rather than opening the files directly:
 
 ```powershell
 # If Python is installed
@@ -495,12 +554,11 @@ python -m http.server 8080
 
 ## Checklist Before Going Live
 
-- [ ] Replace placeholder phone number `404-565-4216` with confirmed business number
-- [ ] Replace placeholder email `info@bridgeway404.com` with confirmed business email
-- [ ] Verify the "Call Now" buttons dial `404-565-4216` (mobile) and open the call modal (desktop)
-- [ ] Replace Unsplash placeholder images with your own photos
-- [ ] Add real Privacy Policy and Terms pages (or remove footer links)
-- [ ] Test the quote form and confirm email notification arrives
+- [ ] Confirm `404-565-4216` is the customer-facing line for calls **and texts**
+- [ ] Confirm Sistamatic Organizing approves use of its name and logo
+- [ ] Confirm the Instagram handle `@bridgeway404` is live
+- [ ] Submit a test of each of the 5 forms on the deploy preview and confirm notifications arrive
+- [ ] Add form notifications for `commercial-partner-inquiry`, `service-saturdays-nomination`, `service-saturdays-community`
 - [ ] Test on mobile (iPhone and Android)
 - [ ] Connect `bridgeway404.com` domain and enable HTTPS
 - [ ] Submit sitemap to Google Search Console after launch
