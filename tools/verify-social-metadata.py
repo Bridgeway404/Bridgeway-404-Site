@@ -21,7 +21,7 @@ from html.parser import HTMLParser
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 PROD = "https://bridgeway404.com"
-CARD = "/assets/bridgeway404-social-preview-v2.png"
+CARD = "/assets/bridgeway404-social-preview-v3.png"
 CARD_URL = PROD + CARD
 
 # Any host that would mean a stock photo is being advertised as the preview.
@@ -30,7 +30,14 @@ STOCK_HOSTS = ("images.unsplash.com", "unsplash.com", "istockphoto",
 
 PAGES = {
     "/": "index.html",
+    "/services/": "services/index.html",
+    "/commercial/": "commercial/index.html",
+    "/service-saturdays/": "service-saturdays/index.html",
+    "/about/": "about/index.html",
+    "/quote/": "quote/index.html",
     "/thank-you.html": "thank-you.html",
+    "/commercial/thank-you.html": "commercial/thank-you.html",
+    "/service-saturdays/thank-you.html": "service-saturdays/thank-you.html",
     "/privacy-policy.html": "privacy-policy.html",
 }
 

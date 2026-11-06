@@ -34,8 +34,12 @@
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
 
+# Public-site stylesheet and script live outside /assets on purpose so edits go
+# live immediately (Netlify's default: revalidate on every request).
+
 # Long-lived cache for /assets/* — this includes the branded social share
-# card (assets/bridgeway404-social-preview-v2.png). Because these are cached as
+# card (assets/bridgeway404-social-preview-v3.png) and the logo files in
+# assets/brand/. Because these are cached as
 # immutable for a year, always ship a NEW filename (-v2, -v3, ...) when the
 # share image changes, and update the og:image / twitter:image URLs to match.
 [[headers]]
@@ -64,6 +68,37 @@
   to     = "/"
   status = 302
 
+# Friendly short links for the redesigned public site
+[[redirects]]
+  from   = "/contact"
+  to     = "/quote/#contact"
+  status = 301
+
+[[redirects]]
+  from   = "/get-a-quote"
+  to     = "/quote/"
+  status = 301
+
+[[redirects]]
+  from   = "/commercial-partners"
+  to     = "/commercial/"
+  status = 301
+
+[[redirects]]
+  from   = "/partners"
+  to     = "/commercial/"
+  status = 301
+
+[[redirects]]
+  from   = "/about-us"
+  to     = "/about/"
+  status = 301
+
+[[redirects]]
+  from   = "/nominate"
+  to     = "/service-saturdays/#nominate"
+  status = 301
+
 # Internal repo directories — never serve these publicly
 [[redirects]]
   from   = "/docs/*"
@@ -73,6 +108,19 @@
 
 [[redirects]]
   from   = "/supabase/*"
+  to     = "/index.html"
+  status = 404
+  force  = true
+
+# Source/maintenance folders for the public site (shared partials, scripts)
+[[redirects]]
+  from   = "/partials/*"
+  to     = "/index.html"
+  status = 404
+  force  = true
+
+[[redirects]]
+  from   = "/tools/*"
   to     = "/index.html"
   status = 404
   force  = true

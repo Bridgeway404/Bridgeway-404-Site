@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /thank-you.html
+Disallow: /commercial/thank-you.html
+Disallow: /service-saturdays/thank-you.html
+
+Sitemap: https://bridgeway404.com/sitemap.xml

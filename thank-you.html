@@ -1,263 +1,190 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- Favicon — Bridgeway 404 logo -->
-  <link rel="icon" type="image/png" sizes="512x512" href="/favicon.png">
-  <link rel="shortcut icon" type="image/png" href="/favicon.png">
-  <link rel="apple-touch-icon" sizes="512x512" href="/favicon.png">
-  <title>Request Received | Bridgeway 404 Junk Removal</title>
-  <meta name="robots" content="noindex, nofollow" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Request Received | Bridgeway 404</title>
+<meta name="robots" content="noindex, nofollow">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Bridgeway 404">
+<meta property="og:url" content="https://bridgeway404.com/thank-you.html">
+<meta property="og:title" content="Bridgeway 404 | Junk Removal &amp; Property Cleanouts">
+<meta property="og:description" content="Junk removal, property cleanouts and furniture assembly across Metro Atlanta. Call 404-565-4216.">
+<meta property="og:image" content="https://bridgeway404.com/assets/bridgeway404-social-preview-v3.png">
+<meta property="og:image:secure_url" content="https://bridgeway404.com/assets/bridgeway404-social-preview-v3.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Bridgeway 404 — Junk Removal &amp; Property Cleanouts. A Cleaner Tomorrow.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://bridgeway404.com/assets/bridgeway404-social-preview-v3.png">
 
-  <!-- Share preview — branded Bridgeway 404 card (see index.html) -->
-  <meta property="og:title" content="Bridgeway 404 Junk Removal" />
-  <meta property="og:description" content="Fast. Respectful. Reliable. Junk removal, furniture pickup, mattress removal, and furniture assembly in Metro Atlanta." />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://bridgeway404.com/thank-you.html" />
-  <meta property="og:site_name" content="Bridgeway 404 Junk Removal" />
-  <meta property="og:image" content="https://bridgeway404.com/assets/bridgeway404-social-preview-v2.png" />
-  <meta property="og:image:secure_url" content="https://bridgeway404.com/assets/bridgeway404-social-preview-v2.png" />
-  <meta property="og:image:type" content="image/png" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
-  <meta property="og:image:alt" content="Bridgeway 404 Junk Removal — Fast. Respectful. Reliable." />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Bridgeway 404 Junk Removal" />
-  <meta name="twitter:description" content="Fast. Respectful. Reliable. Junk removal, furniture pickup, mattress removal, and furniture assembly in Metro Atlanta." />
-  <meta name="twitter:image" content="https://bridgeway404.com/assets/bridgeway404-social-preview-v2.png" />
-  <meta name="twitter:image:alt" content="Bridgeway 404 Junk Removal — Fast. Respectful. Reliable." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --color-black:       #0f0f0f;
-      --color-white:       #ffffff;
-      --color-off-white:   #f8f7f5;
-      --color-purple:      #6b3d9a;
-      --color-purple-dark: #4e2c72;
-      --color-gold:        #c49a30;
-      --color-gray-400:    #9a9a9a;
-      --color-gray-600:    #555555;
-      --font-main: 'Inter', system-ui, -apple-system, sans-serif;
-    }
-
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-
-    body {
-      font-family: var(--font-main);
-      background: var(--color-off-white);
-      color: var(--color-black);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* ---- NAV ---- */
-    .nav {
-      background: var(--color-black);
-      padding: 14px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .nav-logo {
-      font-size: 1.1rem;
-      font-weight: 800;
-      color: var(--color-white);
-      text-decoration: none;
-      letter-spacing: -0.01em;
-    }
-    .nav-logo span { color: var(--color-gold); }
-    .nav-logo em {
-      font-style: normal;
-      font-weight: 400;
-      font-size: 0.8em;
-      color: rgba(255,255,255,0.5);
-    }
-
-    /* ---- MAIN CONTENT ---- */
-    main {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 60px 24px;
-    }
-
-    .card {
-      background: var(--color-white);
-      border-radius: 20px;
-      box-shadow: 0 8px 40px rgba(0,0,0,0.10);
-      padding: 56px 48px;
-      max-width: 580px;
-      width: 100%;
-      text-align: center;
-    }
-
-    .check-circle {
-      width: 72px;
-      height: 72px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--color-purple) 0%, var(--color-purple-dark) 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 28px;
-      box-shadow: 0 4px 20px rgba(107,61,154,0.30);
-    }
-    .check-circle svg {
-      width: 36px;
-      height: 36px;
-      stroke: #ffffff;
-      stroke-width: 3;
-      fill: none;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
-    .eyebrow {
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--color-gold);
-      margin-bottom: 12px;
-    }
-
-    h1 {
-      font-size: 1.9rem;
-      font-weight: 800;
-      color: var(--color-black);
-      line-height: 1.2;
-      margin-bottom: 18px;
-      letter-spacing: -0.02em;
-    }
-
-    .message {
-      font-size: 1rem;
-      color: var(--color-gray-600);
-      line-height: 1.7;
-      margin-bottom: 36px;
-    }
-    .message strong { color: var(--color-black); }
-
-    .divider {
-      border: none;
-      border-top: 1px solid #e8e8e8;
-      margin: 0 0 32px;
-    }
-
-    .actions {
-      display: flex;
-      gap: 14px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      display: inline-block;
-      padding: 13px 26px;
-      border-radius: 6px;
-      font-family: var(--font-main);
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      border: 2px solid transparent;
-      text-decoration: none;
-      text-align: center;
-      transition: background 0.2s, border-color 0.2s, transform 0.1s, box-shadow 0.2s;
-    }
-    .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,0,0,0.12); }
-    .btn:active { transform: translateY(0); }
-
-    .btn-primary {
-      background: var(--color-purple);
-      color: #ffffff;
-      border-color: var(--color-purple);
-    }
-    .btn-primary:hover { background: var(--color-purple-dark); border-color: var(--color-purple-dark); }
-
-    .btn-outline {
-      background: transparent;
-      color: var(--color-purple);
-      border-color: var(--color-purple);
-    }
-    .btn-outline:hover { background: #f3eafa; }
-
-    /* ---- FOOTER ---- */
-    footer {
-      background: #080808;
-      border-top: 1px solid #1a1a1a;
-      padding: 24px;
-      text-align: center;
-    }
-    footer p {
-      font-size: 0.82rem;
-      color: var(--color-gray-400);
-    }
-
-    @media (max-width: 480px) {
-      .card { padding: 36px 24px; }
-      h1 { font-size: 1.5rem; }
-      .actions { flex-direction: column; }
-      .btn { width: 100%; }
-    }
-  </style>
+<!-- partial:head -->
+<link rel="icon" href="/assets/brand/favicon-v1.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32-v1.png">
+<link rel="apple-touch-icon" href="/assets/brand/apple-touch-icon-v1.png">
+<meta name="theme-color" content="#240842">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&amp;family=Inter:wght@400;500;600;700;800&amp;display=swap">
+<link rel="stylesheet" href="/css/site.css">
+<!-- /partial:head -->
 </head>
-<body>
-
-  <!-- NAV -->
-  <nav class="nav" aria-label="Main navigation">
-    <a href="/" class="nav-logo">
-      Bridgeway <span>404</span> <em>Junk Removal</em>
-    </a>
-  </nav>
-
-  <!-- MAIN -->
-  <main>
-    <div class="card" role="main">
-
-      <!-- Checkmark icon -->
-      <div class="check-circle" aria-hidden="true">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <polyline points="20 6 9 17 4 12"></polyline>
-        </svg>
-      </div>
-
-      <p class="eyebrow">Quote Request Received</p>
-
-      <h1>Thank You!</h1>
-
-      <p class="message">
-        Your quote request has been received. Bridgeway 404 will follow up as soon as possible.<br><br>
-        For the fastest quote, you may also text photos or videos to
-        <!-- PHONE — update 404-565-4216 here if number changes -->
-        <strong>404-565-4216</strong>.
-      </p>
-
-      <hr class="divider" />
-
-      <div class="actions">
-        <a href="/" class="btn btn-primary">Back to Home</a>
-        <!-- PHONE — update 404-565-4216 / tel:+14045654216 here if number changes -->
-        <a
-          href="tel:+14045654216"
-          class="btn btn-outline"
-        >
-          Call 404-565-4216
-        </a>
-      </div>
-
+<body data-page="thanks">
+<!-- partial:header -->
+<a class="skip-link" href="#main">Skip to main content</a>
+<div class="topbar">
+  <div class="container">
+    <span class="tagline">A Cleaner Tomorrow.</span>
+    <div class="topbar-links">
+      <span>Junk removal &amp; property cleanouts · Metro Atlanta</span>
+      <a class="sms-on" href="sms:+14045654216?&amp;body=Hi%20Bridgeway%20404!%20I%27d%20like%20a%20quote.%20Here%20are%20some%20photos%3A"><svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#message"/></svg>Text photos</a>
+      <a href="mailto:info@bridgeway404.com?subject=Photos%20for%20my%20quote%20request&amp;body=Hi%20Bridgeway%20404!%20Photos%20for%20my%20quote%20request%20are%20attached.%20My%20name%3A%20"><svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#mail"/></svg>Email photos</a>
+      <a href="tel:+14045654216" data-call><svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#phone"/></svg>404-565-4216</a>
     </div>
-  </main>
+  </div>
+</div>
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="brand" href="/" aria-label="Bridgeway 404 home">
+      <img src="/assets/brand/logo-mark-light-v1.webp" width="631" height="407" alt="Bridgeway 404 logo — Atlanta skyline over a purple and gold arch">
+    </a>
+    <nav class="site-nav" aria-label="Main">
+      <ul class="nav-list">
+        <li><a href="/services/">Services</a></li>
+        <li><a href="/commercial/">Commercial Partners</a></li>
+        <li><a href="/service-saturdays/">Service Saturdays</a></li>
+        <li><a href="/about/">About &amp; Our Work</a></li>
+      </ul>
+    </nav>
+    <div class="header-actions">
+      <a class="header-call" href="tel:+14045654216" data-call><svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#phone"/></svg><span>404-565-4216</span><span class="sr-only">Call Bridgeway 404</span></a>
+      <a class="btn btn-gold btn-sm btn-quote" href="/quote/">Get a Quote</a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-panel" aria-label="Open menu">
+        <svg class="icon icon-open" aria-hidden="true"><use href="/assets/icons-v1.svg#menu"/></svg>
+        <svg class="icon icon-close" aria-hidden="true"><use href="/assets/icons-v1.svg#x"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="mobile-panel" id="mobile-panel">
+    <nav aria-label="Mobile">
+      <ul class="nav-list">
+        <li><a href="/">Home</a></li>
+        <li><a href="/services/">Residential Services</a></li>
+        <li><a href="/commercial/">Commercial Partners</a></li>
+        <li><a href="/service-saturdays/">Service Saturdays</a></li>
+        <li><a href="/about/">About &amp; Our Work</a></li>
+        <li><a href="/quote/">Get a Quote</a></li>
+      </ul>
+    </nav>
+    <div class="mobile-panel-cta">
+      <a class="btn btn-gold btn-lg" href="/quote/">Request a Quote</a>
+      <a class="btn btn-purple btn-lg" href="tel:+14045654216"><svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#phone"/></svg>Call 404-565-4216</a>
+      <a class="btn btn-outline btn-lg sms-on" href="sms:+14045654216?&amp;body=Hi%20Bridgeway%20404!%20I%27d%20like%20a%20quote.%20Here%20are%20some%20photos%3A"><svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#camera"/></svg>Text Photos for a Quote</a>
+      <a class="btn btn-outline btn-lg" href="mailto:info@bridgeway404.com?subject=Photos%20for%20my%20quote%20request&amp;body=Hi%20Bridgeway%20404!%20Photos%20for%20my%20quote%20request%20are%20attached.%20My%20name%3A%20"><svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#camera"/></svg>Email Photos for a Quote</a>
+    </div>
+  </div>
+</header>
+<!-- /partial:header -->
 
-  <!-- FOOTER -->
-  <footer>
-    <p>© 2026 Bridgeway 404 Junk Removal. All rights reserved.</p>
-  </footer>
+<main id="main">
+  <section class="section bg-gray">
+    <div class="container thanks">
+      <div class="check-badge" aria-hidden="true"><svg class="icon"><use href="/assets/icons-v1.svg#check"/></svg></div>
+      <p class="eyebrow">Quote request received</p>
+      <h1 style="font-size:clamp(2.4rem,6vw,3.6rem)">Thank you!</h1>
+      <p class="lead" style="margin:16px auto 0">We've got your request and will follow up the way you asked to confirm your price and timing.</p>
+      <div class="card" style="margin-top:32px;text-align:left;border-top:5px solid var(--gold-500)">
+        <h2 style="font-size:1.6rem">One more step: send photos</h2>
+        <p>Photos are the fastest way to an accurate price. Send pictures of the items (and any stairs or tight spots), with the name you used on the form.</p>
+        <a class="btn btn-gold btn-lg btn-block sms-on" href="sms:+14045654216?&amp;body=Hi%20Bridgeway%20404!%20I%20just%20sent%20a%20quote%20request.%20Here%20are%20photos%3A"><svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#camera"/></svg>Text Photos Now</a>
+        <a class="btn btn-outline btn-lg btn-block" href="mailto:info@bridgeway404.com?subject=Photos%20for%20my%20quote%20request&amp;body=Hi%20Bridgeway%20404!%20Photos%20for%20my%20quote%20request%20are%20attached.%20My%20name%3A%20"><svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#camera"/></svg>Email Photos Now</a>
+      </div>
+      <div class="btn-row">
+        <a class="btn btn-purple btn-lg" href="tel:+14045654216" data-call>Call 404-565-4216</a>
+        <a class="btn btn-outline btn-lg" href="/">Back to Home</a>
+      </div>
+    </div>
+  </section>
+</main>
 
+<!-- partial:footer -->
+<section class="brand-strip" aria-label="Contact Bridgeway 404">
+  <div class="container">
+    <div class="brand-strip-row">
+      <a class="brand-strip-item" href="tel:+14045654216" data-call><span class="gold-dot"><svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#phone"/></svg></span>404-565-4216</a>
+      <a class="brand-strip-item small" href="/quote/"><span class="gold-dot"><svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#clipboard"/></svg></span>bridgeway404.com/quote</a>
+      <a class="brand-strip-item small" href="https://www.instagram.com/bridgeway404/" target="_blank" rel="noopener"><span class="gold-dot"><svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#instagram"/></svg></span>@bridgeway404</a>
+    </div>
+    <span class="tagline">Serving a stronger Atlanta</span>
+  </div>
+</section>
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <img src="/assets/brand/logo-full-dark-v1.webp" width="631" height="491" alt="Bridgeway 404 — Junk Removal &amp; Property Cleanouts. A Cleaner Tomorrow." loading="lazy">
+        <p>Locally owned junk removal, property cleanouts and furniture help for homeowners, renters and property professionals across Metro Atlanta.</p>
+      </div>
+      <div>
+        <h2>Services</h2>
+        <ul class="footer-links">
+          <li><a href="/services/#junk-removal">Junk removal</a></li>
+          <li><a href="/services/#furniture-removal">Furniture removal</a></li>
+          <li><a href="/services/#cleanouts">Garage, basement &amp; attic cleanouts</a></li>
+          <li><a href="/services/#property-cleanouts">Property cleanouts</a></li>
+          <li><a href="/services/#assembly">Furniture assembly</a></li>
+          <li><a href="/commercial/">Commercial &amp; property management</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Company</h2>
+        <ul class="footer-links">
+          <li><a href="/about/">About &amp; our work</a></li>
+          <li><a href="/commercial/#partner-form">Become a commercial partner</a></li>
+          <li><a href="/service-saturdays/">Service Saturdays</a></li>
+          <li><a href="/quote/">Get a quote</a></li>
+          <li><a href="/privacy-policy.html">Privacy policy</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Contact</h2>
+        <ul class="footer-contact">
+          <li><svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#phone"/></svg><a href="tel:+14045654216" data-call>404-565-4216</a></li>
+          <li class="sms-on"><svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#message"/></svg><a href="sms:+14045654216?&amp;body=Hi%20Bridgeway%20404!%20I%27d%20like%20a%20quote.%20Here%20are%20some%20photos%3A">Text photos for a quote</a></li>
+          <li><svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#mail"/></svg><a href="mailto:info@bridgeway404.com">info@bridgeway404.com</a></li>
+          <li><svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#pin"/></svg><span>Serving Metro Atlanta, Georgia</span></li>
+          <li><svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#instagram"/></svg><a href="https://www.instagram.com/bridgeway404/" rel="noopener" target="_blank">@bridgeway404</a></li>
+          <li><svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#star"/></svg><a href="https://www.thumbtack.com/ga/atlanta/furniture-assembly/bridgeway-404/service/581226974715854852" rel="noopener" target="_blank">Bridgeway 404 on Thumbtack</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span data-year>2026</span> Bridgeway 404. All rights reserved.</span>
+      <span class="tagline">A Cleaner Tomorrow.</span>
+    </div>
+  </div>
+</footer>
+
+<nav class="action-bar" aria-label="Quick contact">
+  <a href="tel:+14045654216"><svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#phone"/></svg>Call</a>
+  <a class="sms-on" href="sms:+14045654216?&amp;body=Hi%20Bridgeway%20404!%20I%27d%20like%20a%20quote.%20Here%20are%20some%20photos%3A"><svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#camera"/></svg>Text</a>
+  <a class="sms-off" href="mailto:info@bridgeway404.com?subject=Photos%20for%20my%20quote%20request&amp;body=Hi%20Bridgeway%20404!%20Photos%20for%20my%20quote%20request%20are%20attached.%20My%20name%3A%20"><svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#camera"/></svg>Photos</a>
+  <a class="primary" href="/quote/"><svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#clipboard"/></svg>Get a Quote</a>
+</nav>
+
+<div class="modal" id="call-modal" role="dialog" aria-modal="true" aria-labelledby="call-modal-title">
+  <div class="modal-card">
+    <button class="modal-close" type="button" aria-label="Close"><svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#x"/></svg></button>
+    <p class="eyebrow">Call or text</p>
+    <h2 id="call-modal-title">Call Bridgeway 404</h2>
+    <p class="modal-number">404-565-4216</p>
+    <a class="btn btn-purple btn-lg" href="tel:+14045654216">Call 404-565-4216</a>
+    <button class="btn btn-outline" type="button" data-copy-phone>Copy number</button>
+    <p class="modal-status" role="status" aria-live="polite"></p>
+  </div>
+</div>
+<script src="/js/site.js" defer></script>
+<!-- /partial:footer -->
 </body>
 </html>
