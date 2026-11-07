@@ -490,6 +490,12 @@ body.menu-open { overflow: hidden; }
 .faq details[open] summary::after { content: '–'; }
 .faq details > div { padding: 0 0 20px; color: var(--gray-700); }
 .faq details > div p + p { margin-top: 10px; }
+.faq summary h3 { font: inherit; text-transform: none; letter-spacing: normal; line-height: 1.35; margin: 0; }
+.faq-jump { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: clamp(36px, 5vw, 56px); }
+.faq-jump a { padding: 8px 14px; border-radius: 999px; background: var(--white); border: 1px solid var(--gray-200); font-size: .9rem; font-weight: 600; color: var(--purple-700); text-decoration: none; }
+.faq-jump a:hover, .faq-jump a:focus-visible { border-color: var(--purple-700); background: var(--purple-50); }
+.faq-group + .faq-group { margin-top: clamp(44px, 6vw, 68px); }
+.faq-group > h2 { font-size: clamp(1.7rem, 3.4vw, 2.3rem); margin-bottom: 18px; }
 
 /* ---------- CTA banner ---------- */
 .cta-banner {

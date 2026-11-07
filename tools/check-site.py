@@ -12,6 +12,7 @@ Checks every public page for:
   * alt text on every <img>
   * no stock-photo hosts and no leftover placeholders
   * header/footer partials in sync (tools/sync-partials.py --check)
+  * /faq/ structured data matches the visible questions (tools/build-faq-schema.py --check)
 Exit 0 = pass, 1 = failures.
 """
 import pathlib
@@ -191,6 +192,11 @@ def main():
                           capture_output=True, text=True)
     if sync.returncode:
         failures.append(sync.stdout.strip())
+
+    faq = subprocess.run([sys.executable, str(ROOT / "tools" / "build-faq-schema.py"), "--check"],
+                         capture_output=True, text=True)
+    if faq.returncode:
+        failures.append(faq.stdout.strip())
 
     print(f"Checked {len(PAGES)} pages and {sum(len(v) for v in found_forms.values())} Netlify forms.")
     if failures:

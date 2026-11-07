@@ -34,6 +34,7 @@ PAGES = {
     "/commercial/": "commercial/index.html",
     "/service-saturdays/": "service-saturdays/index.html",
     "/about/": "about/index.html",
+    "/faq/": "faq/index.html",
     "/quote/": "quote/index.html",
     "/thank-you.html": "thank-you.html",
     "/commercial/thank-you.html": "commercial/thank-you.html",

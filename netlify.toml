@@ -95,6 +95,11 @@
   status = 301
 
 [[redirects]]
+  from   = "/faqs"
+  to     = "/faq/"
+  status = 301
+
+[[redirects]]
   from   = "/nominate"
   to     = "/service-saturdays/#nominate"
   status = 301

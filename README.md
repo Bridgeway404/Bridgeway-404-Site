@@ -21,6 +21,7 @@ page by a small script (see "Updating the Website").
 | `commercial/index.html` | Commercial / property-professional landing page + **commercial partner** form |
 | `service-saturdays/index.html` | Service Saturdays program page + **senior nomination** and **community** forms |
 | `about/index.html` | Company story, values, real job photos (`#our-work`), reviews link |
+| `faq/index.html` | FAQ page (34 questions, FAQPage structured data). After editing questions run `python3 tools/build-faq-schema.py`. Owner review notes: `docs/faq-review.md` |
 | `quote/index.html` | Quote page: **junk removal / cleanout** and **furniture assembly** forms (tabs) |
 | `thank-you.html`, `commercial/thank-you.html`, `service-saturdays/thank-you.html` | Form success pages (noindex) |
 | `privacy-policy.html` | Privacy policy |

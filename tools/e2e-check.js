@@ -48,7 +48,7 @@ async function fillForm(page, formSel, values) {
 
   console.log('\n[pages]');
   const page = await newPage(browser, { viewport: { width: 1366, height: 900 } });
-  for (const p of ['/', '/services/', '/commercial/', '/service-saturdays/', '/about/', '/quote/', '/thank-you.html',
+  for (const p of ['/', '/services/', '/commercial/', '/service-saturdays/', '/about/', '/faq/', '/quote/', '/thank-you.html',
                    '/commercial/thank-you.html', '/service-saturdays/thank-you.html', '/privacy-policy.html']) {
     page.errors = [];
     const res = await page.goto(BASE + p);
