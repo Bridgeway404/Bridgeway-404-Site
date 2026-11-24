@@ -125,6 +125,19 @@
   status = 404
   force  = true
 
+# Repository housekeeping files that must not be served
+[[redirects]]
+  from   = "/.claude/*"
+  to     = "/index.html"
+  status = 404
+  force  = true
+
+[[redirects]]
+  from   = "/README.md"
+  to     = "/index.html"
+  status = 404
+  force  = true
+
 # ---- Form spam protection ----
 # Netlify automatically handles form submissions when data-netlify="true"
 # is set on the <form> element. No additional config needed here.
