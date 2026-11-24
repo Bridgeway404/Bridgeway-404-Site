@@ -21,17 +21,20 @@ const PERMIT_FIELDS = {
 
 export const SOURCES = [
   {
-    id: 'atl_permits_issued', kind: 'arcgis_permits', county: 'Fulton', enabled: false, verified: false,
-    layerUrl: 'https://services5.arcgis.com/54falWtcpty3V47Z/ArcGIS/rest/services/BldgPermitIssued_CurrentYear/FeatureServer/0',
-    dateField: 'IssuedDate', fields: PERMIT_FIELDS,
-    terms: 'Public ArcGIS feature service found by web search; ownership by City of Atlanta NOT yet confirmed. Confirm owner, field names and terms before enabling.',
-  },
-  {
-    id: 'dekalb_permit_applications', kind: 'arcgis_permits', county: 'DeKalb', enabled: false, verified: false,
+    // Verified live on 2026-11-24 from the development database: 96,146 records, current to the same day.
+    // The production adapter for this layer (its real field names and work-type scoring) lives with the
+    // background worker in the private automation repository, not here.
+    id: 'dekalb_permits', kind: 'arcgis_permits', county: 'DeKalb', enabled: false, verified: true,
     layerUrl: 'https://dcgis.dekalbcountyga.gov/mapping/rest/services/Building_Permit_Applications/MapServer/0',
-    dateField: 'APPLIED_DATE', fields: PERMIT_FIELDS,
-    terms: 'DeKalb County GIS public map service. Field names and terms not yet confirmed.',
+    dateField: 'applicationDateTime',
+    fields: { ...PERMIT_FIELDS, permitNumber: ['applicationNumber'], date: ['applicationDateTime'], address: ['locationLine1'],
+      workClass: ['WorkTypeDescription'], permitType: ['applicationType_description'], description: ['comments', 'applicationName'],
+      valuation: ['declaredValuation'], contractor: ['primaryContactName'], occupancy: ['OccupancyTypeDescription'], status: ['statusDescription'] },
+    terms: 'County-run public ArcGIS map service, no login; layer metadata carries no copyright or use restriction; host serves no robots.txt.',
   },
+  // REMOVED 2026-11-24: services5.arcgis.com/54falWtcpty3V47Z "BldgPermitIssued_CurrentYear" was listed here as
+  // City of Atlanta. A live check showed it belongs to the City of Sacramento. City of Atlanta's planning GIS
+  // (gis.atlantaga.gov/dpcd) exposes zoning and parcel layers but no permit layer.
   {
     id: 'sam_gov', kind: 'sam_gov', enabled: false, verified: false,
     terms: 'Official public API (api.sam.gov). Requires a free API key from a registered SAM.gov account.',

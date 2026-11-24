@@ -1,7 +1,7 @@
 // Synthetic data only. No real customer, payment or job appears in this file.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { reconcile, channelProfit, targetCac } from '../lib/reconcile.js';
+import { reconcile, channelProfit, targetCac, ownerStatus, snapshotToPayments, OWNER_STATUSES } from '../lib/reconcile.js';
 
 const job = (id, x = {}) => ({ id, customer_id: `cust-${id}`, quoted_cents: 40000, deposit_cents: 10000,
   booked_at: '2026-10-01T15:00:00Z', scheduled_for: '2026-10-04T14:00:00Z', completed_at: '2026-10-04T18:00:00Z', ...x });
@@ -184,4 +184,39 @@ test('in-person balance on a nameless profile links through the same card as the
   // Without the shared card the balance must NOT be guessed onto the job.
   const r2 = reconcile([job('A')], [pay('p2', { customer_id: 'nameless-profile', amount_cents: 30000, paid_at: '2026-10-04T18:10:00Z' })]);
   assert.equal(r2.links.length, 0);
+});
+
+test('owner statuses: each of the eight is reachable and deposits are never counted as jobs', () => {
+  const st = (j, pays, open = false) => { const r = reconcile([j], pays); return ownerStatus(j, fin(r, j.id), open); };
+  const dep = pay('p1', { customer_id: 'cust-A', amount_cents: 10000, paid_at: '2026-10-01T15:05:00Z' });
+  const bal = pay('p2', { customer_id: 'cust-A', amount_cents: 30000, paid_at: '2026-10-04T18:10:00Z' });
+  const zelle = { id: 'z1', provider: 'zelle', kind: 'payment', customer_id: 'cust-A', amount_cents: 30000, paid_at: '2026-10-04T19:00:00Z' };
+  const seen = new Set([
+    st(job('A', { completed_at: null }), [dep]),                                   // Deposit received
+    st(job('A'), [dep]),                                                           // Balance outstanding
+    st(job('A'), [dep, pay('p3', { customer_id: 'cust-A', amount_cents: 15000, paid_at: '2026-10-04T18:10:00Z' })]), // Partially paid
+    st(job('A'), [dep, bal]),                                                      // Square
+    st(job('A'), [dep, zelle]),                                                    // another source
+    st(job('A', { payment_reported_by: 'jonathan' }), [dep]),                      // reported, not verified
+    st(job('A'), [dep], true),                                                     // reconciliation required
+    st(job('A', { cancelled_at: '2026-10-03T12:00:00Z', completed_at: null }), [dep, pay('r1', { kind: 'refund', refunds_payment_id: 'p1', amount_cents: 10000, paid_at: '2026-10-03T13:00:00Z' })]),
+  ]);
+  assert.deepEqual([...seen].sort(), [...OWNER_STATUSES].sort());
+});
+
+test('weekly snapshot rows: only business rows are kept, with no account details, and they reconcile like any payment', () => {
+  const rows = [
+    { channel: 'zelle', date: '2026-10-04', amount: 300, payer_name: 'Sample Payer', reference: 'balance', is_business: true, account_number: '000111222' },
+    { channel: 'cashapp', date: '2026-10-05', amount: 45, payer_name: 'Friend', is_business: false },
+  ];
+  const pays = snapshotToPayments(rows, '2026-W40');
+  assert.equal(pays.length, 1);
+  assert.equal(pays[0].amount_cents, 30000);
+  assert.equal('account_number' in pays[0], false);
+  // No customer identity on a snapshot row: it is NOT auto-linked; a person confirms it.
+  const j = job('A');
+  const r = reconcile([j], [pay('p1', { customer_id: 'cust-A', amount_cents: 10000, paid_at: '2026-10-01T15:05:00Z' }), ...pays]);
+  assert.equal(r.unmatched[0].reason, 'no_customer_identity');
+  const r2 = reconcile([j], [pay('p1', { customer_id: 'cust-A', amount_cents: 10000, paid_at: '2026-10-01T15:05:00Z' }), ...pays], { manualLinks: [{ payment_id: pays[0].id, job_id: 'A', confirmed_by: 'michael' }] });
+  assert.equal(ownerStatus(j, fin(r2, 'A')), 'Fully paid and verified through another source');
 });

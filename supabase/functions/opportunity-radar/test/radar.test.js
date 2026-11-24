@@ -12,7 +12,8 @@ import { runRadar, createMemoryStore } from '../lib/pipeline.js';
 
 const NOW = '2026-11-24T10:00:00Z';
 const ms = (iso) => new Date(iso).getTime();
-const permitSource = (id, county) => ({ ...SOURCES[0], id, county, enabled: true, verified: true, layerUrl: `https://example.test/${id}/FeatureServer/0` });
+const GENERIC = { permitNumber: ['PermitNumber', 'PERMIT_NUMBER'], date: ['IssuedDate', 'APPLIED_DATE'], address: ['Address', 'ADDRESS'], permitType: ['PermitType', 'PERMIT_TYPE'], workClass: ['WorkClass', 'WORK_CLASS'], description: ['Description', 'DESCRIPTION'], valuation: ['Valuation', 'JOB_VALUE'], contractor: ['ContractorCompanyName', 'CONTRACTOR'], occupancy: ['Occupancy'], status: ['Status'] };
+const permitSource = (id, county) => ({ kind: 'arcgis_permits', dateField: 'IssuedDate', fields: GENERIC, terms: 'synthetic', id, county, enabled: true, verified: true, layerUrl: `https://example.test/${id}/FeatureServer/0` });
 
 const ATL = { features: [
   { attributes: { PermitNumber: 'BB-2026-0001', IssuedDate: ms('2026-11-20T00:00:00Z'), Address: '100 Sample Street NW', PermitType: 'Commercial', WorkClass: 'Interior Demolition', Description: 'Interior demo of second floor office', Valuation: 180000, ContractorCompanyName: 'Example Builders, LLC', Occupancy: 'Office' } },
@@ -105,7 +106,7 @@ test('dedupe: repeated rows collapse; the same job in two layers merges; differe
 });
 
 test('pipeline: one failing source does not stop the run; the digest is capped and explains itself', async () => {
-  const sources = [permitSource('atl', 'Fulton'), permitSource('dek', 'DeKalb'), { id: 'broken', kind: 'arcgis_permits', county: 'Cobb', layerUrl: 'https://example.test/broken/FeatureServer/0', dateField: 'X', fields: SOURCES[0].fields }, { id: 'sam_gov', kind: 'sam_gov', naics: ['562111'] }];
+  const sources = [permitSource('atl', 'Fulton'), permitSource('dek', 'DeKalb'), { id: 'broken', kind: 'arcgis_permits', county: 'Cobb', layerUrl: 'https://example.test/broken/FeatureServer/0', dateField: 'X', fields: GENERIC }, { id: 'sam_gov', kind: 'sam_gov', naics: ['562111'] }];
   const http = fakeHttp([['/atl/', ATL], ['/dek/', DEK], ['/broken/', new Error('down')], ['api.sam.gov', SAM]]);
   const store = createMemoryStore();
   const r = await runRadar({ sources, http, store, now: NOW, secrets: { sam_gov: 'test-key' }, digestLimit: 2 });
@@ -139,7 +140,8 @@ test('pipeline: a permit with no contractor is never marked usable in outreach; 
   assert.match(r.summary.sources.sam_gov.error, /no API key/);
 });
 
-test('registry: every real source ships disabled and unverified', () => {
+test('registry: every source ships disabled here; only a live-verified one may carry verified: true', () => {
   assert.equal(enabledSources().length, 0);
+  assert.deepEqual(SOURCES.filter((x) => x.verified).map((x) => x.id), ['dekalb_permits']);
   assert.ok(SOURCES.every((s) => s.terms));
 });

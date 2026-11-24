@@ -284,6 +284,54 @@ export function channelProfit(jobs, financials, spend, opts = {}) {
   }).sort((a, b) => b.contribution_cents - a.contribution_cents);
 }
 
+// The eight payment statuses the owner tracks. `job.payment_reported_by` records
+// a team member saying "this was paid" (e.g. cash) before any account snapshot
+// or Square record backs it up; that is reported, not verified.
+export const OWNER_STATUSES = [
+  'Deposit received', 'Balance outstanding', 'Partially paid',
+  'Fully paid and verified through Square', 'Fully paid and verified through another source',
+  'Payment reported but not independently verified', 'Reconciliation required', 'Refunded or canceled',
+];
+
+/**
+ * Map a job's financial position to one owner status.
+ * @param {object} job        the job (reads cancelled_at, payment_reported_by, paid_confirmed_by, completed_at)
+ * @param {object} fin        that job's entry from reconcile().jobs
+ * @param {boolean} hasOpenQuestion  true when an unmatched or held payment lists this job as a candidate
+ */
+export function ownerStatus(job, fin, hasOpenQuestion = false) {
+  const s = fin.status;
+  if (s.startsWith('cancelled') || s === 'refunded') return 'Refunded or canceled';
+  if (hasOpenQuestion || s === 'overpaid' || s === 'payment_received_total_unknown') return 'Reconciliation required';
+  if (s === 'paid' || s === 'paid_confirmed_no_record') {
+    const sources = fin.verified_by.filter((v) => v !== 'manual_confirmation');
+    if (sources.length && sources.every((v) => v === 'square')) return 'Fully paid and verified through Square';
+    // A weekly account snapshot (Zelle, Cash App, bank) or an owner confirmation backed by one.
+    if (sources.length || job.paid_confirmed_by) return 'Fully paid and verified through another source';
+  }
+  if (job.payment_reported_by && s !== 'paid') return 'Payment reported but not independently verified';
+  if (s === 'deposit_paid') return job.completed_at ? 'Balance outstanding' : 'Deposit received';
+  if (s === 'partially_paid') return 'Partially paid';
+  if (s === 'unpaid') return 'Balance outstanding';
+  return 'Reconciliation required';
+}
+
+/**
+ * Turn rows read from a weekly account snapshot into payment records for reconcile().
+ * Only the fields needed for reconciliation are kept: no account numbers, no memo
+ * text beyond a short reference, and anything the owner did not mark as business is dropped.
+ * @param {object[]} rows {channel: 'zelle'|'cashapp'|'cash'|'check'|'other', date, amount, payer_name?, reference?, is_business}
+ * @param {string} snapshotId  e.g. '2026-W48'
+ */
+export function snapshotToPayments(rows, snapshotId) {
+  return rows.filter((r) => r.is_business === true && Number(r.amount) > 0).map((r, i) => ({
+    id: `${snapshotId}:${r.channel}:${i + 1}`, provider: r.channel, provider_id: `${snapshotId}:${r.channel}:${r.date}:${Math.round(Number(r.amount) * 100)}:${i + 1}`,
+    kind: 'payment', amount_cents: Math.round(Number(r.amount) * 100), paid_at: new Date(r.date).toISOString(),
+    payer_name: r.payer_name ? String(r.payer_name).slice(0, 60) : null, reference: r.reference ? String(r.reference).slice(0, 40) : null,
+    entered_by: 'weekly_snapshot',
+  }));
+}
+
 /** Maximum acquisition cost a job can carry. */
 export function targetCac({ avgJobRevenueCents, avgDirectCostCents, shareOfMarginForAcquisition = 0.4 }) {
   const marginBeforeAcquisition = avgJobRevenueCents - avgDirectCostCents;
