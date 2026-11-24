@@ -262,6 +262,19 @@
         <!-- Netlify form "commercial-partner-inquiry" — separate from residential quotes -->
         <form name="commercial-partner-inquiry" method="POST" action="/commercial/thank-you.html" data-netlify="true" data-netlify-honeypot="bot-field-commercial" aria-label="Commercial partner inquiry">
           <input type="hidden" name="form-name" value="commercial-partner-inquiry">
+          <!-- Lead source attribution (filled by /js/attribution.js; blank when unavailable). -->
+          <input type="hidden" name="lead_source" value="">
+          <input type="hidden" name="lead_source_first" value="">
+          <input type="hidden" name="utm_source" value="">
+          <input type="hidden" name="utm_medium" value="">
+          <input type="hidden" name="utm_campaign" value="">
+          <input type="hidden" name="utm_term" value="">
+          <input type="hidden" name="utm_content" value="">
+          <input type="hidden" name="click_id" value="">
+          <input type="hidden" name="referral_code" value="">
+          <input type="hidden" name="landing_page" value="">
+          <input type="hidden" name="referrer_site" value="">
+          <input type="hidden" name="first_visit_at" value="">
             <!-- Email notification subject (overrides the Netlify UI). Only %{formName}, %{siteName}, %{submissionId} are supported. -->
             <input type="hidden" name="subject" data-remove-prefix value="NEW COMMERCIAL PARTNER INQUIRY (#%{submissionId})">
           <input type="hidden" name="privacy_consent_granted" id="cp-privacy-granted" value="No">
@@ -448,6 +461,7 @@
     <p class="modal-status" role="status" aria-live="polite"></p>
   </div>
 </div>
+<script src="/js/attribution.js" defer></script>
 <script src="/js/site.js" defer></script>
 <!-- /partial:footer -->
 </body>

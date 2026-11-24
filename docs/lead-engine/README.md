@@ -1,22 +1,26 @@
 # Bridgeway Lead Generation Engine — repository notes
 
-The full plan (strategy, audit, architecture, workflows, budget, roadmap, KPIs and the
-Claude Code prompts for each phase) is the document "Bridgeway 404 Lead Generation Engine"
-shared with the owner. This folder holds only what belongs next to the code.
+This repository is public. It holds code and synthetic test data only. Business records,
+customer or prospect data, financial figures and project memory live in the private
+Google Drive folder "Bridgeway Lead Generation Engine" and in Supabase, never here.
 
-| File | What it is | Status |
+| Path | What it is | Status |
 |---|---|---|
-| `schema-draft.sql` | Proposed `le_` tables, guards and reporting views for the existing `bridgeway-404` Supabase project | **Draft. Not applied.** Loaded cleanly into a scratch Postgres 16 on 2026-11-24 (22 tables); suppression, text-consent, duplicate-lead and eviction-job guards were exercised. |
+| `docs/lead-engine/schema-draft.sql` | Proposed `le_` tables, guards and views for the existing Supabase project | Draft. Not applied. Loads cleanly into a scratch Postgres 16. |
+| `supabase/functions/lead-engine/lib/reconcile.js` | Job-level payment reconciliation: deposits + balances, partials, refunds, off-Square payments, duplicate prevention, manual confirmation, channel profit, target acquisition cost | Library + tests. Not deployed. |
+| `supabase/functions/lead-engine/lib/stalled.js` | Stalled-lead identification across the lead lifecycle | Library + tests. Not deployed. |
+| `supabase/functions/lead-engine/lib/gates.js` | Ad-spend tier recommendations and the weekly capacity gate | Library + tests. Recommends only; never changes a budget. |
+| `supabase/functions/lead-engine/lib/approvals.js` | Approval queue rules for outbound marketing messages | Library + tests. Not deployed. |
+| `supabase/functions/opportunity-radar/` | Opportunity Radar: permit and bid source adapters, dedupe, explainable scoring, daily digest | Library + tests on synthetic records. **Every real source is disabled and unverified** until one live query confirms its fields and terms. |
+| `supabase/functions/_shared/http.js` | Polite HTTP client (throttle, retries) shared by new workers | Copy of the existing workers' client. |
+| `js/attribution.js` + hidden form fields | First-party lead-source capture on all five forms | On the development branch only. Browser-tested locally. |
 
-Rules that carry over from the commercial-account design (`bridgeway404-commercial-account-machine`):
+Run the tests: `node --test` inside `supabase/functions/lead-engine` and `supabase/functions/opportunity-radar`.
 
-- No message reaches a new business contact without a person sending it.
-- Suppression is checked when a draft is created and again when it is sent.
-- No marketing text without recorded consent. No automated outbound calls.
-- Only a Google Places `place_id` is stored from Places; other fields come from sources that allow storage.
-- Court-record details never appear in outreach. Scores are computed by code, not by a model.
-- Every workflow starts paused and has a budget line.
+Rules that apply to everything here:
 
-Before applying the schema: confirm the primary keys of the live `customers` and `quotes`
-tables (they were created outside this repository's migrations), then move the file to
-`supabase/migrations/` under the next free number.
+- No marketing message is sent without a named person approving it. Suppression and text consent are rechecked at send time.
+- A payment is linked to a job automatically only on strong evidence; anything ambiguous waits for a person.
+- The success metric is a completed, paid job with a known source.
+- Spending tiers are recommendations. Moving up always needs the owner.
+- No migration is applied, nothing is deployed and nothing merges to `main` without approval.

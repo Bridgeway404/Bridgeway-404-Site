@@ -1,0 +1,7 @@
+{
+  "name": "bridgeway-lead-engine",
+  "private": true,
+  "type": "module",
+  "description": "Bridgeway Lead Generation Engine — lead-engine library. Pure functions, no dependencies. Tests run with Node 22's built-in runner on synthetic data only.",
+  "scripts": { "test": "node --test" }
+}

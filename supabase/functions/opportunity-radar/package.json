@@ -1,0 +1,7 @@
+{
+  "name": "bridgeway-opportunity-radar",
+  "private": true,
+  "type": "module",
+  "description": "Bridgeway Lead Generation Engine — opportunity-radar library. Pure functions, no dependencies. Tests run with Node 22's built-in runner on synthetic data only.",
+  "scripts": { "test": "node --test" }
+}
